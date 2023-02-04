@@ -6,7 +6,7 @@ import cookie from "cookie";
 var client_id = process.env.NEXT_SPOTIFY_CLIENT_ID;
 var redirect_uri = process.env.NEXT_SPOTIFY_REDIRECT_URI;
 
-export default function handler(
+export default function SpotifyLogin(
   req: NextApiRequest,
   res: NextApiResponse<any>
 ) {

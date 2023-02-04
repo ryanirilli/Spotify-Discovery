@@ -3,7 +3,10 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import setSpotifyAccessToken from "@/lib/setSpotifyAccessToken";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+export default async function SpotifyGetRecommendationsreq(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
     const seed_artists = (req.query.artists as string) ?? "";
     const seed_genres = (req.query.genres as string) ?? "";
@@ -18,4 +21,4 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     return res.status(200).json(tracks as TSpotifyTrack[]);
   });
-};
+}

@@ -11,7 +11,10 @@ type TTokenData = {
   scope: string;
 };
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+export default async function SpotifyAUthCallback(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const { code, state } = req.query;
   const redirect_uri = process.env.NEXT_SPOTIFY_REDIRECT_URI;
   const client_id = process.env.NEXT_SPOTIFY_CLIENT_ID;
@@ -60,4 +63,4 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   ]);
 
   res.redirect(`/home`);
-};
+}

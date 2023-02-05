@@ -11,7 +11,8 @@ export default function SpotifyLogin(
   res: NextApiResponse<any>
 ) {
   var state = nanoid();
-  var scope = "user-read-private user-read-email playlist-read-private";
+  var scope =
+    "user-read-private user-read-email playlist-read-private playlist-modify-private playlist-modify-public";
 
   res.setHeader("Set-Cookie", [
     cookie.serialize("spotify_login_state", state, {

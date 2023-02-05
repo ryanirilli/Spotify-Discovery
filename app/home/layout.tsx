@@ -1,4 +1,5 @@
 import SpotifyCurrentTrackProvider from "@/components/SpotifyCurrentTrackProvider";
+import SpotifyPlaylistsProvider from "@/components/SpotifyPlaylistsProvider";
 import SpotifyRecommendationsProvider from "@/components/SpotifyRecommendationsProvider";
 
 export default function MainLayout({
@@ -8,7 +9,9 @@ export default function MainLayout({
 }) {
   return (
     <SpotifyRecommendationsProvider>
-      <SpotifyCurrentTrackProvider>{children}</SpotifyCurrentTrackProvider>
+      <SpotifyPlaylistsProvider>
+        <SpotifyCurrentTrackProvider>{children}</SpotifyCurrentTrackProvider>
+      </SpotifyPlaylistsProvider>
     </SpotifyRecommendationsProvider>
   );
 }

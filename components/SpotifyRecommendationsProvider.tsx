@@ -102,8 +102,6 @@ export default function SpotifyRecommendationsProvider({
     recommendations: recommendations || [],
   };
 
-  console.log("recommendationsDATA: ", recommendations);
-
   return (
     <SpotifyRecommendationsContext.Provider value={contextValue}>
       {children}

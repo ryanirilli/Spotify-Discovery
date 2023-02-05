@@ -42,12 +42,17 @@ export default function SpotifyGenres() {
       <Button borderRadius="full" colorScheme="blue" onClick={setIsOpen.on}>
         Add Genres
       </Button>
-      <Modal isOpen={isOpen} onClose={onClose} scrollBehavior="inside">
-        <ModalOverlay bg="blackAlpha.800" />
-        <ModalContent background="gray.900" color="white" boxShadow="2xl">
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        scrollBehavior="inside"
+        variant="spotifyModal"
+      >
+        <ModalOverlay />
+        <ModalContent>
           <ModalHeader>Genres</ModalHeader>
           <ModalCloseButton />
-          <ModalBody sx={scrollBarStyle} bg="blackAlpha.500" px={0}>
+          <ModalBody sx={scrollBarStyle}>
             <List>
               {data?.map((genre: string) => {
                 const hasAdded = genres.includes(genre);

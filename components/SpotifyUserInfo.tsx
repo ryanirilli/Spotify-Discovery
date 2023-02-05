@@ -7,7 +7,6 @@ import { BsSpotify } from "react-icons/bs";
 
 export default function SpotifyUserInfo() {
   const { data } = useQuery("user", spotifyUserInfo);
-  console.log("USER", data);
   return (
     <HStack
       display={["none", null, "flex"]}

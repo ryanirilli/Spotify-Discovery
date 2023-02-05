@@ -18,4 +18,5 @@ export type TSpotifyTrack = {
   preview_url: string;
   artists: Omit<TSpotifyArtist, "images">[];
   album: TSpotifyAlbum;
+  uri: string;
 };

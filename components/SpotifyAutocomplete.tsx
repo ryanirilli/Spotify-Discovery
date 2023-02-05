@@ -48,7 +48,7 @@ export default function SpotifyAutocomplete() {
     if (data?.length) {
       setIsResultsShowing.on();
     }
-  }, [data]);
+  }, [data, setIsResultsShowing]);
 
   const onFocus = () => {
     if (data?.length && !isResultsShowing) {

@@ -2,12 +2,37 @@
 
 import { useContext, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { CgMoreVerticalAlt, CgSearch } from "react-icons/cg";
+import { BsCheck2 } from "react-icons/bs";
 import {
   AspectRatio,
   Box,
+  Button,
   Card,
+  Flex,
+  Icon,
+  IconButton,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  List,
+  ListItem,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Progress,
+  Spacer,
   Text,
+  useBoolean,
+  useToast,
   VisuallyHidden,
   Wrap,
   WrapItem,
@@ -21,30 +46,151 @@ import {
   SpotifyCurrentTrackContext,
   TSpotifyCurrentTrackContext,
 } from "./SpotifyCurrentTrackProvider";
+import { TSpotifyPlaylist } from "@/types/SpotifyPlaylist";
+import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
+import scrollBarStyle from "@/utils/scrollBarStyle";
+import { useMutation } from "react-query";
+import spotifyAddTracksToPlaylist, {
+  TSpotifyAddToPlaylistArgs,
+} from "@/mutations/SpotifyAddTracksToPlaylist";
 
 export default function SpotifyTracks() {
   const { recommendations } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
+  const { playlists } = useContext(SpotifyPlaylistsContext) || {};
+  const [playlistFilter, setPlaylistFilter] = useState("");
+  const [isShowingPlaylistsModal, setIsShowingPlaylistsModal] = useBoolean();
+
+  const filteredPlaylists =
+    playlists?.filter((playlist: TSpotifyPlaylist) =>
+      playlist.name.toLowerCase().includes(playlistFilter.toLowerCase())
+    ) || [];
+
+  const [selectedTrack, setSelectedTrack] = useState<TSpotifyTrack | null>(
+    null
+  );
+
+  const onAddTrackToPlaylist = (track: TSpotifyTrack) => {
+    setSelectedTrack(track);
+    setIsShowingPlaylistsModal.on();
+  };
+
+  const onClosePlaylistModal = () => {
+    setPlaylistFilter("");
+    setSelectedTrack(null);
+    setIsShowingPlaylistsModal.off();
+  };
+
+  const selectedTrackAlbumImageUrl = selectedTrack?.album.images[0]?.url;
+
   return (
     <>
       <Wrap spacing={0} pb={32}>
         {recommendations.map((rec) => (
           <WrapItem
-            w={["100%", "50%", "25%", "16.66%"]}
+            w={["100%", "50%", "25%", null, "16.66%"]}
             key={rec.id}
             position="relative"
           >
-            <SpotifyTrack rec={rec} />
+            <SpotifyTrack
+              rec={rec}
+              onAddTrackToPlaylist={onAddTrackToPlaylist}
+            />
           </WrapItem>
         ))}
       </Wrap>
+      <Modal
+        isOpen={isShowingPlaylistsModal}
+        onClose={onClosePlaylistModal}
+        scrollBehavior="inside"
+        variant="spotifyModal"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            Add To Playlist
+            <Flex
+              color="white"
+              bg="black"
+              borderRadius="md"
+              overflow="hidden"
+              my={2}
+            >
+              <Box flex={1} maxW={16}>
+                <AspectRatio ratio={1} overflow="hidden">
+                  {selectedTrackAlbumImageUrl && (
+                    <Image
+                      fill
+                      sizes="(max-width: 768px) 100vw,
+              (max-width: 1200px) 50vw,
+              33vw"
+                      alt="selected track album art"
+                      src={selectedTrackAlbumImageUrl}
+                    />
+                  )}
+                </AspectRatio>
+              </Box>
+              <Box p={2}>
+                <Text fontWeight="bold" fontSize="small" noOfLines={1}>
+                  {selectedTrack?.name}
+                </Text>
+                <Text
+                  fontWeight="normal"
+                  fontSize="small"
+                  noOfLines={1}
+                  transform="translateY(-3px)"
+                >
+                  {selectedTrack?.artists.map((a) => a.name).join(", ")}
+                </Text>
+              </Box>
+            </Flex>
+            <InputGroup mt={4}>
+              <InputLeftElement
+                pointerEvents="none"
+                children={<Icon as={CgSearch} color="gray.500" />}
+              />
+              <Input
+                placeholder="Find a playlist"
+                value={playlistFilter}
+                onChange={(e) => setPlaylistFilter(e.target.value)}
+              />
+            </InputGroup>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody sx={scrollBarStyle}>
+            <List>
+              {filteredPlaylists.map((playlist: TSpotifyPlaylist) => {
+                return (
+                  <SpotifyPlaylistListItem
+                    onSuccess={onClosePlaylistModal}
+                    key={playlist.id}
+                    playlist={playlist}
+                    selectedTrack={selectedTrack}
+                  />
+                );
+              })}
+            </List>
+          </ModalBody>
+          <ModalFooter>
+            <Button w="100%" colorScheme="blue" onClick={onClosePlaylistModal}>
+              Done
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 }
 
-function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
+function SpotifyTrack({
+  rec,
+  onAddTrackToPlaylist,
+}: {
+  rec: TSpotifyTrack;
+  onAddTrackToPlaylist: (track: TSpotifyTrack) => void;
+}) {
   const { curTrack, setCurTrack } =
     useContext<TSpotifyCurrentTrackContext | null>(
       SpotifyCurrentTrackContext
@@ -115,7 +261,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
   };
 
   return (
-    <Card m={2} w="100%" bg="gray.900" overflow="hidden">
+    <Card m={2} mb={[8, 2]} w="100%" bg="black">
       <AspectRatio
         ratio={1}
         onMouseEnter={handleMouseEnter}
@@ -123,6 +269,8 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
         onClick={toggleTrack}
         transition="opacity 0.3s ease-in-out"
         opacity={isAlbumArtLoaded ? 1 : 0}
+        borderTopRadius="md"
+        overflow="hidden"
       >
         {albumImageUrl && (
           <Image
@@ -140,15 +288,101 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
       <VisuallyHidden>
         <audio src={rec.preview_url} ref={previewRef} />
       </VisuallyHidden>
-      <Progress value={trackProgress} />
-      <Box px={2} bg="white">
-        <Text fontWeight="bold" fontSize="small" noOfLines={1}>
-          {rec.name}
-        </Text>
-        <Text fontSize="small" noOfLines={1} transform="translateY(-3px)">
-          {rec.artists.map((a) => a.name).join(", ")}
-        </Text>
-      </Box>
+      <Progress h={2} value={trackProgress} />
+      <Flex px={2} bg="white" alignItems="center" borderBottomRadius="md">
+        <Box flex={1}>
+          <Text fontWeight="bold" fontSize="small" noOfLines={1}>
+            {rec.name}
+          </Text>
+          <Text fontSize="small" noOfLines={1} transform="translateY(-3px)">
+            {rec.artists.map((a) => a.name).join(", ")}
+          </Text>
+        </Box>
+        <Box py={2} pl={2}>
+          <Menu>
+            <MenuButton
+              as={IconButton}
+              aria-label="Options"
+              icon={<Icon as={CgMoreVerticalAlt} />}
+              variant="outline"
+            />
+            <MenuList boxShadow="dark-lg">
+              <MenuItem onClick={() => onAddTrackToPlaylist(rec)}>
+                Add To Playlist
+              </MenuItem>
+              <MenuItem command="coming soon">Track Details</MenuItem>
+            </MenuList>
+          </Menu>
+        </Box>
+      </Flex>
     </Card>
+  );
+}
+
+interface ISpotifyPlaylistListItem {
+  playlist: TSpotifyPlaylist;
+  selectedTrack: TSpotifyTrack | null;
+  onSuccess: () => void;
+}
+
+function SpotifyPlaylistListItem({
+  playlist,
+  selectedTrack,
+  onSuccess,
+}: ISpotifyPlaylistListItem) {
+  const toast = useToast();
+  const mutation = useMutation(
+    ({ playlistId, tracks }: TSpotifyAddToPlaylistArgs) =>
+      spotifyAddTracksToPlaylist({ playlistId, tracks }),
+    {
+      onSuccess: () => {
+        //onSuccess();
+        toast({
+          title: "Track added to playlist",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top",
+        });
+      },
+    }
+  );
+
+  return (
+    <ListItem
+      _hover={{ bg: "black" }}
+      px={4}
+      py={2}
+      cursor="pointer"
+      role="button"
+      onClick={() => {
+        if (mutation.isSuccess) {
+          return;
+        }
+        mutation.mutate({
+          playlistId: playlist.id,
+          tracks: [selectedTrack?.uri || ""],
+        });
+      }}
+    >
+      <Flex alignItems="center">
+        <Text opacity={mutation.isSuccess ? 0.4 : 1} textTransform="capitalize">
+          {playlist.name}
+        </Text>
+        <Spacer />
+        {!mutation.isSuccess ? (
+          <Button
+            disabled={mutation.isLoading || mutation.isSuccess}
+            isLoading={mutation.isLoading}
+            colorScheme="blackAlpha"
+            size="sm"
+          >
+            Add
+          </Button>
+        ) : (
+          <Icon mr={4} as={BsCheck2} color="green.500" />
+        )}
+      </Flex>
+    </ListItem>
   );
 }

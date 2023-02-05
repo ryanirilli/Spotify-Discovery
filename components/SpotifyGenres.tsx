@@ -29,9 +29,8 @@ export default function SpotifyGenres() {
   const { data } = useQuery("spotifyGenres", spotifyGenreSeeds);
   const [isOpen, setIsOpen] = useBoolean();
   const hasModifiedRef = useRef(false);
-  const { addGenre, genres, removeGenre, fetchRecs } = useContext(
-    SpotifyRecommendationsContext
-  ) as TSpotifyRecommendationsContext;
+  const { addGenre, genres, removeGenre, fetchRecs, isSeedLimitReached } =
+    useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
 
   const onClose = () => {
     setIsOpen.off();
@@ -58,7 +57,11 @@ export default function SpotifyGenres() {
             <List>
               {data?.map((genre: string) => {
                 const hasAdded = genres.includes(genre);
-                const action = hasAdded ? removeGenre : addGenre;
+                const action = hasAdded
+                  ? removeGenre
+                  : isSeedLimitReached
+                  ? () => {}
+                  : addGenre;
                 return (
                   <ListItem
                     key={genre}
@@ -76,7 +79,12 @@ export default function SpotifyGenres() {
                       <Text textTransform="capitalize">{genre}</Text>
                       <Spacer />
                       {!genres.includes(genre) ? (
-                        <Button colorScheme="blackAlpha" size="sm">
+                        <Button
+                          disabled={isSeedLimitReached}
+                          opacity={isSeedLimitReached ? 0.5 : 1}
+                          colorScheme="blackAlpha"
+                          size="sm"
+                        >
                           Add
                         </Button>
                       ) : (

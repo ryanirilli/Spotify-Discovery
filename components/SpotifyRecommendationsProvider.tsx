@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useMemo, useState } from "react";
 import produce from "immer";
 import spotifyRecommendations from "@/queries/spotifyRecommendations";
 import { useQuery } from "react-query";
@@ -16,6 +16,7 @@ export type TSpotifyRecommendationsContext = {
   artists: TSpotifyArtist[];
   fetchRecs: () => void;
   recommendations: TSpotifyTrack[];
+  isSeedLimitReached: boolean;
 };
 
 interface ISpotifyRecommendationsProvider {
@@ -54,6 +55,10 @@ export default function SpotifyRecommendationsProvider({
       staleTime: 0,
     }
   );
+
+  const isSeedLimitReached = useMemo(() => {
+    return artists.length + genres.length === 5;
+  }, [artists, genres]);
 
   const addArtist = (artist: TSpotifyArtist) => {
     const updatedArtists = produce(artists, (draft: TSpotifyArtist[]) => {
@@ -100,6 +105,7 @@ export default function SpotifyRecommendationsProvider({
     artists,
     fetchRecs,
     recommendations: recommendations || [],
+    isSeedLimitReached,
   };
 
   return (

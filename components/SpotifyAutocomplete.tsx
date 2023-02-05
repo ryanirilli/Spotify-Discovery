@@ -31,7 +31,7 @@ export default function SpotifyAutocomplete() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [artist, setArtist] = useState("");
   const [isResultsShowing, setIsResultsShowing] = useBoolean();
-  const { addArtist, artists, fetchRecs } = useContext(
+  const { addArtist, artists, fetchRecs, isSeedLimitReached } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
@@ -113,13 +113,15 @@ export default function SpotifyAutocomplete() {
                 key={artist.id}
                 _hover={{ bg: "gray.200" }}
                 py={2}
-                onClick={() => onAddArtist(artist)}
+                onClick={() => !isSeedLimitReached && onAddArtist(artist)}
               >
                 <Flex alignItems="center" px={2}>
                   <Text>{artist.name}</Text>
                   <Spacer />
                   {!artistIds.includes(artist.id) && (
-                    <Button size="sm">Add</Button>
+                    <Button opacity={isSeedLimitReached ? 0.5 : 1} size="sm">
+                      Add
+                    </Button>
                   )}
                 </Flex>
               </ListItem>

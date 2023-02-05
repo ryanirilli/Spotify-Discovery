@@ -89,7 +89,7 @@ export default function SpotifyAutocomplete() {
       </InputGroup>
       {Boolean(data?.length) && isResultsShowing && (
         <Box
-          boxShadow={"md"}
+          boxShadow="dark-lg"
           position={"absolute"}
           top={"calc(100% + 8px)"}
           left={0}
@@ -97,7 +97,6 @@ export default function SpotifyAutocomplete() {
           zIndex="dropdown"
         >
           <List
-            spacing={2}
             role="listbox"
             maxH="xs"
             overflowY="scroll"
@@ -112,14 +111,15 @@ export default function SpotifyAutocomplete() {
                 aria-setsize={data.length}
                 aria-posinset={i + 1}
                 key={artist.id}
+                _hover={{ bg: "gray.200" }}
+                py={2}
+                onClick={() => onAddArtist(artist)}
               >
                 <Flex alignItems="center" px={2}>
                   <Text>{artist.name}</Text>
                   <Spacer />
                   {!artistIds.includes(artist.id) && (
-                    <Button size="sm" onClick={() => onAddArtist(artist)}>
-                      Add
-                    </Button>
+                    <Button size="sm">Add</Button>
                   )}
                 </Flex>
               </ListItem>

@@ -87,7 +87,7 @@ export default function SpotifyTracks() {
 
   return (
     <>
-      <Wrap spacing={0} pb={32}>
+      <Wrap spacing={0} pt={4} px={4} pb={32}>
         {recommendations.map((rec) => (
           <WrapItem
             w={["100%", "50%", "25%", null, "16.66%"]}

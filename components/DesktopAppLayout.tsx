@@ -44,16 +44,15 @@ const DesktopAppLayout = ({
         <Box
           display={["none", "block"]}
           gridArea="leftsidebar"
-          top={0}
           bg="black"
           color="white"
           position="relative"
         >
-          <Box position={"sticky"} top={16}>
+          <Box position={"sticky"} top={28}>
             {leftSidebar}
           </Box>
         </Box>
-        <Box gridArea="maincontent" bg="gray.900" p={4}>
+        <Box gridArea="maincontent" bg="gray.900">
           {children}
         </Box>
       </Grid>

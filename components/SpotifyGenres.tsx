@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import spotifyGenreSeeds from "@/queries/spotifyGenreSeeds";
 import { useQuery } from "react-query";
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
@@ -28,13 +28,15 @@ import scrollBarStyle from "@/utils/scrollBarStyle";
 export default function SpotifyGenres() {
   const { data } = useQuery("spotifyGenres", spotifyGenreSeeds);
   const [isOpen, setIsOpen] = useBoolean();
+  const hasModifiedRef = useRef(false);
   const { addGenre, genres, removeGenre, fetchRecs } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
   const onClose = () => {
     setIsOpen.off();
-    fetchRecs();
+    hasModifiedRef.current && fetchRecs();
+    hasModifiedRef.current = false;
   };
 
   return (
@@ -65,7 +67,10 @@ export default function SpotifyGenres() {
                     py={2}
                     cursor="pointer"
                     role="button"
-                    onClick={() => action(genre)}
+                    onClick={() => {
+                      hasModifiedRef.current = true;
+                      action(genre);
+                    }}
                   >
                     <Flex alignItems="center">
                       <Text textTransform="capitalize">{genre}</Text>

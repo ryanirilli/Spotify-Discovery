@@ -4,11 +4,13 @@ import { useContext } from "react";
 import {
   Avatar,
   Box,
+  Icon,
   Tag,
   TagLabel,
   TagCloseButton,
   Flex,
 } from "@chakra-ui/react";
+import { MdLibraryMusic } from "react-icons/md";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
@@ -71,6 +73,7 @@ export default function SpotifySeeds() {
                 variant="solid"
                 colorScheme="green"
               >
+                <Icon ml={-1} mr={2} as={MdLibraryMusic} color="white" />
                 <TagLabel textTransform="capitalize">{genre}</TagLabel>
                 <TagCloseButton
                   onClick={() => {

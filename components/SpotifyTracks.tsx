@@ -336,7 +336,7 @@ function SpotifyPlaylistListItem({
       spotifyAddTracksToPlaylist({ playlistId, tracks }),
     {
       onSuccess: () => {
-        //onSuccess();
+        onSuccess();
         toast({
           title: "Track added to playlist",
           status: "success",

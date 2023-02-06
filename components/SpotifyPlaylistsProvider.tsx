@@ -8,6 +8,7 @@ import { useQuery } from "react-query";
 export type TSpotifyPlaylistsContext = {
   playlists: TSpotifyPlaylist[];
   isLoading: boolean;
+  refetchPlaylists: () => void;
 };
 
 export const SpotifyPlaylistsContext =
@@ -20,13 +21,14 @@ interface ISpotifyPlaylistsProvider {
 export default function SpotifyPlaylistsProvider({
   children,
 }: ISpotifyPlaylistsProvider) {
-  const { data: playlists, isLoading } = useQuery(
-    "userPlaylists",
-    spotifyUserPlaylists
-  );
+  const {
+    data: playlists,
+    isLoading,
+    refetch: refetchPlaylists,
+  } = useQuery("userPlaylists", spotifyUserPlaylists);
   return (
     <SpotifyPlaylistsContext.Provider
-      value={{ playlists: playlists || [], isLoading }}
+      value={{ playlists: playlists || [], isLoading, refetchPlaylists }}
     >
       {children}
     </SpotifyPlaylistsContext.Provider>

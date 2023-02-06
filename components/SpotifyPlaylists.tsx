@@ -9,9 +9,6 @@ export default function SpotifyPlaylists() {
   const { playlists, isLoading } = useContext(SpotifyPlaylistsContext) || {};
   return (
     <>
-      <Text px={2} fontWeight="bold">
-        Playlists
-      </Text>
       <Box
         maxH="50vh"
         overflowY="scroll"

@@ -174,7 +174,11 @@ export default function SpotifyTracks() {
             </List>
           </ModalBody>
           <ModalFooter>
-            <Button w="100%" colorScheme="blue" onClick={onClosePlaylistModal}>
+            <Button
+              w="100%"
+              colorScheme="purple"
+              onClick={onClosePlaylistModal}
+            >
               Done
             </Button>
           </ModalFooter>

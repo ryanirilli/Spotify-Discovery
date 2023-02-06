@@ -28,7 +28,7 @@ export default function Home() {
           as="a"
           href="/api/spotify-login"
         >
-          Login
+          Login with Spotify
         </Button>
       </Flex>
     </Flex>

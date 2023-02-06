@@ -40,7 +40,7 @@ export default function SpotifyGenres() {
 
   return (
     <>
-      <Button borderRadius="full" colorScheme="blue" onClick={setIsOpen.on}>
+      <Button borderRadius="full" colorScheme="purple" onClick={setIsOpen.on}>
         Add Genres
       </Button>
       <Modal
@@ -99,7 +99,7 @@ export default function SpotifyGenres() {
             </List>
           </ModalBody>
           <ModalFooter>
-            <Button w="100%" colorScheme="blue" onClick={onClose}>
+            <Button w="100%" colorScheme="purple" onClick={onClose}>
               Done
             </Button>
           </ModalFooter>

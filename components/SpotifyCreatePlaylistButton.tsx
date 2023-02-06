@@ -49,8 +49,12 @@ export default function SpotifyCreatePlaylistButton() {
           w="100%"
           borderRadius="full"
           variant="outline"
-          colorScheme="blue"
-          _hover={{ bg: "blue.500", color: "white", borderColor: "blue.900" }}
+          colorScheme="purple"
+          _hover={{
+            bg: "purple.500",
+            color: "white",
+            borderColor: "purple.900",
+          }}
           onClick={setIsCreatePlaylistOpen.on}
         >
           Create Playlist
@@ -82,7 +86,7 @@ export default function SpotifyCreatePlaylistButton() {
           <ModalFooter>
             <Button
               isLoading={mutation.isLoading}
-              colorScheme="blue"
+              colorScheme="purple"
               onClick={() => {
                 mutation.mutate({ name: playlistName });
               }}

@@ -1,6 +1,11 @@
 "use client";
 
 import { Box, Grid, Flex } from "@chakra-ui/react";
+import { useContext } from "react";
+import {
+  SpotifyRecommendationsContext,
+  TSpotifyRecommendationsContext,
+} from "./SpotifyRecommendationsProvider";
 
 interface IDesktopAppLayout {
   children: React.ReactNode;
@@ -13,6 +18,8 @@ const DesktopAppLayout = ({
   leftSidebar,
   children,
 }: IDesktopAppLayout) => {
+  const { artists, genres } = useContext(SpotifyRecommendationsContext) || {};
+  const hasSeeds = Boolean(artists?.length || genres?.length);
   return (
     <Box>
       <Grid
@@ -48,7 +55,7 @@ const DesktopAppLayout = ({
           color="white"
           position="relative"
         >
-          <Box position={"sticky"} top={28}>
+          <Box position={"sticky"} top={hasSeeds ? 28 : 0}>
             {leftSidebar}
           </Box>
         </Box>

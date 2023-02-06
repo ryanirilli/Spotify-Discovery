@@ -17,8 +17,8 @@ export default function SpotifyMainContent() {
   return recommendations.length > 0 ? (
     <SpotifyTracks />
   ) : (
-    <Center minH="100vh">
-      <Box maxW={800} mixBlendMode="overlay">
+    <Center>
+      <Box mt={[32, 16]} maxW={800} mixBlendMode="overlay">
         <Lottie lottiePlayerOptions={{ animationData }} />
       </Box>
     </Center>

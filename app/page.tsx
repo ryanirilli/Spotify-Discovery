@@ -1,7 +1,8 @@
 "use client";
-import { Box, Button, Flex, Heading, Icon } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Icon, useBoolean } from "@chakra-ui/react";
 import { BsSpotify } from "react-icons/bs";
 export default function Home() {
+  const [isLoading, setIsLoading] = useBoolean(false);
   return (
     <Flex
       height="100vh"
@@ -17,6 +18,8 @@ export default function Home() {
           </Heading>
         </Box>
         <Button
+          isLoading={isLoading}
+          onClick={setIsLoading.on}
           borderRadius="full"
           minW="200px"
           size="lg"

@@ -2,6 +2,7 @@
 
 import { Box, Grid, Flex } from "@chakra-ui/react";
 import { useContext } from "react";
+import SpotifyAttribution from "./SpotifyAttribution";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
@@ -21,7 +22,7 @@ const DesktopAppLayout = ({
   const { artists, genres } = useContext(SpotifyRecommendationsContext) || {};
   const hasSeeds = Boolean(artists?.length || genres?.length);
   return (
-    <Box>
+    <>
       <Grid
         templateColumns={["1fr", "minmax(200px, 15%) 1fr"]}
         templateRows="auto 1fr"
@@ -43,7 +44,7 @@ const DesktopAppLayout = ({
           width="100%"
           position="sticky"
           top={0}
-          zIndex="docked"
+          zIndex="dropdown"
           display="block"
         >
           {topNav}
@@ -55,7 +56,12 @@ const DesktopAppLayout = ({
           color="white"
           position="relative"
         >
-          <Box position={"sticky"} top={hasSeeds ? 28 : 0} h="100%">
+          <Box
+            position={"sticky"}
+            top={hasSeeds ? 28 : 0}
+            h="100%"
+            zIndex="docked"
+          >
             {leftSidebar}
           </Box>
         </Box>
@@ -63,7 +69,15 @@ const DesktopAppLayout = ({
           {children}
         </Box>
       </Grid>
-    </Box>
+      <SpotifyAttribution
+        py={2}
+        display={["flex", null, "none"]}
+        bg="blackAlpha.700"
+        position="fixed"
+        bottom={0}
+        w="100vw"
+      />
+    </>
   );
 };
 

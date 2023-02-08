@@ -61,7 +61,9 @@ export default function SpotifyTempoFilter({ onChange }: ISpotifyTempoFilter) {
           <NumberInput
             maxW={20}
             value={tempoRange[0]}
-            onChange={(_, val) => setTempoRange([val, tempoRange[1]])}
+            onChange={(_, val) =>
+              setTempoRange([isNaN(val) ? 0 : val, tempoRange[1]])
+            }
             size="sm"
           >
             <NumberInputField bg="whiteAlpha.900" />
@@ -76,7 +78,9 @@ export default function SpotifyTempoFilter({ onChange }: ISpotifyTempoFilter) {
           <NumberInput
             maxW="80px"
             value={tempoRange[1]}
-            onChange={(_, val) => setTempoRange?.([tempoRange[0], val])}
+            onChange={(_, val) =>
+              setTempoRange?.([tempoRange[0], isNaN(val) ? 0 : val])
+            }
             size="sm"
           >
             <NumberInputField bg="whiteAlpha.900" />

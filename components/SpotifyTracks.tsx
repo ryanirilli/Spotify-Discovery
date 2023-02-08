@@ -209,6 +209,7 @@ function SpotifyTrack({
   );
   const [trackProgress, setTrackProgress] = useState(0);
   const [isAlbumArtLoaded, setIsAlbumArtLoaded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const animateTrackProgress = () => {
     if (previewRef.current !== null && !previewRef.current.paused) {
@@ -226,9 +227,12 @@ function SpotifyTrack({
   const playTrack = () => {
     setCurTrack?.(rec.id);
     previewRef.current?.play();
+    setIsPlaying(true);
     animateTrackProgress();
   };
+
   const pauseTrack = () => {
+    setIsPlaying(false);
     previewRef.current?.pause();
   };
 
@@ -275,13 +279,8 @@ function SpotifyTrack({
       w="100%"
       bg="black"
       _hover={{ boxShadow: "outline" }}
-      sx={{
-        "&:hover .cur-track-indicator": {
-          visibility: "visible",
-        },
-      }}
     >
-      <Box position="relative">
+      <Box position="relative" overflow="hidden">
         <AspectRatio
           ratio={1}
           onMouseEnter={handleMouseEnter}
@@ -303,17 +302,17 @@ function SpotifyTrack({
             />
           )}
         </AspectRatio>
+
         <Box
-          className="cur-track-indicator"
           position={"absolute"}
-          visibility="hidden"
-          bottom={0}
+          transition="bottom 0.3s ease-in-out"
+          bottom={isPlaying ? 0 : "-100%"}
           left={0}
           w="100%"
           bgGradient="linear(to-t, blackAlpha.900, transparent)"
         >
           <Box maxW="40px">
-            <Lottie lottiePlayerOptions={lottiePlayerOptions} />
+            {isPlaying && <Lottie lottiePlayerOptions={lottiePlayerOptions} />}
           </Box>
         </Box>
       </Box>

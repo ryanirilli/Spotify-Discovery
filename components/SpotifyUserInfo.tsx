@@ -8,13 +8,7 @@ import { BsSpotify } from "react-icons/bs";
 export default function SpotifyUserInfo() {
   const { data } = useQuery("user", spotifyUserInfo);
   return (
-    <HStack
-      display={["none", null, "flex"]}
-      mr={2}
-      bg="blackAlpha.900"
-      px={4}
-      borderRadius="full"
-    >
+    <HStack mr={2} bg="blackAlpha.900" px={4} borderRadius="full">
       <Avatar
         icon={<Icon as={BsSpotify} fontSize="md" color="black" />}
         bg="green.300"

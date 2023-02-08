@@ -93,8 +93,8 @@ export default function SpotifyAutocomplete() {
           position={"absolute"}
           top={"calc(100% + 8px)"}
           left={0}
-          right={0}
-          zIndex="overlay"
+          w={["calc(100vw - 16px)", "100%"]}
+          zIndex="dropdown"
         >
           <List
             role="listbox"

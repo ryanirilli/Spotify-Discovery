@@ -70,62 +70,60 @@ export default function SpotifyRecommendationFilters() {
     setTimeout(() => fetchRecs?.(), 0);
   };
 
-  return (
-    Boolean(recommendations?.length) && (
-      <Box bg="blackAlpha.500" p={4}>
-        <Flex alignItems="center">
-          <Popover>
-            {({ onClose }) => (
-              <>
-                <PopoverTrigger>
+  return Boolean(recommendations?.length) ? (
+    <Box bg="blackAlpha.500" p={4}>
+      <Flex alignItems="center">
+        <Popover>
+          {({ onClose }) => (
+            <>
+              <PopoverTrigger>
+                <Button
+                  leftIcon={<Icon as={IoFilter} />}
+                  size="sm"
+                  colorScheme="blue"
+                  variant="outline"
+                  borderRadius="full"
+                >
+                  Filters
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <PopoverArrow />
+                <PopoverBody>
+                  <SpotifyTempoFilter onChange={onChangeTempoRange} />
+                </PopoverBody>
+                <Box p={2}>
                   <Button
-                    leftIcon={<Icon as={IoFilter} />}
-                    size="sm"
-                    colorScheme="blue"
-                    variant="outline"
-                    borderRadius="full"
+                    isDisabled={!draftFilters.isDirty}
+                    w="100%"
+                    colorScheme="purple"
+                    onClick={() => {
+                      onApply();
+                      onClose();
+                    }}
                   >
-                    Filters
+                    Apply
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <PopoverArrow />
-                  <PopoverBody>
-                    <SpotifyTempoFilter onChange={onChangeTempoRange} />
-                  </PopoverBody>
-                  <Box p={2}>
-                    <Button
-                      isDisabled={!draftFilters.isDirty}
-                      w="100%"
-                      colorScheme="purple"
-                      onClick={() => {
-                        onApply();
-                        onClose();
-                      }}
-                    >
-                      Apply
-                    </Button>
-                  </Box>
-                </PopoverContent>
-              </>
+                </Box>
+              </PopoverContent>
+            </>
+          )}
+        </Popover>
+        <Box color="white" ml={2}>
+          <HStack>
+            {filters?.target_tempo && (
+              <Tag colorScheme="blue">
+                <TagLabel>Target BPM: {filters.target_tempo}</TagLabel>
+              </Tag>
             )}
-          </Popover>
-          <Box color="white" ml={2}>
-            <HStack>
-              {filters?.target_tempo && (
-                <Tag colorScheme="blue">
-                  <TagLabel>Target BPM: {filters.target_tempo}</TagLabel>
-                </Tag>
-              )}
-              {filters?.max_tempo && (
-                <Tag colorScheme="blue">
-                  <TagLabel>Max BPM: {filters.max_tempo}</TagLabel>
-                </Tag>
-              )}
-            </HStack>
-          </Box>
-        </Flex>
-      </Box>
-    )
-  );
+            {filters?.max_tempo && (
+              <Tag colorScheme="blue">
+                <TagLabel>Max BPM: {filters.max_tempo}</TagLabel>
+              </Tag>
+            )}
+          </HStack>
+        </Box>
+      </Flex>
+    </Box>
+  ) : null;
 }

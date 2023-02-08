@@ -15,7 +15,6 @@ export type TSpotifyRecommendationsContext = {
   removeGenre: (genre: string) => void;
   genres: string[];
   artists: TSpotifyArtist[];
-  setHasAddedTempoRange: (hasAdded: boolean) => void;
   fetchRecs: () => void;
   recommendations: TSpotifyTrack[];
   isSeedLimitReached: boolean;

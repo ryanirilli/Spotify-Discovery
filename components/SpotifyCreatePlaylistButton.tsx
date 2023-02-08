@@ -20,10 +20,7 @@ import {
 } from "@chakra-ui/react";
 import { useContext, useRef, useState } from "react";
 import { useMutation } from "react-query";
-import {
-  SpotifyPlaylistsContext,
-  TSpotifyPlaylistsContext,
-} from "./SpotifyPlaylistsProvider";
+import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
 export default function SpotifyCreatePlaylistButton() {
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useBoolean();

@@ -21,7 +21,9 @@ export default function SpotifyUserInfo() {
         ml={-4}
         size="sm"
       />
-      <Text color="white">{data?.display_name}</Text>
+      <Text color="white" noOfLines={1}>
+        {data?.display_name}
+      </Text>
     </HStack>
   );
 }

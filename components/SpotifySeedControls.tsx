@@ -1,9 +1,9 @@
 "use client";
 
-import { Flex, HStack } from "@chakra-ui/react";
+import { Box, Flex, HStack, Text } from "@chakra-ui/react";
+import Image from "next/image";
 import SpotifyAutocomplete from "./SpotifyAutocomplete";
 import SpotifyGenres from "./SpotifyGenres";
-import SpotifyUserInfo from "./SpotifyUserInfo";
 
 export default function SpotifyFilters() {
   return (
@@ -12,7 +12,19 @@ export default function SpotifyFilters() {
         <SpotifyAutocomplete />
         <SpotifyGenres />
       </HStack>
-      <SpotifyUserInfo />
+      <HStack mr={4} justifyContent="center">
+        <Text fontSize="xs" color="whiteAlpha.500">
+          Powered by
+        </Text>
+        <Box maxW="75px">
+          <Image
+            src="/Spotify_Logo_RGB_Green.png"
+            width={2362}
+            height={709}
+            alt="Spotify Logo"
+          />
+        </Box>
+      </HStack>
     </Flex>
   );
 }

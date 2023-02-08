@@ -55,7 +55,7 @@ const DesktopAppLayout = ({
           color="white"
           position="relative"
         >
-          <Box position={"sticky"} top={hasSeeds ? 28 : 0}>
+          <Box position={"sticky"} top={hasSeeds ? 28 : 0} h="100%">
             {leftSidebar}
           </Box>
         </Box>

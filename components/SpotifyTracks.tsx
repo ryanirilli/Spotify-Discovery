@@ -53,6 +53,10 @@ import { useMutation } from "react-query";
 import spotifyAddTracksToPlaylist, {
   TSpotifyAddToPlaylistArgs,
 } from "@/mutations/spotifyAddTracksToPlaylistMutation";
+import animationData from "@/public/sound-bars.json";
+import Lottie from "@/components/Lottie";
+
+const lottiePlayerOptions = { animationData };
 
 export default function SpotifyTracks() {
   const { recommendations } = useContext(
@@ -265,30 +269,54 @@ function SpotifyTrack({
   };
 
   return (
-    <Card m={2} mb={[8, 2]} w="100%" bg="black">
-      <AspectRatio
-        ratio={1}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={toggleTrack}
-        transition="opacity 0.3s ease-in-out"
-        opacity={isAlbumArtLoaded ? 1 : 0}
-        borderTopRadius="md"
-        overflow="hidden"
-      >
-        {albumImageUrl && (
-          <Image
-            fill
-            sizes="(max-width: 768px) 100vw,
+    <Card
+      m={2}
+      mb={[8, 2]}
+      w="100%"
+      bg="black"
+      _hover={{ boxShadow: "outline" }}
+      sx={{
+        "&:hover .cur-track-indicator": {
+          visibility: "visible",
+        },
+      }}
+    >
+      <Box position="relative">
+        <AspectRatio
+          ratio={1}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onClick={toggleTrack}
+          transition="opacity 0.3s ease-in-out"
+          opacity={isAlbumArtLoaded ? 1 : 0}
+          overflow="hidden"
+        >
+          {albumImageUrl && (
+            <Image
+              fill
+              sizes="(max-width: 768px) 100vw,
               (max-width: 1200px) 50vw,
               33vw"
-            alt="album art"
-            src={albumImageUrl}
-            onLoadingComplete={() => setIsAlbumArtLoaded(true)}
-          />
-        )}
-      </AspectRatio>
-
+              alt="album art"
+              src={albumImageUrl}
+              onLoadingComplete={() => setIsAlbumArtLoaded(true)}
+            />
+          )}
+        </AspectRatio>
+        <Box
+          className="cur-track-indicator"
+          position={"absolute"}
+          visibility="hidden"
+          bottom={0}
+          left={0}
+          w="100%"
+          bgGradient="linear(to-t, blackAlpha.900, transparent)"
+        >
+          <Box maxW="40px">
+            <Lottie lottiePlayerOptions={lottiePlayerOptions} />
+          </Box>
+        </Box>
+      </Box>
       <VisuallyHidden>
         <audio src={rec.preview_url} ref={previewRef} />
       </VisuallyHidden>
@@ -302,10 +330,11 @@ function SpotifyTrack({
             {rec.artists.map((a) => a.name).join(", ")}
           </Text>
         </Box>
-        <Box py={2} pl={2}>
+        <Box py={2} pl={1}>
           <Menu>
             <MenuButton
               as={IconButton}
+              size="sm"
               aria-label="Options"
               icon={<Icon as={CgMoreVerticalAlt} />}
               variant="outline"

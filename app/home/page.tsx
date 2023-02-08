@@ -4,9 +4,8 @@ import SpotifyTopNav from "@/components/SpotifyTopNav";
 import DesktopAppLayout from "@/components/DesktopAppLayout";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import SpotifyPlaylists from "@/components/SpotifyPlaylists";
 import SpotifyMainContent from "@/components/SpotifyMainContent";
-import SpotifyCreatePlaylistButton from "@/components/SpotifyCreatePlaylistButton";
+import SpotifyLeftSidebar from "@/components/SpotifyLeftSidebar";
 
 export default async function Home() {
   const nextCookies = cookies();
@@ -26,12 +25,7 @@ export default async function Home() {
           <SpotifySeeds />
         </SpotifyTopNav>
       }
-      leftSidebar={
-        <>
-          <SpotifyPlaylists />
-          <SpotifyCreatePlaylistButton />
-        </>
-      }
+      leftSidebar={<SpotifyLeftSidebar />}
     >
       <SpotifyMainContent />
     </DesktopAppLayout>

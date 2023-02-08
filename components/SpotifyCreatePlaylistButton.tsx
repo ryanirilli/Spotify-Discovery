@@ -2,7 +2,7 @@
 
 import spotifyCreatePlaylist, {
   TSpotifyCreatePlaylistArgs,
-} from "@/mutations/spotifyCreatePlaylist";
+} from "@/mutations/spotifyCreatePlaylistMutation";
 import scrollBarStyle from "@/utils/scrollBarStyle";
 import {
   Button,

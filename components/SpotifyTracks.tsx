@@ -52,7 +52,7 @@ import scrollBarStyle from "@/utils/scrollBarStyle";
 import { useMutation } from "react-query";
 import spotifyAddTracksToPlaylist, {
   TSpotifyAddToPlaylistArgs,
-} from "@/mutations/spotifyAddTracksToPlaylist";
+} from "@/mutations/spotifyAddTracksToPlaylistMutation";
 
 export default function SpotifyTracks() {
   const { recommendations } = useContext(

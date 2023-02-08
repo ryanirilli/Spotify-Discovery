@@ -18,6 +18,7 @@ import {
 import produce from "immer";
 import { useContext, useReducer } from "react";
 import { IoFilter } from "react-icons/io5";
+import { TopNavHeightContext } from "./DesktopAppLayout";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationFilters,
@@ -70,8 +71,18 @@ export default function SpotifyRecommendationFilters() {
     setTimeout(() => fetchRecs?.(), 0);
   };
 
+  const { topNavHeight } = useContext(TopNavHeightContext);
+
+  console.log("topNavHeight: ", topNavHeight);
+
   return Boolean(recommendations?.length) ? (
-    <Box bg="blackAlpha.500" p={4}>
+    <Box
+      bg="blackAlpha.900"
+      p={4}
+      position="sticky"
+      top={`${topNavHeight}px`}
+      zIndex="docked"
+    >
       <Flex alignItems="center">
         <Popover>
           {({ onClose }) => (

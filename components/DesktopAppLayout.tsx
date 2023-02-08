@@ -1,18 +1,27 @@
 "use client";
 
-import { Box, Grid, Flex } from "@chakra-ui/react";
-import { useContext } from "react";
+import { Box, Grid } from "@chakra-ui/react";
+import { createContext, useContext, useState } from "react";
 import SpotifyAttribution from "./SpotifyAttribution";
-import {
-  SpotifyRecommendationsContext,
-  TSpotifyRecommendationsContext,
-} from "./SpotifyRecommendationsProvider";
+import { SpotifyRecommendationsContext } from "./SpotifyRecommendationsProvider";
 
 interface IDesktopAppLayout {
   children: React.ReactNode;
   topNav: React.ReactNode;
   leftSidebar: React.ReactNode;
 }
+
+interface ITopNavHeightContext {
+  topNavHeight: number;
+  setTopNavHeight: (height: number) => void;
+}
+
+export const TopNavHeightContext = createContext<ITopNavHeightContext>({
+  topNavHeight: 0,
+  setTopNavHeight(height) {
+    return height;
+  },
+});
 
 const DesktopAppLayout = ({
   topNav,
@@ -21,8 +30,9 @@ const DesktopAppLayout = ({
 }: IDesktopAppLayout) => {
   const { artists, genres } = useContext(SpotifyRecommendationsContext) || {};
   const hasSeeds = Boolean(artists?.length || genres?.length);
+  const [topNavHeight, setTopNavHeight] = useState(0);
   return (
-    <>
+    <TopNavHeightContext.Provider value={{ topNavHeight, setTopNavHeight }}>
       <Grid
         templateColumns={["1fr", "minmax(200px, 15%) 1fr"]}
         templateRows="auto 1fr"
@@ -58,9 +68,9 @@ const DesktopAppLayout = ({
         >
           <Box
             position={"sticky"}
-            top={hasSeeds ? 28 : 0}
-            h="100%"
+            top={`${topNavHeight}px`}
             zIndex="docked"
+            height={`calc(100vh - ${topNavHeight}px)`}
           >
             {leftSidebar}
           </Box>
@@ -77,7 +87,7 @@ const DesktopAppLayout = ({
         bottom={0}
         w="100vw"
       />
-    </>
+    </TopNavHeightContext.Provider>
   );
 };
 

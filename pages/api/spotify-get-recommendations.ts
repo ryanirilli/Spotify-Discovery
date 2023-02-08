@@ -14,7 +14,14 @@ export default async function SpotifyGetRecommendationsreq(
       limit: 100,
       seed_artists: seed_artists.split(",").filter((a) => a !== ""),
       seed_genres: seed_genres.split(",").filter((a) => a !== ""),
+      max_tempo: req.query.max_tempo
+        ? parseInt(req.query.max_tempo as string)
+        : undefined,
+      target_tempo: req.query.target_tempo
+        ? parseInt(req.query.target_tempo as string)
+        : undefined,
     };
+
     const data = await spotifyApi.getRecommendations(settings);
     const tracks: unknown =
       data?.body?.tracks.filter((t) => Boolean(t.preview_url)) || [];

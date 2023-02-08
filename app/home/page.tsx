@@ -1,4 +1,4 @@
-import SpotifyFilters from "@/components/SpotifyFilters";
+import SpotifySeedControls from "@/components/SpotifySeedControls";
 import SpotifySeeds from "@/components/SpotifySeeds";
 import SpotifyTopNav from "@/components/SpotifyTopNav";
 import DesktopAppLayout from "@/components/DesktopAppLayout";
@@ -22,14 +22,14 @@ export default async function Home() {
     <DesktopAppLayout
       topNav={
         <SpotifyTopNav>
-          <SpotifyFilters />
+          <SpotifySeedControls />
           <SpotifySeeds />
         </SpotifyTopNav>
       }
       leftSidebar={
         <>
-          <SpotifyCreatePlaylistButton />
           <SpotifyPlaylists />
+          <SpotifyCreatePlaylistButton />
         </>
       }
     >

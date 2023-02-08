@@ -14,7 +14,7 @@ export default function Home() {
         <Box pb={8} textAlign="center">
           <Heading>Better Music Discovery</Heading>
           <Heading as="h4" size="md" fontWeight="light">
-            Made with love for Spotify users
+            for curators, tastemakers, and audiophiles
           </Heading>
         </Box>
         <Button

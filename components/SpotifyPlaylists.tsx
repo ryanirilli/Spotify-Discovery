@@ -9,6 +9,9 @@ export default function SpotifyPlaylists() {
   const { playlists, isLoading } = useContext(SpotifyPlaylistsContext) || {};
   return (
     <>
+      <Text pl={4} mt={4} mb={2} fontWeight="bold">
+        Playlists
+      </Text>
       <Box
         maxH="50vh"
         overflowY="scroll"
@@ -30,7 +33,7 @@ export default function SpotifyPlaylists() {
             </>
           ) : (
             playlists?.map((playlist) => (
-              <ListItem px={2} key={playlist.id}>
+              <ListItem px={4} key={playlist.id}>
                 <Text fontSize="small" noOfLines={1} color="whiteAlpha.800">
                   {playlist.name}
                 </Text>

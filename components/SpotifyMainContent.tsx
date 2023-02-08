@@ -8,19 +8,27 @@ import {
 import SpotifyTracks from "./SpotifyTracks";
 import Lottie from "@/components/Lottie";
 import animationData from "@/public/dj.json";
+import SpotifyRecommendationFilters from "./SpotifyRecommendationFilters";
+
+const lottiePlayerOptions = { animationData };
 
 export default function SpotifyMainContent() {
   const { recommendations } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
-  return recommendations.length > 0 ? (
-    <SpotifyTracks />
-  ) : (
-    <Center>
-      <Box mt={[32, 16]} maxW={800} mixBlendMode="overlay">
-        <Lottie lottiePlayerOptions={{ animationData }} />
-      </Box>
-    </Center>
+  return (
+    <>
+      <SpotifyRecommendationFilters />
+      {recommendations.length > 0 ? (
+        <SpotifyTracks />
+      ) : (
+        <Center>
+          <Box mt={[32, 16]} maxW={800} mixBlendMode="overlay">
+            <Lottie lottiePlayerOptions={lottiePlayerOptions} />
+          </Box>
+        </Center>
+      )}
+    </>
   );
 }

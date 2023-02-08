@@ -6,6 +6,7 @@ import spotifyRecommendations from "@/queries/spotifyRecommendations";
 import { useQuery } from "react-query";
 import { TSpotifyArtist } from "@/types/SpotifyArtist";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
+import { TSpotifyRecommendationsOptions } from "@/types/SpotifyRecommendationsOptions";
 
 export type TSpotifyRecommendationsContext = {
   addArtist: (artist: TSpotifyArtist) => void;
@@ -14,9 +15,17 @@ export type TSpotifyRecommendationsContext = {
   removeGenre: (genre: string) => void;
   genres: string[];
   artists: TSpotifyArtist[];
+  setHasAddedTempoRange: (hasAdded: boolean) => void;
   fetchRecs: () => void;
   recommendations: TSpotifyTrack[];
   isSeedLimitReached: boolean;
+  filters: TSpotifyRecommendationFilters;
+  setFilters: (filters: TSpotifyRecommendationFilters) => void;
+};
+
+export type TSpotifyRecommendationFilters = {
+  target_tempo?: number;
+  max_tempo?: number;
 };
 
 interface ISpotifyRecommendationsProvider {
@@ -32,6 +41,7 @@ export default function SpotifyRecommendationsProvider({
 }: ISpotifyRecommendationsProvider) {
   const [artists, setArtists] = useState<TSpotifyArtist[]>([]);
   const [genres, setGenres] = useState<string[]>([]);
+  const [filters, setFilters] = useState<TSpotifyRecommendationFilters>({});
 
   const { data: recommendations, refetch: fetchRecs } = useQuery<
     TSpotifyTrack[]
@@ -43,9 +53,10 @@ export default function SpotifyRecommendationsProvider({
       }
       document.body.scrollIntoView({ behavior: "smooth", block: "start" });
 
-      const settings = {
+      const settings: TSpotifyRecommendationsOptions = {
         artists: artists.map((a) => a.id),
         genres,
+        ...filters,
       };
 
       return spotifyRecommendations(settings);
@@ -106,6 +117,8 @@ export default function SpotifyRecommendationsProvider({
     fetchRecs,
     recommendations: recommendations || [],
     isSeedLimitReached,
+    filters,
+    setFilters,
   };
 
   return (

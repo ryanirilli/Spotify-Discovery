@@ -2,7 +2,7 @@
 
 import spotifyCreatePlaylist, {
   TSpotifyCreatePlaylistArgs,
-} from "@/mutations/SpotifyCreatePlaylist";
+} from "@/mutations/spotifyCreatePlaylist";
 import scrollBarStyle from "@/utils/scrollBarStyle";
 import {
   Button,
@@ -46,12 +46,11 @@ export default function SpotifyCreatePlaylistButton() {
     <>
       <Box p={2}>
         <Button
-          w="100%"
           borderRadius="full"
-          variant="outline"
-          colorScheme="purple"
+          size="sm"
+          variant="ghost"
           _hover={{
-            bg: "purple.500",
+            bg: "whiteAlpha.300",
             color: "white",
             borderColor: "purple.900",
           }}

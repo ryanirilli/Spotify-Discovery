@@ -41,7 +41,7 @@ export default function SpotifyGenres() {
   return (
     <>
       <Button borderRadius="full" colorScheme="purple" onClick={setIsOpen.on}>
-        Add Genres
+        Genres
       </Button>
       <Modal
         isOpen={isOpen}

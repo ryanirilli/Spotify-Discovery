@@ -73,11 +73,9 @@ export default function SpotifyRecommendationFilters() {
 
   const { topNavHeight } = useContext(TopNavHeightContext);
 
-  console.log("topNavHeight: ", topNavHeight);
-
   return Boolean(recommendations?.length) ? (
     <Box
-      bg="blackAlpha.900"
+      bg="blackAlpha.800"
       p={4}
       position="sticky"
       top={`${topNavHeight}px`}
@@ -92,7 +90,6 @@ export default function SpotifyRecommendationFilters() {
                   leftIcon={<Icon as={IoFilter} />}
                   size="sm"
                   colorScheme="blue"
-                  variant="outline"
                   borderRadius="full"
                 >
                   Filters

@@ -63,6 +63,8 @@ const DesktopAppLayout = ({
           display={["none", "block"]}
           gridArea="leftsidebar"
           bg="black"
+          borderRight="1px"
+          borderRightColor="whiteAlpha.300"
           color="white"
           position="relative"
         >

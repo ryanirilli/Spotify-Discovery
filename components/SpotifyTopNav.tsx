@@ -17,7 +17,13 @@ export default function SpotifyTopNav({ children }: ISpotifyTopNav) {
     setTopNavHeight(height);
   }, [height]);
   return (
-    <Box pt={2} pb={2} ref={topNavRef}>
+    <Box
+      pt={2}
+      pb={2}
+      ref={topNavRef}
+      borderBottom="1px"
+      borderColor="whiteAlpha.300"
+    >
       {children}
     </Box>
   );

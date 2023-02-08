@@ -290,17 +290,19 @@ function SpotifyTrack({
           opacity={isAlbumArtLoaded ? 1 : 0}
           overflow="hidden"
         >
-          {albumImageUrl && (
-            <Image
-              fill
-              sizes="(max-width: 768px) 100vw,
+          <Box>
+            {albumImageUrl && (
+              <Image
+                fill
+                sizes="(max-width: 768px) 100vw,
               (max-width: 1200px) 50vw,
               33vw"
-              alt="album art"
-              src={albumImageUrl}
-              onLoadingComplete={() => setIsAlbumArtLoaded(true)}
-            />
-          )}
+                alt="album art"
+                src={albumImageUrl}
+                onLoadingComplete={() => setIsAlbumArtLoaded(true)}
+              />
+            )}
+          </Box>
         </AspectRatio>
 
         <Box

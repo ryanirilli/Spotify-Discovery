@@ -15,6 +15,7 @@ import {
   Flex,
   Spacer,
   useBoolean,
+  Icon,
 } from "@chakra-ui/react";
 import spotifyGenreSeeds from "@/queries/spotifyGenreSeeds";
 import { useQuery } from "react-query";
@@ -24,6 +25,7 @@ import {
   TSpotifyRecommendationsContext,
 } from "./SpotifyRecommendationsProvider";
 import scrollBarStyle from "@/utils/scrollBarStyle";
+import { MdLibraryMusic } from "react-icons/md";
 
 export default function SpotifyGenres() {
   const { data } = useQuery("spotifyGenres", spotifyGenreSeeds);
@@ -40,7 +42,13 @@ export default function SpotifyGenres() {
 
   return (
     <>
-      <Button borderRadius="full" colorScheme="purple" onClick={setIsOpen.on}>
+      <Button
+        leftIcon={<Icon as={MdLibraryMusic} />}
+        borderRadius="full"
+        colorScheme="purple"
+        onClick={setIsOpen.on}
+        size="sm"
+      >
         Genres
       </Button>
       <Modal

@@ -76,7 +76,7 @@ export default function SpotifyRecommendationFilters() {
   return Boolean(recommendations?.length) ? (
     <Box
       bg="blackAlpha.800"
-      p={4}
+      p={[1, 4]}
       position="sticky"
       top={`${topNavHeight}px`}
       zIndex="docked"
@@ -120,13 +120,13 @@ export default function SpotifyRecommendationFilters() {
         <Box color="white" ml={2}>
           <HStack>
             {filters?.target_tempo && (
-              <Tag colorScheme="blue">
-                <TagLabel>Target BPM: {filters.target_tempo}</TagLabel>
+              <Tag colorScheme="blue" size={["sm", "md"]}>
+                <TagLabel>Target BPM {filters.target_tempo}</TagLabel>
               </Tag>
             )}
             {filters?.max_tempo && (
-              <Tag colorScheme="blue">
-                <TagLabel>Max BPM: {filters.max_tempo}</TagLabel>
+              <Tag colorScheme="blue" size={["sm", "md"]}>
+                <TagLabel>Max BPM {filters.max_tempo}</TagLabel>
               </Tag>
             )}
           </HStack>

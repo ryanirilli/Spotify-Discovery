@@ -29,8 +29,9 @@ export default function SpotifySeeds() {
     <>
       {(hasArtists || hasGenres) && (
         <Flex
-          mt={2}
-          p={2}
+          mt={[1, 2]}
+          p={[1, 2]}
+          pb={[0, 1]}
           bg="blackAlpha.500"
           overflowX="scroll"
           w="100%"

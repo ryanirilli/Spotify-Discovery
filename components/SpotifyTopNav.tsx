@@ -21,7 +21,7 @@ export default function SpotifyTopNav({ children }: ISpotifyTopNav) {
       pt={2}
       pb={2}
       ref={topNavRef}
-      borderBottom="1px"
+      borderBottom={["none", "1px"]}
       borderColor="whiteAlpha.300"
     >
       {children}

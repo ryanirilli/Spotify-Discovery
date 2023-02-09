@@ -71,7 +71,7 @@ export default function SpotifyTempoFilter({ onChange }: ISpotifyTempoFilter) {
               onChange={(_, val) =>
                 setTempoRange([isNaN(val) ? 0 : val, tempoRange[1]])
               }
-              size="sm"
+              size={["lg", "sm"]}
             >
               <NumberInputField bg="whiteAlpha.900" />
               <NumberInputStepper>
@@ -88,7 +88,7 @@ export default function SpotifyTempoFilter({ onChange }: ISpotifyTempoFilter) {
               onChange={(_, val) =>
                 setTempoRange?.([tempoRange[0], isNaN(val) ? 0 : val])
               }
-              size="sm"
+              size={["lg", "sm"]}
             >
               <NumberInputField bg="whiteAlpha.900" />
               <NumberInputStepper>

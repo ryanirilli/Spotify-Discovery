@@ -68,19 +68,22 @@ export default function SpotifyAutocomplete() {
   const artistIds = artists.map((artist) => artist.id);
 
   return (
-    <Box position="relative" ref={containerRef} maxW="md" w={["auto", "md"]}>
-      <InputGroup size="lg">
+    <Box
+      position="relative"
+      ref={containerRef}
+      maxW="md"
+      w={["auto", "md"]}
+      flex={1}
+    >
+      <InputGroup size="sm">
         <InputLeftElement
           pointerEvents="none"
-          children={
-            <Icon as={CgSearch} color="gray.500" transform="translateY(-3px)" />
-          }
+          children={<Icon as={CgSearch} color="gray.500" />}
         />
         <Input
           borderRadius="full"
-          bg="whiteAlpha.800"
+          bg="white"
           w="100%"
-          size="md"
           ref={inputRef}
           onFocus={onFocus}
           placeholder="Search for an artist"

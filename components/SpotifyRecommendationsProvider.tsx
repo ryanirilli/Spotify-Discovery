@@ -20,6 +20,7 @@ export type TSpotifyRecommendationsContext = {
   isSeedLimitReached: boolean;
   filters: TSpotifyRecommendationFilters;
   setFilters: (filters: TSpotifyRecommendationFilters) => void;
+  isLoadingRecs: boolean;
 };
 
 export type TSpotifyRecommendationFilters = {
@@ -42,9 +43,11 @@ export default function SpotifyRecommendationsProvider({
   const [genres, setGenres] = useState<string[]>([]);
   const [filters, setFilters] = useState<TSpotifyRecommendationFilters>({});
 
-  const { data: recommendations, refetch: fetchRecs } = useQuery<
-    TSpotifyTrack[]
-  >(
+  const {
+    data: recommendations,
+    refetch: fetchRecs,
+    isFetching: isLoadingRecs,
+  } = useQuery<TSpotifyTrack[]>(
     ["spotifyRecommendations"],
     () => {
       if (!artists.length && !genres.length) {
@@ -118,6 +121,7 @@ export default function SpotifyRecommendationsProvider({
     isSeedLimitReached,
     filters,
     setFilters,
+    isLoadingRecs,
   };
 
   return (

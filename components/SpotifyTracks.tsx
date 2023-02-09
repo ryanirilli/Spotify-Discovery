@@ -59,7 +59,7 @@ import Lottie from "@/components/Lottie";
 const lottiePlayerOptions = { animationData };
 
 export default function SpotifyTracks() {
-  const { recommendations } = useContext(
+  const { recommendations, isLoadingRecs } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
@@ -101,6 +101,7 @@ export default function SpotifyTracks() {
             <SpotifyTrack
               rec={rec}
               onAddTrackToPlaylist={onAddTrackToPlaylist}
+              isLoadingRecs={isLoadingRecs}
             />
           </WrapItem>
         ))}
@@ -195,9 +196,11 @@ export default function SpotifyTracks() {
 function SpotifyTrack({
   rec,
   onAddTrackToPlaylist,
+  isLoadingRecs,
 }: {
   rec: TSpotifyTrack;
   onAddTrackToPlaylist: (track: TSpotifyTrack) => void;
+  isLoadingRecs: boolean;
 }) {
   const { curTrack, setCurTrack } =
     useContext<TSpotifyCurrentTrackContext | null>(
@@ -291,7 +294,7 @@ function SpotifyTrack({
           overflow="hidden"
         >
           <Box>
-            {albumImageUrl && (
+            {albumImageUrl && !isLoadingRecs && (
               <Image
                 fill
                 sizes="(max-width: 768px) 100vw,
@@ -325,10 +328,10 @@ function SpotifyTrack({
       <Flex px={2} bg="white" alignItems="center" borderBottomRadius="md">
         <Box flex={1}>
           <Text fontWeight="bold" fontSize="small" noOfLines={1}>
-            {rec.name}
+            {isLoadingRecs ? "..." : rec.name}
           </Text>
           <Text fontSize="small" noOfLines={1} transform="translateY(-3px)">
-            {rec.artists.map((a) => a.name).join(", ")}
+            {isLoadingRecs ? "..." : rec.artists.map((a) => a.name).join(", ")}
           </Text>
         </Box>
         <Box py={2} pl={1}>

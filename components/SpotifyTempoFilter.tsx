@@ -51,7 +51,7 @@ export default function SpotifyTempoFilter({ onChange }: ISpotifyTempoFilter) {
       <Box px={2}>
         <Flex justifyContent="space-between" mb={2}>
           <Text mb={2}>Tempo Range (BPM)</Text>
-          <Tooltip label="Remove filter" fontSize="xs" hasArrow>
+          <Tooltip label="Remove filter" fontSize="xs" hasArrow openDelay={500}>
             <IconButton
               variant={"ghost"}
               aria-label="remove tempo filter"

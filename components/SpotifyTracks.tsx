@@ -2,8 +2,10 @@
 
 import { useContext, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { CgMoreVerticalAlt, CgSearch } from "react-icons/cg";
+import { CgSearch } from "react-icons/cg";
 import { BsCheck2 } from "react-icons/bs";
+import { MdPlaylistAdd } from "react-icons/md";
+import { BiBarChartAlt2 } from "react-icons/bi";
 import {
   AspectRatio,
   Box,
@@ -17,10 +19,6 @@ import {
   InputLeftElement,
   List,
   ListItem,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -28,9 +26,15 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
   Progress,
   Spacer,
   Text,
+  Tooltip,
   useBoolean,
   useToast,
   VisuallyHidden,
@@ -55,6 +59,7 @@ import spotifyAddTracksToPlaylist, {
 } from "@/mutations/spotifyAddTracksToPlaylistMutation";
 import animationData from "@/public/sound-bars.json";
 import Lottie from "@/components/Lottie";
+import SpotifyTrackDetails from "./SpotifyTrackDetails";
 
 const lottiePlayerOptions = { animationData };
 
@@ -94,7 +99,7 @@ export default function SpotifyTracks() {
       <Wrap spacing={0} pt={4} px={4} pb={32}>
         {recommendations.map((rec) => (
           <WrapItem
-            w={["100%", "50%", "25%", null, "16.66%"]}
+            w={["100%", null, "50%", "25%", null, "16.66%"]}
             key={rec.id}
             position="relative"
           >
@@ -218,17 +223,12 @@ function SpotifyTrack({
     if (previewRef.current !== null && !previewRef.current.paused) {
       const { currentTime, duration } = previewRef.current;
       let progress = (currentTime / duration) * 100;
-      if (progress === 100) {
-        progress = 0;
-        previewRef.current.currentTime = 0;
-      }
       setTrackProgress(progress);
       requestAnimationFrame(animateTrackProgress);
     }
   };
 
   const playTrack = () => {
-    setCurTrack?.(rec.id);
     previewRef.current?.play();
     setIsPlaying(true);
     animateTrackProgress();
@@ -282,6 +282,8 @@ function SpotifyTrack({
       w="100%"
       bg="black"
       _hover={{ boxShadow: "outline" }}
+      onMouseEnter={() => setCurTrack?.(rec.id)}
+      onClick={() => setCurTrack?.(rec.id)}
     >
       <Box position="relative" overflow="hidden">
         <AspectRatio
@@ -309,6 +311,7 @@ function SpotifyTrack({
         </AspectRatio>
 
         <Box
+          pointerEvents="none"
           position={"absolute"}
           transition="bottom 0.3s ease-in-out"
           bottom={isPlaying ? 0 : "-100%"}
@@ -322,36 +325,72 @@ function SpotifyTrack({
         </Box>
       </Box>
       <VisuallyHidden>
-        <audio src={rec.preview_url} ref={previewRef} />
+        <audio src={rec.preview_url} ref={previewRef} loop />
       </VisuallyHidden>
       <Progress h={2} value={trackProgress} />
-      <Flex px={2} bg="white" alignItems="center" borderBottomRadius="md">
-        <Box flex={1}>
-          <Text fontWeight="bold" fontSize="small" noOfLines={1}>
-            {isLoadingRecs ? "..." : rec.name}
-          </Text>
-          <Text fontSize="small" noOfLines={1} transform="translateY(-3px)">
-            {isLoadingRecs ? "..." : rec.artists.map((a) => a.name).join(", ")}
-          </Text>
-        </Box>
-        <Box py={2} pl={1}>
-          <Menu>
-            <MenuButton
-              as={IconButton}
-              size="sm"
-              aria-label="Options"
-              icon={<Icon as={CgMoreVerticalAlt} />}
+      <Box bg="white" alignItems="center" borderBottomRadius="md">
+        <Flex p={2}>
+          <Box flex={1}>
+            <Text fontWeight="bold" fontSize="small" noOfLines={1}>
+              {isLoadingRecs ? "..." : rec.name}
+            </Text>
+            <Text fontSize="small" noOfLines={1} color="gray.500">
+              {isLoadingRecs
+                ? "..."
+                : rec.artists.map((a) => a.name).join(", ")}
+            </Text>
+          </Box>
+        </Flex>
+        <Flex>
+          <Popover isLazy>
+            {({ isOpen, onClose }) => {
+              if (curTrack !== rec.id && isOpen) {
+                onClose();
+              }
+              return (
+                <>
+                  <PopoverTrigger>
+                    <Flex flex="1">
+                      <Tooltip hasArrow label="Track details" openDelay={500}>
+                        <IconButton
+                          variant="outline"
+                          size="sm"
+                          aria-label="Track details"
+                          icon={<Icon boxSize={4} as={BiBarChartAlt2} />}
+                          borderRadius={0}
+                          flex={1}
+                          borderRight="none"
+                          borderBottom="none"
+                          borderLeft="none"
+                        />
+                      </Tooltip>
+                    </Flex>
+                  </PopoverTrigger>
+                  <PopoverContent boxShadow="dark-lg">
+                    <PopoverArrow />
+                    <PopoverBody p={0}>
+                      <SpotifyTrackDetails id={rec.id} />
+                    </PopoverBody>
+                  </PopoverContent>
+                </>
+              );
+            }}
+          </Popover>
+          <Tooltip hasArrow label="Add to playlist" openDelay={500}>
+            <IconButton
+              aria-label="Add to playlist database"
+              icon={<Icon boxSize={6} as={MdPlaylistAdd} />}
               variant="outline"
+              size="sm"
+              borderRadius={0}
+              flex={1}
+              onClick={() => onAddTrackToPlaylist(rec)}
+              borderBottom="none"
+              borderRight="none"
             />
-            <MenuList boxShadow="dark-lg">
-              <MenuItem onClick={() => onAddTrackToPlaylist(rec)}>
-                Add To Playlist
-              </MenuItem>
-              <MenuItem command="coming soon">Track Details</MenuItem>
-            </MenuList>
-          </Menu>
-        </Box>
-      </Flex>
+          </Tooltip>
+        </Flex>
+      </Box>
     </Card>
   );
 }

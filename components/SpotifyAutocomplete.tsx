@@ -122,7 +122,11 @@ export default function SpotifyAutocomplete() {
                   <Text>{artist.name}</Text>
                   <Spacer />
                   {!artistIds.includes(artist.id) && (
-                    <Button opacity={isSeedLimitReached ? 0.5 : 1} size="sm">
+                    <Button
+                      colorScheme="purple"
+                      size="xs"
+                      isDisabled={isSeedLimitReached ? true : false}
+                    >
                       Add
                     </Button>
                   )}

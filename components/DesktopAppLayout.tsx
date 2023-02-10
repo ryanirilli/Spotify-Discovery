@@ -54,7 +54,7 @@ const DesktopAppLayout = ({
             width="100%"
             position="sticky"
             top={0}
-            zIndex="dropdown"
+            zIndex="overlay"
             display="block"
           >
             {topNav}

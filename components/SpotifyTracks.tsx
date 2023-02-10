@@ -17,6 +17,7 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  Link,
   List,
   ListItem,
   Modal,
@@ -359,12 +360,22 @@ function SpotifyTrack({
           <Flex p={2}>
             <Box flex={1}>
               <Text fontWeight="bold" fontSize="small" noOfLines={1}>
-                {isLoadingRecs ? "..." : rec.name}
+                {isLoadingRecs ? (
+                  "..."
+                ) : (
+                  <Link isExternal href={rec.external_urls.spotify}>
+                    {rec.name}
+                  </Link>
+                )}
               </Text>
               <Text fontSize="small" noOfLines={1} color="gray.500">
-                {isLoadingRecs
-                  ? "..."
-                  : rec.artists.map((a) => a.name).join(", ")}
+                {isLoadingRecs ? (
+                  "..."
+                ) : (
+                  <Link isExternal href={rec.artists[0].external_urls.spotify}>
+                    {rec.artists.map((a) => a.name).join(", ")}
+                  </Link>
+                )}
               </Text>
             </Box>
           </Flex>

@@ -1,7 +1,7 @@
 export default function Head() {
   return (
     <>
-      <title>Spotworm</title>
+      <title>Disco Stu</title>
       <meta
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1"

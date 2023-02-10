@@ -1,4 +1,5 @@
 import { TSpotifyArtist } from "./SpotifyArtist";
+import { TSpotifyExternalUrls } from "./SpotifyExternalUrls";
 
 type TSpotifyAlbumImage = {
   width: number;
@@ -19,4 +20,5 @@ export type TSpotifyTrack = {
   artists: Omit<TSpotifyArtist, "images">[];
   album: TSpotifyAlbum;
   uri: string;
+  external_urls: TSpotifyExternalUrls;
 };

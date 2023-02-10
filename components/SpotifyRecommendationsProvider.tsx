@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useEffect, useMemo, useState } from "react";
+import { createContext, ReactNode, useMemo, useState } from "react";
 import produce from "immer";
 import spotifyRecommendations from "@/queries/spotifyRecommendations";
 import { useQuery } from "react-query";

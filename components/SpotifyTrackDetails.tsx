@@ -22,7 +22,6 @@ const attributes = new Set(["duration_ms", "tempo"]);
 const sliderAttributes = new Set([
   "danceability",
   "energy",
-  "loudness",
   "speechiness",
   "acousticness",
   "instrumentalness",
@@ -82,7 +81,7 @@ export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
     sliderAttributes.forEach((key) => {
       nodes.push(
         <Tr key={key}>
-          <Td>{key}</Td>
+          <Td>{key === "valence" ? "positive vibe" : key}</Td>
           <Td textAlign="right">
             <Slider
               aria-label={`${key} slider`}

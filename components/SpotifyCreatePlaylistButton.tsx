@@ -17,9 +17,11 @@ import {
   useBoolean,
   InputGroup,
   Input,
+  Icon,
 } from "@chakra-ui/react";
 import { useContext, useRef, useState } from "react";
 import { useMutation } from "react-query";
+import { SiApplemusic } from "react-icons/si";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
 export default function SpotifyCreatePlaylistButton() {
@@ -52,6 +54,7 @@ export default function SpotifyCreatePlaylistButton() {
             borderColor: "purple.900",
           }}
           onClick={setIsCreatePlaylistOpen.on}
+          leftIcon={<Icon as={SiApplemusic} />}
         >
           Create Playlist
         </Button>

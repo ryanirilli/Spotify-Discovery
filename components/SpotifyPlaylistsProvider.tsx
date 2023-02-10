@@ -25,7 +25,7 @@ export default function SpotifyPlaylistsProvider({
     data: playlists,
     isLoading,
     refetch: refetchPlaylists,
-  } = useQuery("userPlaylists", spotifyUserPlaylists);
+  } = useQuery<TSpotifyPlaylist[]>("userPlaylists", spotifyUserPlaylists);
   return (
     <SpotifyPlaylistsContext.Provider
       value={{ playlists: playlists || [], isLoading, refetchPlaylists }}

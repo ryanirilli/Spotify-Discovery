@@ -1,8 +1,22 @@
 "use client";
 
+import spotifyAddTracksToPlaylist, {
+  TSpotifyAddToPlaylistArgs,
+} from "@/mutations/spotifyAddTracksToPlaylistMutation";
+import { TSpotifyPlaylist } from "@/types/SpotifyPlaylist";
+import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import scrollBarStyle from "@/utils/scrollBarStyle";
-import { Box, List, ListItem, Skeleton, Text } from "@chakra-ui/react";
+import {
+  Box,
+  List,
+  ListItem,
+  Skeleton,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
 import { useContext } from "react";
+import { useDrop } from "react-dnd";
+import { useMutation } from "react-query";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
 export default function SpotifyPlaylists() {
@@ -33,16 +47,67 @@ export default function SpotifyPlaylists() {
             </>
           ) : (
             playlists?.map((playlist) => (
-              <ListItem px={4} key={playlist.id}>
-                <Text fontSize="small" noOfLines={1} color="whiteAlpha.800">
-                  {playlist.name}
-                </Text>
-              </ListItem>
+              <PlaylistItem key={playlist.id} playlist={playlist} />
             ))
           )}
         </List>
       </Box>
     </>
+  );
+}
+
+function PlaylistItem({ playlist }: { playlist: TSpotifyPlaylist }) {
+  const toast = useToast();
+  const mutation = useMutation(
+    ({ playlistId, tracks }: TSpotifyAddToPlaylistArgs) =>
+      spotifyAddTracksToPlaylist({ playlistId, tracks }),
+    {
+      onSuccess: () => {
+        toast({
+          title: "Track added to playlist",
+          status: "success",
+          duration: 3000,
+          isClosable: false,
+          position: "top",
+        });
+      },
+    }
+  );
+
+  const [{ isOver }, dropRef] = useDrop(
+    () => ({
+      accept: "SpotifyTrack",
+      drop(track: TSpotifyTrack) {
+        mutation.mutate({ playlistId: playlist.id, tracks: [track.uri] });
+      },
+      collect: (monitor) => ({
+        isOver: Boolean(monitor.isOver()),
+      }),
+    }),
+    [playlist, mutation]
+  );
+  return (
+    <ListItem
+      ref={dropRef}
+      px={4}
+      sx={{
+        "& .spotify-playlist-list-item": {
+          color: isOver && "whiteAlpha.900",
+        },
+        "&:hover .spotify-playlist-list-item": {
+          color: "whiteAlpha.900",
+        },
+      }}
+    >
+      <Text
+        fontSize="small"
+        noOfLines={1}
+        color="whiteAlpha.500"
+        className="spotify-playlist-list-item"
+      >
+        {playlist.name}
+      </Text>
+    </ListItem>
   );
 }
 

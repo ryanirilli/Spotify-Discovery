@@ -47,7 +47,7 @@ export default function SpotifySeeds() {
                 size="lg"
                 borderRadius="full"
                 variant="solid"
-                colorScheme="green"
+                colorScheme="blue"
               >
                 <Avatar
                   src={artist.images[artist.images.length - 1].url}
@@ -72,7 +72,7 @@ export default function SpotifySeeds() {
                 size="lg"
                 borderRadius="full"
                 variant="solid"
-                colorScheme="green"
+                colorScheme="blue"
               >
                 <Icon ml={-1} mr={2} as={MdLibraryMusic} color="white" />
                 <TagLabel textTransform="capitalize">{genre}</TagLabel>

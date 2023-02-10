@@ -79,7 +79,7 @@ export default function SpotifyRecommendationFilters() {
       p={[1, 4]}
       position="sticky"
       top={`${topNavHeight}px`}
-      zIndex="docked"
+      zIndex="sticky"
     >
       <Flex alignItems="center">
         <Popover>

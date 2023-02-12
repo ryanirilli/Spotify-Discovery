@@ -1,7 +1,6 @@
 "use client";
 
 import { useContext, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { CgSearch } from "react-icons/cg";
 import { BsCheck2 } from "react-icons/bs";
 import { MdPlaylistAdd } from "react-icons/md";
@@ -14,6 +13,7 @@ import {
   Flex,
   Icon,
   IconButton,
+  Image,
   Input,
   InputGroup,
   InputLeftElement,
@@ -135,10 +135,7 @@ export default function SpotifyTracks() {
                 <AspectRatio ratio={1} overflow="hidden">
                   {selectedTrackAlbumImageUrl && (
                     <Image
-                      fill
-                      sizes="(max-width: 768px) 100vw,
-              (max-width: 1200px) 50vw,
-              33vw"
+                      boxSize="cover"
                       alt="selected track album art"
                       src={selectedTrackAlbumImageUrl}
                     />
@@ -324,13 +321,12 @@ function SpotifyTrack({
             <Box>
               {albumImageUrl && !isLoadingRecs && (
                 <Image
-                  fill
-                  sizes="(max-width: 768px) 100vw,
-              (max-width: 1200px) 50vw,
-              33vw"
+                  loading="lazy"
+                  w="100%"
+                  objectFit={"cover"}
                   alt="album art"
                   src={albumImageUrl}
-                  onLoadingComplete={() => setIsAlbumArtLoaded(true)}
+                  onLoad={() => setIsAlbumArtLoaded(true)}
                 />
               )}
             </Box>

@@ -339,7 +339,7 @@ function SpotifyTrack({
             bottom={isPlaying ? 0 : "-100%"}
             left={0}
             w="100%"
-            bgGradient="linear(to-t, blackAlpha.900, transparent)"
+            bgGradient="linear(to-t, blackAlpha.500, transparent)"
           >
             <Box maxW="40px">
               {isPlaying && (

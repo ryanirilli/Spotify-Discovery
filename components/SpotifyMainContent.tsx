@@ -1,16 +1,12 @@
 "use client";
-import { Box, Center } from "@chakra-ui/react";
+import { Center, Image } from "@chakra-ui/react";
 import { useContext } from "react";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
 } from "./SpotifyRecommendationsProvider";
 import SpotifyTracks from "./SpotifyTracks";
-import Lottie from "@/components/Lottie";
-import animationData from "@/public/dj.json";
 import SpotifyRecommendationFilters from "./SpotifyRecommendationFilters";
-
-const lottiePlayerOptions = { animationData };
 
 export default function SpotifyMainContent() {
   const { recommendations } = useContext(
@@ -23,10 +19,13 @@ export default function SpotifyMainContent() {
       {recommendations.length > 0 ? (
         <SpotifyTracks />
       ) : (
-        <Center>
-          <Box mt={[32, 16]} maxW={800} mixBlendMode="overlay">
-            <Lottie lottiePlayerOptions={lottiePlayerOptions} />
-          </Box>
+        <Center position="absolute" w="100%" h="100%">
+          <Image
+            maxW={["200px", "400px"]}
+            role="presentation"
+            src="/SVG/disco-stu-monochrome.svg"
+            alt="Disco Stu monochromatic"
+          />
         </Center>
       )}
     </>

@@ -1,4 +1,5 @@
 "use client";
+import useWebkitFillAvailableSupported from "@/utils/useWebkitFillAvailableSupported";
 import {
   Box,
   Button,
@@ -11,9 +12,10 @@ import {
 import { BsSpotify } from "react-icons/bs";
 export default function Home() {
   const [isLoading, setIsLoading] = useBoolean(false);
+  const isWebkitFillAvailable = useWebkitFillAvailableSupported();
   return (
     <Flex
-      height="100vh"
+      minH={isWebkitFillAvailable ? "-webkit-fill-available" : "100vh"}
       justifyContent="center"
       alignItems="center"
       bg="gray.900"

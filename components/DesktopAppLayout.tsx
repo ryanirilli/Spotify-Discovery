@@ -5,6 +5,7 @@ import { createContext, useState } from "react";
 import SpotifyAttribution from "./SpotifyAttribution";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import useWebkitFillAvailableSupported from "@/utils/useWebkitFillAvailableSupported";
 interface IDesktopAppLayout {
   children: React.ReactNode;
   topNav: React.ReactNode;
@@ -29,6 +30,7 @@ const DesktopAppLayout = ({
   children,
 }: IDesktopAppLayout) => {
   const [topNavHeight, setTopNavHeight] = useState(0);
+  const isWebkitFillAvailable = useWebkitFillAvailableSupported();
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -46,7 +48,7 @@ const DesktopAppLayout = ({
         "leftsidebar maincontent"
       `,
           ]}
-          minH="100vh"
+          minH={isWebkitFillAvailable ? "-webkit-fill-available" : "100vh"}
         >
           <Box
             gridArea="topnav"
@@ -77,7 +79,7 @@ const DesktopAppLayout = ({
               {leftSidebar}
             </Box>
           </Box>
-          <Box gridArea="maincontent" bg="gray.900">
+          <Box gridArea="maincontent" bg="gray.900" position="relative">
             {children}
           </Box>
         </Grid>

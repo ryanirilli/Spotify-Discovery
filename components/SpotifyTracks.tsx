@@ -63,6 +63,7 @@ import animationData from "@/public/sound-bars.json";
 import Lottie from "@/components/Lottie";
 import SpotifyTrackDetails from "./SpotifyTrackDetails";
 import { DragPreviewImage, useDrag } from "react-dnd";
+import LazyImage from "./LazyImage";
 
 const lottiePlayerOptions = { animationData };
 
@@ -228,7 +229,6 @@ function SpotifyTrack({
     null
   );
   const [trackProgress, setTrackProgress] = useState(0);
-  const [isAlbumArtLoaded, setIsAlbumArtLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const shouldFlipPopover = useBreakpointValue({
@@ -314,19 +314,16 @@ function SpotifyTrack({
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={toggleTrack}
-            transition="opacity 0.3s ease-in-out"
-            opacity={isAlbumArtLoaded ? 1 : 0}
             overflow="hidden"
           >
             <Box>
               {albumImageUrl && !isLoadingRecs && (
-                <Image
+                <LazyImage
                   loading="lazy"
                   w="100%"
                   objectFit={"cover"}
-                  alt="album art"
                   src={albumImageUrl}
-                  onLoad={() => setIsAlbumArtLoaded(true)}
+                  alt="album art"
                 />
               )}
             </Box>

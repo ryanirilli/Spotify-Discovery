@@ -75,7 +75,7 @@ export default function SpotifyRecommendationFilters() {
 
   return Boolean(recommendations?.length) ? (
     <Box
-      bg="blackAlpha.800"
+      bgGradient="linear(to-b, blackAlpha.700, transparent)"
       p={[1, 4]}
       position="sticky"
       top={`${topNavHeight}px`}

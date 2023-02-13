@@ -43,7 +43,7 @@ export default function PrivacyPolicy() {
           and to ensure the proper functioning of my website. These cookies do
           not collect any personal information and are only used for functional
           purposes. If you have any questions or concerns about my privacy
-          policy, please do not hesitate to contact me at ryanirilli@gmail.com
+          policy, please do not hesitate to contact me at discostuapp@gmail.com
         </Text>
         <Text>
           By using my website, you agree to the privacy policy and to the terms

@@ -3,7 +3,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { CgSearch } from "react-icons/cg";
 import { BsCheck2 } from "react-icons/bs";
-import { MdPlaylistAdd } from "react-icons/md";
+import { MdExpandMore, MdPlaylistAdd } from "react-icons/md";
 import { BiBarChartAlt2 } from "react-icons/bi";
 import {
   AspectRatio,
@@ -20,6 +20,10 @@ import {
   Link,
   List,
   ListItem,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -208,6 +212,9 @@ function SpotifyTrack({
   onAddTrackToPlaylist: (track: TSpotifyTrack) => void;
   isLoadingRecs: boolean;
 }) {
+  const { isSeedLimitReached } = useContext(
+    SpotifyRecommendationsContext
+  ) as TSpotifyRecommendationsContext;
   const [_, dragRef, dragPreviewRef] = useDrag(() => ({
     type: "SpotifyTrack",
     collect: (monitor) => ({
@@ -430,6 +437,26 @@ function SpotifyTrack({
                 borderRight="none"
               />
             </Tooltip>
+            <Menu>
+              <Tooltip hasArrow label="More options" openDelay={500}>
+                <MenuButton
+                  isDisabled={isSeedLimitReached}
+                  as={IconButton}
+                  aria-label="Add track or artist"
+                  icon={<Icon boxSize={6} as={MdExpandMore} />}
+                  variant="outline"
+                  size="sm"
+                  borderRadius={0}
+                  flex={1}
+                  borderBottom="none"
+                  borderRight="none"
+                />
+              </Tooltip>
+              <MenuList>
+                <MenuItem>Add seed track</MenuItem>
+                <MenuItem>Add Seed artist</MenuItem>
+              </MenuList>
+            </Menu>
           </Flex>
         </Box>
       </Card>

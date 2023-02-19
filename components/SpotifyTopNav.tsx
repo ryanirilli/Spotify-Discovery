@@ -15,7 +15,7 @@ export default function SpotifyTopNav({ children }: ISpotifyTopNav) {
   const { setTopNavHeight } = useContext(TopNavHeightContext);
   useEffect(() => {
     setTopNavHeight(height);
-  }, [height]);
+  }, [height, setTopNavHeight]);
   return (
     <Box
       pt={2}

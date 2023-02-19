@@ -97,8 +97,9 @@ export default function SpotifyUserInfo() {
             </Text>
             <Text>
               By clicking continue you will end your session with Disco Stu and
-              be redirected to Spotify's "Manage Apps" page. There you can
-              locate the app titled "Disco Stu" and click "Remove Access"
+              be redirected to Spotify&apos;s &quot;Manage Apps&quot; page.
+              There you can locate the app titled &quot;Disco Stu&quot; and
+              click &quot;Remove Access&quot;
             </Text>
           </ModalBody>
           <ModalFooter>

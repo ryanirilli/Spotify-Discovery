@@ -5,7 +5,8 @@ import { CgSearch } from "react-icons/cg";
 import { BsCheck2 } from "react-icons/bs";
 import { MdExpandMore, MdPlaylistAdd } from "react-icons/md";
 import { BiBarChartAlt2 } from "react-icons/bi";
-import { RiSpotifyFill } from "react-icons/ri";
+import { RiAlbumLine, RiSpotifyFill } from "react-icons/ri";
+import { AiOutlineUserAdd } from "react-icons/ai";
 import {
   AspectRatio,
   Box,
@@ -213,7 +214,7 @@ function SpotifyTrack({
   onAddTrackToPlaylist: (track: TSpotifyTrack) => void;
   isLoadingRecs: boolean;
 }) {
-  const { isSeedLimitReached } = useContext(
+  const { isSeedLimitReached, addArtist, fetchRecs } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
   const [_, dragRef, dragPreviewRef] = useDrag(() => ({
@@ -298,6 +299,22 @@ function SpotifyTrack({
     }
     clearTimeout(onMouseEnterTimeoutRef.current!);
     pauseTrack();
+  };
+
+  const onAddTrackToSeed = () => {};
+
+  const onAddArtistToSeed = async () => {
+    let artist;
+    try {
+      const res = await fetch(
+        `/api/spotify-get-artist-details?artistId=${rec.artists[0].id}`
+      );
+      artist = await res.json();
+    } catch (error) {
+      console.error(error);
+    }
+    artist && addArtist(artist);
+    setTimeout(() => fetchRecs(), 0);
   };
 
   return (
@@ -454,8 +471,30 @@ function SpotifyTrack({
                 />
               </Tooltip>
               <MenuList>
-                <MenuItem>Add seed track</MenuItem>
-                <MenuItem>Add Seed artist</MenuItem>
+                {/* <MenuItem
+                  onClick={() => onAddTrackToSeed()}
+                  icon={
+                    <Icon
+                      boxSize={6}
+                      as={RiAlbumLine}
+                      transform="translateY(2px)"
+                    />
+                  }
+                >
+                  Add track as seed
+                </MenuItem> */}
+                <MenuItem
+                  onClick={() => onAddArtistToSeed()}
+                  icon={
+                    <Icon
+                      boxSize={6}
+                      as={AiOutlineUserAdd}
+                      transform="translateY(2px)"
+                    />
+                  }
+                >
+                  Add artist as seed
+                </MenuItem>
               </MenuList>
             </Menu>
           </Flex>

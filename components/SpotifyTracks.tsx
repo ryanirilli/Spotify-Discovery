@@ -5,6 +5,7 @@ import { CgSearch } from "react-icons/cg";
 import { BsCheck2 } from "react-icons/bs";
 import { MdPlaylistAdd } from "react-icons/md";
 import { BiBarChartAlt2 } from "react-icons/bi";
+import { RiSpotifyFill } from "react-icons/ri";
 import {
   AspectRatio,
   Box,
@@ -319,7 +320,6 @@ function SpotifyTrack({
             <Box>
               {albumImageUrl && !isLoadingRecs && (
                 <LazyImage
-                  loading="lazy"
                   w="100%"
                   objectFit={"cover"}
                   src={albumImageUrl}
@@ -371,6 +371,7 @@ function SpotifyTrack({
                 )}
               </Text>
             </Box>
+            <Icon boxSize="6" as={RiSpotifyFill} />
           </Flex>
           <Flex>
             <Popover isLazy flip={shouldFlipPopover} placement="top-start">

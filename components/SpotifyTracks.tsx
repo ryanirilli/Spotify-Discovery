@@ -243,8 +243,9 @@ function SpotifyTrack({
 
   useEffect(() => {
     if (
-      isLoadingRecs ||
-      (previewRef.current && !previewRef.current.paused && curTrack !== rec.id)
+      previewRef.current &&
+      !previewRef.current.paused &&
+      curTrack !== rec.id
     ) {
       pauseTrack();
     }

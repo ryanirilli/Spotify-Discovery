@@ -76,7 +76,7 @@ export default function SpotifyRecommendationFilters() {
   return Boolean(recommendations?.length) ? (
     <Box
       bgGradient="linear(to-b, blackAlpha.700, transparent)"
-      p={[1, 4]}
+      p={[1, 2]}
       position="sticky"
       top={`${topNavHeight}px`}
       zIndex="sticky"
@@ -88,8 +88,8 @@ export default function SpotifyRecommendationFilters() {
               <PopoverTrigger>
                 <Button
                   leftIcon={<Icon as={IoFilter} />}
-                  size="sm"
-                  colorScheme="blue"
+                  size="md"
+                  colorScheme="blackButton"
                   borderRadius="full"
                 >
                   Filters

@@ -10,7 +10,7 @@ interface ILazyImage extends ImageProps {
 const LazyImage = ({ src, alt, ...rest }: ILazyImage) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
-  const [observe, isIntersecting] = useIntersectionObserver({ threshold: 0.5 });
+  const [observe, isIntersecting] = useIntersectionObserver({ threshold: 0.2 });
 
   useEffect(() => {
     const imgEl = imgRef.current;

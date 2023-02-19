@@ -3,9 +3,10 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { CgSearch } from "react-icons/cg";
 import { BsCheck2 } from "react-icons/bs";
-import { MdPlaylistAdd } from "react-icons/md";
+import { MdExpandMore, MdPlaylistAdd } from "react-icons/md";
 import { BiBarChartAlt2 } from "react-icons/bi";
-import { RiSpotifyFill } from "react-icons/ri";
+import { RiAlbumLine, RiSpotifyFill } from "react-icons/ri";
+import { AiOutlineUserAdd } from "react-icons/ai";
 import {
   AspectRatio,
   Box,
@@ -21,6 +22,10 @@ import {
   Link,
   List,
   ListItem,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -69,7 +74,7 @@ import LazyImage from "./LazyImage";
 const lottiePlayerOptions = { animationData };
 
 export default function SpotifyTracks() {
-  const { recommendations, isLoadingRecs } = useContext(
+  const { recommendations } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
@@ -111,7 +116,6 @@ export default function SpotifyTracks() {
             <SpotifyTrack
               rec={rec}
               onAddTrackToPlaylist={onAddTrackToPlaylist}
-              isLoadingRecs={isLoadingRecs}
             />
           </WrapItem>
         ))}
@@ -203,12 +207,12 @@ export default function SpotifyTracks() {
 function SpotifyTrack({
   rec,
   onAddTrackToPlaylist,
-  isLoadingRecs,
 }: {
   rec: TSpotifyTrack;
   onAddTrackToPlaylist: (track: TSpotifyTrack) => void;
-  isLoadingRecs: boolean;
 }) {
+  const { isSeedLimitReached, addArtist, fetchRecs, isLoadingRecs } =
+    useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
   const [_, dragRef, dragPreviewRef] = useDrag(() => ({
     type: "SpotifyTrack",
     collect: (monitor) => ({
@@ -239,13 +243,12 @@ function SpotifyTrack({
 
   useEffect(() => {
     if (
-      previewRef.current &&
-      !previewRef.current.paused &&
-      curTrack !== rec.id
+      isLoadingRecs ||
+      (previewRef.current && !previewRef.current.paused && curTrack !== rec.id)
     ) {
       pauseTrack();
     }
-  }, [curTrack, rec]);
+  }, [curTrack, rec, isLoadingRecs]);
 
   const animateTrackProgress = () => {
     if (previewRef.current !== null && !previewRef.current.paused) {
@@ -291,6 +294,22 @@ function SpotifyTrack({
     }
     clearTimeout(onMouseEnterTimeoutRef.current!);
     pauseTrack();
+  };
+
+  const onAddTrackToSeed = () => {};
+
+  const onAddArtistToSeed = async () => {
+    let artist;
+    try {
+      const res = await fetch(
+        `/api/spotify-get-artist-details?artistId=${rec.artists[0].id}`
+      );
+      artist = await res.json();
+    } catch (error) {
+      console.error(error);
+    }
+    artist && addArtist(artist);
+    setTimeout(() => fetchRecs(), 0);
   };
 
   return (
@@ -431,6 +450,48 @@ function SpotifyTrack({
                 borderRight="none"
               />
             </Tooltip>
+            <Menu>
+              <Tooltip hasArrow label="More options" openDelay={500}>
+                <MenuButton
+                  isDisabled={isSeedLimitReached}
+                  as={IconButton}
+                  aria-label="Add track or artist"
+                  icon={<Icon boxSize={6} as={MdExpandMore} />}
+                  variant="outline"
+                  size="sm"
+                  borderRadius={0}
+                  flex={1}
+                  borderBottom="none"
+                  borderRight="none"
+                />
+              </Tooltip>
+              <MenuList>
+                {/* <MenuItem
+                  onClick={() => onAddTrackToSeed()}
+                  icon={
+                    <Icon
+                      boxSize={6}
+                      as={RiAlbumLine}
+                      transform="translateY(2px)"
+                    />
+                  }
+                >
+                  Add track as seed
+                </MenuItem> */}
+                <MenuItem
+                  onClick={() => onAddArtistToSeed()}
+                  icon={
+                    <Icon
+                      boxSize={6}
+                      as={AiOutlineUserAdd}
+                      transform="translateY(2px)"
+                    />
+                  }
+                >
+                  Add artist as seed
+                </MenuItem>
+              </MenuList>
+            </Menu>
           </Flex>
         </Box>
       </Card>

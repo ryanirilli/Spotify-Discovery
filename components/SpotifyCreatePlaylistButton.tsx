@@ -51,7 +51,6 @@ export default function SpotifyCreatePlaylistButton() {
           _hover={{
             bg: "whiteAlpha.300",
             color: "white",
-            borderColor: "purple.900",
           }}
           onClick={setIsCreatePlaylistOpen.on}
           leftIcon={<Icon as={SiApplemusic} />}

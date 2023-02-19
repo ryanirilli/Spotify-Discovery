@@ -13,16 +13,17 @@ const LazyImage = ({ src, alt, ...rest }: ILazyImage) => {
   const [observe, isIntersecting] = useIntersectionObserver({ threshold: 0.2 });
 
   useEffect(() => {
-    if (isIntersecting && imgRef.current) {
-      if (imgRef.current.complete && imgRef.current.naturalHeight !== 0) {
+    const imgEl = imgRef.current;
+    if (isIntersecting && imgEl) {
+      if (imgEl.complete && imgEl.naturalHeight !== 0) {
         setIsLoaded(true);
       } else {
-        imgRef.current.addEventListener("load", handleLoad);
-        imgRef.current.src = src;
+        imgEl.addEventListener("load", handleLoad);
+        imgEl.src = src;
       }
     }
     return () => {
-      imgRef.current?.removeEventListener("load", handleLoad);
+      imgEl?.removeEventListener("load", handleLoad);
     };
   }, [isIntersecting, src]);
 

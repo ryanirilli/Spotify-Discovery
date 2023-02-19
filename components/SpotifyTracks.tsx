@@ -74,7 +74,7 @@ import LazyImage from "./LazyImage";
 const lottiePlayerOptions = { animationData };
 
 export default function SpotifyTracks() {
-  const { recommendations, isLoadingRecs } = useContext(
+  const { recommendations } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
@@ -116,7 +116,6 @@ export default function SpotifyTracks() {
             <SpotifyTrack
               rec={rec}
               onAddTrackToPlaylist={onAddTrackToPlaylist}
-              isLoadingRecs={isLoadingRecs}
             />
           </WrapItem>
         ))}
@@ -208,15 +207,12 @@ export default function SpotifyTracks() {
 function SpotifyTrack({
   rec,
   onAddTrackToPlaylist,
-  isLoadingRecs,
 }: {
   rec: TSpotifyTrack;
   onAddTrackToPlaylist: (track: TSpotifyTrack) => void;
-  isLoadingRecs: boolean;
 }) {
-  const { isSeedLimitReached, addArtist, fetchRecs } = useContext(
-    SpotifyRecommendationsContext
-  ) as TSpotifyRecommendationsContext;
+  const { isSeedLimitReached, addArtist, fetchRecs, isLoadingRecs } =
+    useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
   const [_, dragRef, dragPreviewRef] = useDrag(() => ({
     type: "SpotifyTrack",
     collect: (monitor) => ({
@@ -247,13 +243,12 @@ function SpotifyTrack({
 
   useEffect(() => {
     if (
-      previewRef.current &&
-      !previewRef.current.paused &&
-      curTrack !== rec.id
+      isLoadingRecs ||
+      (previewRef.current && !previewRef.current.paused && curTrack !== rec.id)
     ) {
       pauseTrack();
     }
-  }, [curTrack, rec]);
+  }, [curTrack, rec, isLoadingRecs]);
 
   const animateTrackProgress = () => {
     if (previewRef.current !== null && !previewRef.current.paused) {

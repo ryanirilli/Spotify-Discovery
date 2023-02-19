@@ -86,7 +86,7 @@ const DesktopAppLayout = ({
         <SpotifyAttribution
           py={2}
           display={["flex", null, "none"]}
-          bg="blackAlpha.700"
+          bgGradient="linear(to-t, blackAlpha.500, transparent)"
           position="fixed"
           bottom={0}
           w="100vw"

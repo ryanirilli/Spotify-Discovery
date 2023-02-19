@@ -242,11 +242,11 @@ function SpotifyTrack({
   });
 
   useEffect(() => {
-    if (
-      previewRef.current &&
-      !previewRef.current.paused &&
-      curTrack !== rec.id
-    ) {
+    const isPlaying = previewRef.current && !previewRef.current.paused;
+    const isPlayingButNotCurrentTrack = isPlaying && curTrack !== rec.id;
+    const isPlayingAndLoadingRecs = isPlaying && isLoadingRecs;
+
+    if (isPlayingButNotCurrentTrack || isPlayingAndLoadingRecs) {
       pauseTrack();
     }
   }, [curTrack, rec, isLoadingRecs]);

@@ -93,7 +93,7 @@ export default function SpotifyUserInfo() {
           <ModalBody p={4}>
             <Text mb={2}>
               Sorry to see you go! In order to disconnect Disco Stu from your
-              spotify account you need to remove access from this app.
+              Spotify account you need to remove access from this app.
             </Text>
             <Text>
               By clicking continue you will end your session with Disco Stu and

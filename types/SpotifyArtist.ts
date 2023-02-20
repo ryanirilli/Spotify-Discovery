@@ -11,4 +11,5 @@ export type TSpotifyArtist = {
   name: string;
   images: TSpotifyArtistImage[];
   external_urls: TSpotifyExternalUrls;
+  uri: string;
 };

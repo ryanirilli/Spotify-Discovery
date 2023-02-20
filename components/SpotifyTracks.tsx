@@ -70,6 +70,7 @@ import Lottie from "@/components/Lottie";
 import SpotifyTrackDetails from "./SpotifyTrackDetails";
 import { DragPreviewImage, useDrag } from "react-dnd";
 import LazyImage from "./LazyImage";
+import SpotifyLink from "./SpotifyLink";
 
 const lottiePlayerOptions = { animationData };
 
@@ -106,7 +107,7 @@ export default function SpotifyTracks() {
 
   return (
     <>
-      <Wrap spacing={0} pt={4} px={4} pb={32}>
+      <Wrap spacing={0} px={4} pb={32}>
         {recommendations.map((rec) => (
           <WrapItem
             w={["100%", null, "50%", "25%", null, "16.66%"]}
@@ -368,7 +369,7 @@ function SpotifyTrack({
         <VisuallyHidden>
           <audio src={rec.preview_url} ref={previewRef} loop />
         </VisuallyHidden>
-        <Progress h={2} value={trackProgress} />
+        <Progress variant="spotify" h={2} value={trackProgress} />
         <Box bg="white" alignItems="center" borderBottomRadius="md">
           <Flex p={2}>
             <Box flex={1}>
@@ -376,18 +377,18 @@ function SpotifyTrack({
                 {isLoadingRecs ? (
                   "..."
                 ) : (
-                  <Link isExternal href={rec.external_urls.spotify}>
+                  <SpotifyLink isExternal rec={rec}>
                     {rec.name}
-                  </Link>
+                  </SpotifyLink>
                 )}
               </Text>
               <Text fontSize="small" noOfLines={1} color="gray.500">
                 {isLoadingRecs ? (
                   "..."
                 ) : (
-                  <Link isExternal href={rec.artists[0].external_urls.spotify}>
+                  <SpotifyLink isExternal rec={rec}>
                     {rec.artists.map((a) => a.name).join(", ")}
-                  </Link>
+                  </SpotifyLink>
                 )}
               </Text>
             </Box>

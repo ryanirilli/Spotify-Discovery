@@ -1,5 +1,5 @@
 "use client";
-import ChakraThemeProvider from "../components/ChakraProvider";
+import ChakraThemeProvider from "../theme/ChakraProvider";
 import { QueryClient, QueryClientProvider } from "react-query";
 
 const queryClient = new QueryClient();

@@ -25,6 +25,7 @@ import {
 } from "@/components/SpotifyRecommendationsProvider";
 import { TSpotifyArtist } from "@/types/SpotifyArtist";
 import scrollBarStyle from "@/utils/scrollBarStyle";
+import useListSelection from "@/utils/useListSelection";
 
 export default function SpotifyAutocomplete() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -43,6 +44,13 @@ export default function SpotifyAutocomplete() {
   const { data } = useQuery<TSpotifyArtist[]>(["spotifyArtist", artist], () =>
     spotifyArtistQuery(artist)
   );
+
+  const { selectedIndex } = useListSelection<TSpotifyArtist>({
+    initialItems: data || [],
+    onSelect(selected: TSpotifyArtist | null) {
+      !isSeedLimitReached && selected && onAddArtist(selected);
+    },
+  });
 
   useEffect(() => {
     if (data?.length) {
@@ -108,31 +116,35 @@ export default function SpotifyAutocomplete() {
             borderRadius="md"
             sx={scrollBarStyle}
           >
-            {data?.map((artist, i) => (
-              <ListItem
-                role="option"
-                aria-setsize={data.length}
-                aria-posinset={i + 1}
-                key={artist.id}
-                _hover={{ bg: "gray.200" }}
-                py={2}
-                onClick={() => !isSeedLimitReached && onAddArtist(artist)}
-              >
-                <Flex alignItems="center" px={2}>
-                  <Text>{artist.name}</Text>
-                  <Spacer />
-                  {!artistIds.includes(artist.id) && (
-                    <Button
-                      colorScheme="purple"
-                      size="xs"
-                      isDisabled={isSeedLimitReached ? true : false}
-                    >
-                      Add
-                    </Button>
-                  )}
-                </Flex>
-              </ListItem>
-            ))}
+            {data?.map((artist, i) => {
+              const isSelected = selectedIndex === i;
+              return (
+                <ListItem
+                  role="option"
+                  aria-setsize={data.length}
+                  aria-posinset={i + 1}
+                  key={artist.id}
+                  _hover={{ bg: "gray.200" }}
+                  bg={isSelected ? "gray.200" : "transparent"}
+                  py={2}
+                  onClick={() => !isSeedLimitReached && onAddArtist(artist)}
+                >
+                  <Flex alignItems="center" px={2}>
+                    <Text>{artist.name}</Text>
+                    <Spacer />
+                    {!artistIds.includes(artist.id) && (
+                      <Button
+                        colorScheme="purple"
+                        size="xs"
+                        isDisabled={isSeedLimitReached ? true : false}
+                      >
+                        Add
+                      </Button>
+                    )}
+                  </Flex>
+                </ListItem>
+              );
+            })}
           </List>
         </Box>
       )}

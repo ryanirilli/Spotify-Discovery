@@ -1,11 +1,9 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
-import { CgSearch } from "react-icons/cg";
-import { BsCheck2 } from "react-icons/bs";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MdExpandMore, MdPlaylistAdd } from "react-icons/md";
 import { BiBarChartAlt2 } from "react-icons/bi";
-import { RiAlbumLine, RiSpotifyFill } from "react-icons/ri";
+import { RiSpotifyFill } from "react-icons/ri";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import {
   AspectRatio,
@@ -15,36 +13,20 @@ import {
   Flex,
   Icon,
   IconButton,
-  Image,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Link,
-  List,
-  ListItem,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Popover,
   PopoverArrow,
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
   Progress,
-  Spacer,
   Text,
   Tooltip,
   useBoolean,
   useBreakpointValue,
-  useToast,
   VisuallyHidden,
   Wrap,
   WrapItem,
@@ -58,19 +40,14 @@ import {
   SpotifyCurrentTrackContext,
   TSpotifyCurrentTrackContext,
 } from "./SpotifyCurrentTrackProvider";
-import { TSpotifyPlaylist } from "@/types/SpotifyPlaylist";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
-import scrollBarStyle from "@/utils/scrollBarStyle";
-import { useMutation } from "react-query";
-import spotifyAddTracksToPlaylist, {
-  TSpotifyAddToPlaylistArgs,
-} from "@/mutations/spotifyAddTracksToPlaylistMutation";
 import animationData from "@/public/sound-bars.json";
-import Lottie from "@/components/Lottie";
+import Lottie from "./Lottie";
 import SpotifyTrackDetails from "./SpotifyTrackDetails";
 import { DragPreviewImage, useDrag } from "react-dnd";
 import LazyImage from "./LazyImage";
 import SpotifyLink from "./SpotifyLink";
+import SpotifyAddTrackToPlaylistModal from "./SpotifyAddTrackToPlaylistModal";
 
 const lottiePlayerOptions = { animationData };
 
@@ -80,30 +57,25 @@ export default function SpotifyTracks() {
   ) as TSpotifyRecommendationsContext;
 
   const { playlists } = useContext(SpotifyPlaylistsContext) || {};
-  const [playlistFilter, setPlaylistFilter] = useState("");
-  const [isShowingPlaylistsModal, setIsShowingPlaylistsModal] = useBoolean();
-
-  const filteredPlaylists =
-    playlists?.filter((playlist: TSpotifyPlaylist) =>
-      playlist.name.toLowerCase().includes(playlistFilter.toLowerCase())
-    ) || [];
 
   const [selectedTrack, setSelectedTrack] = useState<TSpotifyTrack | null>(
     null
   );
 
-  const onAddTrackToPlaylist = (track: TSpotifyTrack) => {
-    setSelectedTrack(track);
-    setIsShowingPlaylistsModal.on();
-  };
+  const [isShowingPlaylistsModal, setIsShowingPlaylistsModal] = useBoolean();
 
-  const onClosePlaylistModal = () => {
-    setPlaylistFilter("");
+  const onAddTrackToPlaylist = useCallback(
+    (track: TSpotifyTrack) => {
+      setSelectedTrack(track);
+      setIsShowingPlaylistsModal.on();
+    },
+    [setSelectedTrack, setIsShowingPlaylistsModal]
+  );
+
+  const onClose = useCallback(() => {
     setSelectedTrack(null);
     setIsShowingPlaylistsModal.off();
-  };
-
-  const selectedTrackAlbumImageUrl = selectedTrack?.album.images[0]?.url;
+  }, [setSelectedTrack, setIsShowingPlaylistsModal]);
 
   return (
     <>
@@ -121,86 +93,12 @@ export default function SpotifyTracks() {
           </WrapItem>
         ))}
       </Wrap>
-      <Modal
+      <SpotifyAddTrackToPlaylistModal
+        playlists={playlists}
+        selectedTrack={selectedTrack}
         isOpen={isShowingPlaylistsModal}
-        onClose={onClosePlaylistModal}
-        scrollBehavior="inside"
-        variant="spotifyModal"
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            Add To Playlist
-            <Flex
-              color="white"
-              bg="black"
-              borderRadius="md"
-              overflow="hidden"
-              my={2}
-            >
-              <Box flex={1} maxW={16}>
-                <AspectRatio ratio={1} overflow="hidden">
-                  {selectedTrackAlbumImageUrl && (
-                    <Image
-                      boxSize="cover"
-                      alt="selected track album art"
-                      src={selectedTrackAlbumImageUrl}
-                    />
-                  )}
-                </AspectRatio>
-              </Box>
-              <Box p={2}>
-                <Text fontWeight="bold" fontSize="small" noOfLines={1}>
-                  {selectedTrack?.name}
-                </Text>
-                <Text
-                  fontWeight="normal"
-                  fontSize="small"
-                  noOfLines={1}
-                  transform="translateY(-3px)"
-                >
-                  {selectedTrack?.artists.map((a) => a.name).join(", ")}
-                </Text>
-              </Box>
-            </Flex>
-            <InputGroup mt={4}>
-              <InputLeftElement
-                pointerEvents="none"
-                children={<Icon as={CgSearch} color="gray.500" />}
-              />
-              <Input
-                placeholder="Find a playlist"
-                value={playlistFilter}
-                onChange={(e) => setPlaylistFilter(e.target.value)}
-              />
-            </InputGroup>
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody sx={scrollBarStyle}>
-            <List>
-              {filteredPlaylists.map((playlist: TSpotifyPlaylist) => {
-                return (
-                  <SpotifyPlaylistListItem
-                    onSuccess={onClosePlaylistModal}
-                    key={playlist.id}
-                    playlist={playlist}
-                    selectedTrack={selectedTrack}
-                  />
-                );
-              })}
-            </List>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              w="100%"
-              colorScheme="purple"
-              onClick={onClosePlaylistModal}
-            >
-              Done
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        onClose={onClose}
+      />
     </>
   );
 }
@@ -297,8 +195,6 @@ function SpotifyTrack({
     clearTimeout(onMouseEnterTimeoutRef.current!);
     pauseTrack();
   };
-
-  const onAddTrackToSeed = () => {};
 
   const onAddArtistToSeed = async () => {
     let artist;
@@ -498,73 +394,5 @@ function SpotifyTrack({
         </Box>
       </Card>
     </>
-  );
-}
-
-interface ISpotifyPlaylistListItem {
-  playlist: TSpotifyPlaylist;
-  selectedTrack: TSpotifyTrack | null;
-  onSuccess: () => void;
-}
-
-function SpotifyPlaylistListItem({
-  playlist,
-  selectedTrack,
-  onSuccess,
-}: ISpotifyPlaylistListItem) {
-  const toast = useToast();
-  const mutation = useMutation(
-    ({ playlistId, tracks }: TSpotifyAddToPlaylistArgs) =>
-      spotifyAddTracksToPlaylist({ playlistId, tracks }),
-    {
-      onSuccess: () => {
-        onSuccess();
-        toast({
-          title: "Track added to playlist",
-          status: "success",
-          duration: 3000,
-          isClosable: false,
-          position: "top",
-        });
-      },
-    }
-  );
-
-  return (
-    <ListItem
-      _hover={{ bg: "black" }}
-      px={4}
-      py={2}
-      cursor="pointer"
-      role="button"
-      onClick={() => {
-        if (mutation.isSuccess) {
-          return;
-        }
-        mutation.mutate({
-          playlistId: playlist.id,
-          tracks: [selectedTrack?.uri || ""],
-        });
-      }}
-    >
-      <Flex alignItems="center">
-        <Text opacity={mutation.isSuccess ? 0.4 : 1} textTransform="capitalize">
-          {playlist.name}
-        </Text>
-        <Spacer />
-        {!mutation.isSuccess ? (
-          <Button
-            disabled={mutation.isLoading || mutation.isSuccess}
-            isLoading={mutation.isLoading}
-            colorScheme="blackAlpha"
-            size="sm"
-          >
-            Add
-          </Button>
-        ) : (
-          <Icon mr={4} as={BsCheck2} color="green.500" />
-        )}
-      </Flex>
-    </ListItem>
   );
 }

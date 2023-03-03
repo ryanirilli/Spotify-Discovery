@@ -13,7 +13,6 @@ import {
   PopoverTrigger,
   Tag,
   TagLabel,
-  Text,
 } from "@chakra-ui/react";
 import produce from "immer";
 import { useContext, useReducer } from "react";
@@ -120,12 +119,12 @@ export default function SpotifyRecommendationFilters() {
         <Box color="white" ml={2}>
           <HStack>
             {filters?.target_tempo && (
-              <Tag colorScheme="blue" size={["sm", "md"]}>
+              <Tag colorScheme="blue" size={["sm", "md"]} borderRadius="full">
                 <TagLabel>Target BPM {filters.target_tempo}</TagLabel>
               </Tag>
             )}
             {filters?.max_tempo && (
-              <Tag colorScheme="blue" size={["sm", "md"]}>
+              <Tag colorScheme="blue" size={["sm", "md"]} borderRadius="full">
                 <TagLabel>Max BPM {filters.max_tempo}</TagLabel>
               </Tag>
             )}

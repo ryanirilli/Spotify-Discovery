@@ -246,21 +246,26 @@ function SpotifyTrack({
             </Box>
           </AspectRatio>
 
-          <Box
+          <Flex
             pointerEvents="none"
-            position={"absolute"}
-            transition="bottom 0.3s ease-in-out"
-            bottom={isPlaying ? 0 : "-100%"}
-            left={0}
-            w="100%"
-            bgGradient="linear(to-t, blackAlpha.500, transparent)"
+            bg="gray.200"
+            borderTopRadius="md"
+            mt={2}
+            justifyContent="space-between"
+            overflow="hidden"
           >
-            <Box maxW="40px">
-              {isPlaying && (
-                <Lottie lottiePlayerOptions={lottiePlayerOptions} />
-              )}
+            <Box
+              maxW="40px"
+              transition={"transform 0.2s ease-in-out"}
+              transform={`translateY(${isPlaying ? "0%" : "100%"})`}
+            >
+              <Lottie
+                lottiePlayerOptions={lottiePlayerOptions}
+                isPlaying={isPlaying}
+              />
             </Box>
-          </Box>
+            <Icon mr={1} mt={1} boxSize="6" as={RiSpotifyFill} />
+          </Flex>
         </Box>
         <VisuallyHidden>
           <audio src={rec.preview_url} ref={previewRef} loop />
@@ -288,7 +293,6 @@ function SpotifyTrack({
                 )}
               </Text>
             </Box>
-            <Icon boxSize="6" as={RiSpotifyFill} />
           </Flex>
           <Flex>
             <Popover isLazy flip={shouldFlipPopover} placement="top-start">

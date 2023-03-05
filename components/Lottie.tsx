@@ -6,6 +6,7 @@ import lottie, {
 } from "lottie-web";
 interface Props extends BoxProps {
   onComplete?: () => void;
+  isPlaying?: boolean;
   lottiePlayerOptions:
     | Omit<AnimationConfigWithData, "container">
     | Omit<AnimationConfigWithPath, "container">;
@@ -13,6 +14,7 @@ interface Props extends BoxProps {
 
 function Lottie({
   lottiePlayerOptions,
+  isPlaying,
   onComplete,
   ...rest
 }: Props): JSX.Element {
@@ -24,15 +26,15 @@ function Lottie({
       container: containerRef.current, // the dom element that will contain the animation
       renderer: "svg",
       loop: true,
-      autoplay: true,
+      autoplay: isPlaying,
       ...lottiePlayerOptions,
     });
     onComplete && animation.addEventListener("complete", onComplete);
     return () => {
       animation.destroy();
     };
-  }, [lottiePlayerOptions, onComplete]);
-  return <Box {...rest} ref={containerRef} />;
+  }, [lottiePlayerOptions, onComplete, isPlaying]);
+  return <Box {...rest} opacity={isPlaying ? 1 : 0} ref={containerRef} />;
 }
 
 export default Lottie;

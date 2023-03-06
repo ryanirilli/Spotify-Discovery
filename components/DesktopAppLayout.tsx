@@ -2,7 +2,6 @@
 
 import { Box, Grid } from "@chakra-ui/react";
 import { createContext, useState } from "react";
-import SpotifyAttribution from "./SpotifyAttribution";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import useWebkitFillAvailableSupported from "@/utils/useWebkitFillAvailableSupported";
@@ -83,14 +82,6 @@ const DesktopAppLayout = ({
             {children}
           </Box>
         </Grid>
-        <SpotifyAttribution
-          py={2}
-          display={["flex", null, "none"]}
-          bgGradient="linear(to-t, blackAlpha.500, transparent)"
-          position="fixed"
-          bottom={0}
-          w="100vw"
-        />
       </TopNavHeightContext.Provider>
     </DndProvider>
   );

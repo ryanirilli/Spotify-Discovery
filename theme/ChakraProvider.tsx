@@ -17,8 +17,6 @@ const theme = extendTheme({
   colors,
 });
 
-console.log(theme);
-
 function ChakraThemeProvider({ children }: IChakraThemeProvider) {
   return <ChakraProvider theme={theme}>{children}</ChakraProvider>;
 }

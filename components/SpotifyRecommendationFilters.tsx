@@ -11,6 +11,7 @@ import {
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
+  Portal,
   Tag,
   TagLabel,
 } from "@chakra-ui/react";
@@ -78,41 +79,43 @@ export default function SpotifyRecommendationFilters() {
       p={[1, 2]}
       position="sticky"
       top={`${topNavHeight}px`}
-      zIndex="sticky"
+      zIndex="banner"
     >
-      <Flex alignItems="center">
+      <Flex alignItems="center" ml={[1, 0]}>
         <Popover>
           {({ onClose }) => (
             <>
               <PopoverTrigger>
                 <Button
                   leftIcon={<Icon as={IoFilter} />}
-                  size="md"
+                  size={["sm", "md"]}
                   colorScheme="blackButton"
                   borderRadius="full"
                 >
                   Filters
                 </Button>
               </PopoverTrigger>
-              <PopoverContent>
-                <PopoverArrow />
-                <PopoverBody>
-                  <SpotifyTempoFilter onChange={onChangeTempoRange} />
-                </PopoverBody>
-                <Box p={2}>
-                  <Button
-                    isDisabled={!draftFilters.isDirty}
-                    w="100%"
-                    colorScheme="purple"
-                    onClick={() => {
-                      onApply();
-                      onClose();
-                    }}
-                  >
-                    Apply
-                  </Button>
-                </Box>
-              </PopoverContent>
+              <Portal>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverBody>
+                    <SpotifyTempoFilter onChange={onChangeTempoRange} />
+                  </PopoverBody>
+                  <Box p={2}>
+                    <Button
+                      isDisabled={!draftFilters.isDirty}
+                      w="100%"
+                      colorScheme="purple"
+                      onClick={() => {
+                        onApply();
+                        onClose();
+                      }}
+                    >
+                      Apply
+                    </Button>
+                  </Box>
+                </PopoverContent>
+              </Portal>
             </>
           )}
         </Popover>

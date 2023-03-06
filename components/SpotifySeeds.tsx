@@ -35,6 +35,7 @@ export default function SpotifySeeds() {
           bg="blackAlpha.500"
           overflowX="scroll"
           w="100%"
+          ml={[1, 0]}
           sx={{
             ...topNavScrollBarStyle,
             WebkitOverflowScrolling: "touch",

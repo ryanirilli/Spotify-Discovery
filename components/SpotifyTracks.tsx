@@ -3,7 +3,6 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MdExpandMore, MdPlaylistAdd } from "react-icons/md";
 import { BiBarChartAlt2 } from "react-icons/bi";
-import { RiSpotifyFill } from "react-icons/ri";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import {
   AspectRatio,
@@ -13,6 +12,7 @@ import {
   Flex,
   Icon,
   IconButton,
+  Image,
   Menu,
   MenuButton,
   MenuItem,
@@ -221,7 +221,7 @@ function SpotifyTrack({
         m={2}
         mb={[8, 2]}
         w="100%"
-        bg="black"
+        bg={isLoadingRecs ? "black" : "transparent"}
         _hover={{ boxShadow: "outline" }}
         onMouseEnter={() => setCurTrack?.(rec.id)}
         onClick={() => setCurTrack?.(rec.id)}
@@ -252,6 +252,7 @@ function SpotifyTrack({
             borderTopRadius="md"
             mt={2}
             justifyContent="space-between"
+            alignItems="center"
             overflow="hidden"
           >
             <Box
@@ -264,7 +265,13 @@ function SpotifyTrack({
                 isPlaying={isPlaying}
               />
             </Box>
-            <Icon mr={1} mt={1} boxSize="6" as={RiSpotifyFill} />
+            <Image
+              height="100%"
+              alt="spotify logo"
+              src="Spotify_Logo_RGB_Black.png"
+              maxW="64px"
+              mr={2}
+            />
           </Flex>
         </Box>
         <VisuallyHidden>

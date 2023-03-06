@@ -34,7 +34,7 @@ function Lottie({
       animation.destroy();
     };
   }, [lottiePlayerOptions, onComplete, isPlaying]);
-  return <Box {...rest} opacity={isPlaying ? 1 : 0} ref={containerRef} />;
+  return <Box {...rest} ref={containerRef} />;
 }
 
 export default Lottie;

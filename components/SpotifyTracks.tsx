@@ -52,7 +52,7 @@ import SpotifyAddTrackToPlaylistModal from "./SpotifyAddTrackToPlaylistModal";
 const lottiePlayerOptions = { animationData };
 
 export default function SpotifyTracks() {
-  const { recommendations } = useContext(
+  const { recommendations, isLoadingRecs } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 

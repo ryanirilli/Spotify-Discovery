@@ -8,7 +8,7 @@ import { useQuery } from "react-query";
 export type TSpotifyPlaylistsContext = {
   playlists: TSpotifyPlaylist[];
   isLoading: boolean;
-  refetchPlaylists: () => void;
+  refetchPlaylists: () => Promise<unknown>;
 };
 
 export const SpotifyPlaylistsContext =

@@ -31,6 +31,7 @@ import { useCallback, useMemo, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { CgSearch } from "react-icons/cg";
 import { useMutation } from "react-query";
+import SpotifyLink from "./SpotifyLink";
 
 interface ISpotifyAddTrackToPlaylistModal {
   isOpen: boolean;
@@ -78,11 +79,13 @@ export default function SpotifyAddTrackToPlaylistModal({
           <Flex
             color="white"
             bg="black"
-            borderRadius="md"
+            border="1px solid"
+            borderColor="whiteAlpha.300"
+            borderRightRadius="md"
             overflow="hidden"
             my={2}
           >
-            <Box flex={1} maxW={16}>
+            <Box maxW={16} flex={1}>
               <AspectRatio ratio={1} overflow="hidden">
                 {selectedTrackAlbumImageUrl && (
                   <Image
@@ -93,19 +96,35 @@ export default function SpotifyAddTrackToPlaylistModal({
                 )}
               </AspectRatio>
             </Box>
-            <Box p={2}>
-              <Text fontWeight="bold" fontSize="small" noOfLines={1}>
-                {selectedTrack?.name}
-              </Text>
-              <Text
-                fontWeight="normal"
-                fontSize="small"
-                noOfLines={1}
-                transform="translateY(-3px)"
-              >
-                {selectedTrack?.artists.map((a) => a.name).join(", ")}
-              </Text>
+            <Box p={2} flex={1}>
+              {selectedTrack && (
+                <>
+                  <SpotifyLink isExternal rec={selectedTrack}>
+                    <Text fontWeight="bold" fontSize="small" noOfLines={1}>
+                      {selectedTrack?.name}
+                    </Text>
+                  </SpotifyLink>
+                  <SpotifyLink isExternal rec={selectedTrack}>
+                    <Text
+                      fontWeight="normal"
+                      fontSize="small"
+                      noOfLines={1}
+                      transform="translateY(-3px)"
+                    >
+                      {selectedTrack?.artists.map((a) => a.name).join(", ")}
+                    </Text>
+                  </SpotifyLink>
+                </>
+              )}
             </Box>
+            <Image
+              height="100%"
+              alt="spotify logo"
+              src="Spotify_Logo_RGB_White.png"
+              maxW="64px"
+              mr={2}
+              mt={2}
+            />
           </Flex>
           <InputGroup mt={4}>
             <InputLeftElement

@@ -20,7 +20,7 @@ const isSpotifySupported = () => {
 
 interface Props extends LinkProps {
   rec: TSpotifyTrack;
-  children: string;
+  children: React.ReactNode;
 }
 
 const SpotifyLink: React.FC<Props> = ({ rec, children, ...rest }) => {

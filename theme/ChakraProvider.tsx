@@ -10,6 +10,14 @@ interface IChakraThemeProvider {
 }
 
 const theme = extendTheme({
+  styles: {
+    global: {
+      body: {
+        bg: "black",
+        minH: "100vh",
+      },
+    },
+  },
   components: {
     Modal,
     Progress,

@@ -36,6 +36,7 @@ import {
   TSpotifyRecommendationsContext,
 } from "./SpotifyRecommendationsProvider";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
+import { TSpotifyArtist } from "@/types/SpotifyArtist";
 import {
   SpotifyCurrentTrackContext,
   TSpotifyCurrentTrackContext,
@@ -110,7 +111,7 @@ function SpotifyTrack({
   rec: TSpotifyTrack;
   onAddTrackToPlaylist: (track: TSpotifyTrack) => void;
 }) {
-  const { isSeedLimitReached, addArtist, fetchRecs, isLoadingRecs } =
+  const { isSeedLimitReached, addArtists, fetchRecs, isLoadingRecs } =
     useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
   const [_, dragRef, dragPreviewRef] = useDrag(() => ({
     type: "SpotifyTrack",
@@ -197,7 +198,7 @@ function SpotifyTrack({
   };
 
   const onAddArtistToSeed = async () => {
-    let artist;
+    let artist: TSpotifyArtist | null = null;
     try {
       const res = await fetch(
         `/api/spotify-get-artist-details?artistId=${rec.artists[0].id}`
@@ -206,7 +207,7 @@ function SpotifyTrack({
     } catch (error) {
       console.error(error);
     }
-    artist && addArtist(artist);
+    artist && addArtists([artist.id]);
     setTimeout(() => fetchRecs(), 0);
   };
 

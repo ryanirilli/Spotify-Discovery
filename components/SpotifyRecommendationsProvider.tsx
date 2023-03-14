@@ -1,20 +1,22 @@
 "use client";
 
-import { createContext, ReactNode, useMemo, useState } from "react";
+import { createContext, ReactNode, useEffect, useMemo, useState } from "react";
 import produce from "immer";
 import spotifyRecommendations from "@/queries/spotifyRecommendations";
 import { useQuery } from "react-query";
 import { TSpotifyArtist } from "@/types/SpotifyArtist";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import { TSpotifyRecommendationsOptions } from "@/types/SpotifyRecommendationsOptions";
+import { artistsQuery } from "@/queries/spotifyArtitstsQuery";
 
 export type TSpotifyRecommendationsContext = {
-  addArtist: (artist: TSpotifyArtist) => void;
-  removeArtist: (artist: TSpotifyArtist) => void;
+  artists: string[];
+  artistsDetails: TSpotifyArtist[];
+  addArtists: (artist: string[]) => void;
+  removeArtist: (artist: string) => void;
   addGenre: (genre: string) => void;
   removeGenre: (genre: string) => void;
   genres: string[];
-  artists: TSpotifyArtist[];
   fetchRecs: () => void;
   recommendations: TSpotifyTrack[];
   isSeedLimitReached: boolean;
@@ -39,7 +41,7 @@ export const SpotifyRecommendationsContext = createContext<
 export default function SpotifyRecommendationsProvider({
   children,
 }: ISpotifyRecommendationsProvider) {
-  const [artists, setArtists] = useState<TSpotifyArtist[]>([]);
+  const [artists, setArtists] = useState<string[]>([]);
   const [genres, setGenres] = useState<string[]>([]);
   const [filters, setFilters] = useState<TSpotifyRecommendationFilters>({});
 
@@ -53,10 +55,11 @@ export default function SpotifyRecommendationsProvider({
       if (!artists.length && !genres.length) {
         return Promise.resolve([]);
       }
+
       document.body.scrollIntoView({ behavior: "smooth", block: "start" });
 
       const settings: TSpotifyRecommendationsOptions = {
-        artists: artists.map((a) => a.id),
+        artists,
         genres,
         ...filters,
       };
@@ -73,17 +76,17 @@ export default function SpotifyRecommendationsProvider({
     return artists.length + genres.length === 5;
   }, [artists, genres]);
 
-  const addArtist = (artist: TSpotifyArtist) => {
-    const updatedArtists = produce(artists, (draft: TSpotifyArtist[]) => {
-      draft.push(artist);
+  const addArtists = (artist: string[]) => {
+    const updatedArtists = produce(artists, (draft: string[]) => {
+      draft.push(...artist);
       return draft;
     });
     setArtists(updatedArtists);
   };
 
-  const removeArtist = (artist: TSpotifyArtist) => {
-    const updatedArtists = produce(artists, (draft: TSpotifyArtist[]) => {
-      const index = draft.findIndex((a) => a.id === artist.id);
+  const removeArtist = (artist: string) => {
+    const updatedArtists = produce(artists, (draft: string[]) => {
+      const index = draft.findIndex((a) => a === artist);
       if (index > -1) {
         draft.splice(index, 1);
       }
@@ -109,13 +112,26 @@ export default function SpotifyRecommendationsProvider({
     setGenres(updatedGenres);
   };
 
+  const { data: artistsDetails, refetch: fetchArtistsDetails } = useQuery<
+    TSpotifyArtist[]
+  >("spotifyArtistsDetails", () => artistsQuery(artists), {
+    enabled: false,
+    staleTime: 0,
+  });
+  useEffect(() => {
+    if (artists.length) {
+      fetchArtistsDetails();
+    }
+  }, [artists, fetchArtistsDetails]);
+
   const contextValue = {
-    addArtist,
+    addArtists,
     removeArtist,
     addGenre,
     removeGenre,
     genres,
     artists,
+    artistsDetails: artistsDetails || [],
     fetchRecs,
     recommendations: recommendations || [],
     isSeedLimitReached,

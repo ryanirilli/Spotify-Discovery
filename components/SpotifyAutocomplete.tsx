@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 
 import { CgSearch } from "react-icons/cg";
-import spotifyArtistQuery from "@/queries/spoitifyArtistQuery";
+import { artistSearchQuery } from "@/queries/spotifyArtistSearchQuery";
 import { useQuery } from "react-query";
 import {
   SpotifyRecommendationsContext,
@@ -32,7 +32,7 @@ export default function SpotifyAutocomplete() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [artist, setArtist] = useState("");
   const [isResultsShowing, setIsResultsShowing] = useBoolean();
-  const { addArtist, artists, fetchRecs, isSeedLimitReached } = useContext(
+  const { addArtists, artists, fetchRecs, isSeedLimitReached } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
@@ -41,39 +41,43 @@ export default function SpotifyAutocomplete() {
     handler: () => setIsResultsShowing.off(),
   });
 
-  const { data } = useQuery<TSpotifyArtist[]>(["spotifyArtist", artist], () =>
-    spotifyArtistQuery(artist)
+  const { data: spotifyArtists } = useQuery<TSpotifyArtist[]>(
+    ["spotifyArtist", artist],
+    () => {
+      if (artist.length < 2) {
+        return [];
+      }
+      return artistSearchQuery(artist);
+    }
   );
 
   const { selectedIndex } = useListSelection<TSpotifyArtist>({
-    initialItems: data || [],
+    initialItems: spotifyArtists || [],
     onSelect(selected: TSpotifyArtist | null) {
       !isSeedLimitReached && selected && onAddArtist(selected);
     },
   });
 
   useEffect(() => {
-    if (data?.length) {
+    if (spotifyArtists?.length) {
       setIsResultsShowing.on();
     }
-  }, [data, setIsResultsShowing]);
+  }, [spotifyArtists, setIsResultsShowing]);
 
   const onFocus = () => {
-    if (data?.length && !isResultsShowing) {
+    if (spotifyArtists?.length && !isResultsShowing) {
       setIsResultsShowing.on();
     }
   };
 
   const onAddArtist = (artist: TSpotifyArtist) => {
-    addArtist(artist);
+    addArtists([artist.id]);
     setIsResultsShowing.off();
     if (inputRef.current) {
       inputRef.current.value = "";
     }
     setTimeout(fetchRecs, 0);
   };
-
-  const artistIds = artists.map((artist) => artist.id);
 
   return (
     <Box
@@ -98,7 +102,7 @@ export default function SpotifyAutocomplete() {
           onChange={(e) => setArtist(e.target.value)}
         />
       </InputGroup>
-      {Boolean(data?.length) && isResultsShowing && (
+      {Boolean(spotifyArtists?.length) && isResultsShowing && (
         <Box
           boxShadow="dark-lg"
           position={"absolute"}
@@ -116,12 +120,12 @@ export default function SpotifyAutocomplete() {
             borderRadius="md"
             sx={scrollBarStyle}
           >
-            {data?.map((artist, i) => {
+            {spotifyArtists?.map((artist, i) => {
               const isSelected = selectedIndex === i;
               return (
                 <ListItem
                   role="option"
-                  aria-setsize={data.length}
+                  aria-setsize={spotifyArtists.length}
                   aria-posinset={i + 1}
                   key={artist.id}
                   _hover={{ bg: "gray.200" }}
@@ -132,7 +136,7 @@ export default function SpotifyAutocomplete() {
                   <Flex alignItems="center" px={2}>
                     <Text>{artist.name}</Text>
                     <Spacer />
-                    {!artistIds.includes(artist.id) && (
+                    {!artists.includes(artist.id) && (
                       <Button
                         colorScheme="purple"
                         size="xs"

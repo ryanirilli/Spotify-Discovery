@@ -7,6 +7,7 @@ import {
 } from "./SpotifyRecommendationsProvider";
 import SpotifyTracks from "./SpotifyTracks";
 import SpotifyRecommendationFilters from "./SpotifyRecommendationFilters";
+import SpotifyHomePageContent from "./SpotifyHomePageContent";
 
 export default function SpotifyMainContent() {
   const { recommendations } = useContext(
@@ -19,14 +20,7 @@ export default function SpotifyMainContent() {
       {recommendations.length > 0 ? (
         <SpotifyTracks />
       ) : (
-        <Center position="absolute" w="100%" h="100%">
-          <Image
-            maxW={["200px", "400px"]}
-            role="presentation"
-            src="/SVG/disco-stu-monochrome.svg"
-            alt="Disco Stu monochromatic"
-          />
-        </Center>
+        <SpotifyHomePageContent />
       )}
     </>
   );

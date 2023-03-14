@@ -33,7 +33,8 @@
     "react-icons": "^4.7.1",
     "react-query": "^3.39.3",
     "spotify-web-api-node": "^5.0.2",
-    "typescript": "4.9.4"
+    "typescript": "4.9.4",
+    "unsplash-js": "^7.0.15"
   },
   "devDependencies": {
     "@types/cookie": "^0.5.1",

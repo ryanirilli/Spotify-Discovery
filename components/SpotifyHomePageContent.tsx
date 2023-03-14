@@ -9,7 +9,7 @@ export default function SpotifyHomePageContent() {
     <Box color="white">
       <Box p={[4, null, null, 16]}>
         <Heading mb={4}>Disco Stu Selects</Heading>
-        <Wrap spacing={4}>
+        <Wrap spacing={[16, 4]}>
           {homePageConfig.selects.map((data, i) => (
             <Box
               key={i}

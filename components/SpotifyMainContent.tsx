@@ -1,5 +1,4 @@
 "use client";
-import { Center, Image } from "@chakra-ui/react";
 import { useContext } from "react";
 import {
   SpotifyRecommendationsContext,
@@ -10,15 +9,20 @@ import SpotifyRecommendationFilters from "./SpotifyRecommendationFilters";
 import SpotifyHomePageContent from "./SpotifyHomePageContent";
 
 export default function SpotifyMainContent() {
-  const { recommendations } = useContext(
+  const { recommendations, isLoadingRecs } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
+  const { artists } = useContext(SpotifyRecommendationsContext) || {};
+  const hasArtists = Boolean(artists?.length);
+
   return (
     <>
-      <SpotifyRecommendationFilters />
-      {recommendations.length > 0 ? (
-        <SpotifyTracks />
+      {hasArtists && (recommendations.length > 0 || isLoadingRecs) ? (
+        <>
+          <SpotifyRecommendationFilters />
+          <SpotifyTracks />
+        </>
       ) : (
         <SpotifyHomePageContent />
       )}

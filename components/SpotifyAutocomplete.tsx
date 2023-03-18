@@ -94,7 +94,9 @@ export default function SpotifyAutocomplete() {
         />
         <Input
           borderRadius="full"
-          bg="white"
+          borderColor="whiteAlpha.300"
+          color="white"
+          bg="whiteAlpha.200"
           w="100%"
           ref={inputRef}
           onFocus={onFocus}

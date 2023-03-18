@@ -30,11 +30,10 @@ export default function SpotifySeeds() {
   ) as TSpotifyRecommendationsContext;
 
   const hasArtists = artistsDetails.length > 0;
-  const hasGenres = genres.length > 0;
 
   return (
     <>
-      {(hasArtists || hasGenres) && (
+      {hasArtists && (
         <Flex
           mt={[1, 2]}
           p={[1, 2]}

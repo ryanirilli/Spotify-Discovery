@@ -7,7 +7,7 @@ import SpotifyCollectionCard from "./SpotifyCollectionCard";
 export default function SpotifyHomePageContent() {
   return (
     <Box color="white">
-      <Box p={[4, null, null, 16]}>
+      <Box p={[4, null, null, 8]}>
         <Heading mb={4}>Disco Stu Selects</Heading>
         <Wrap spacing={[16, 4]}>
           {homePageConfig.selects.map((data, i) => (
@@ -23,6 +23,8 @@ export default function SpotifyHomePageContent() {
               <SpotifyCollectionCard
                 name={data.name}
                 unSplashId={data.unSplashId}
+                artists={data.artists}
+                coverPath={data.coverPath}
               />
             </Box>
           ))}

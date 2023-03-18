@@ -5,16 +5,13 @@ const unsplash = createApi({
   accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || "",
 });
 
-interface UnsplashImage {
-  urls: {
-    regular: string;
-  };
-}
-
-const useUnsplashImage = (imageId: string): string => {
+const useUnsplashImage = (imageId?: string): string => {
   const [imageUrl, setImageUrl] = useState<string>("");
 
   useEffect(() => {
+    if (!imageId) {
+      return;
+    }
     unsplash.photos
       .get({ photoId: imageId })
       .then((res: any) => {

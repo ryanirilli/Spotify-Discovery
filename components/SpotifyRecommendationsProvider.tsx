@@ -13,6 +13,7 @@ export type TSpotifyRecommendationsContext = {
   artists: string[];
   artistsDetails: TSpotifyArtist[];
   addArtists: (artist: string[]) => void;
+  setArtists: (artist: string[]) => void;
   removeArtist: (artist: string) => void;
   addGenre: (genre: string) => void;
   removeGenre: (genre: string) => void;
@@ -90,7 +91,6 @@ export default function SpotifyRecommendationsProvider({
       if (index > -1) {
         draft.splice(index, 1);
       }
-      return draft;
     });
     setArtists(updatedArtists);
   };
@@ -112,7 +112,7 @@ export default function SpotifyRecommendationsProvider({
     setGenres(updatedGenres);
   };
 
-  const { data: artistsDetails, refetch: fetchArtistsDetails } = useQuery<
+  const { data: artistsDetailsData, refetch: fetchArtistsDetails } = useQuery<
     TSpotifyArtist[]
   >("spotifyArtistsDetails", () => artistsQuery(artists), {
     enabled: false,
@@ -124,14 +124,23 @@ export default function SpotifyRecommendationsProvider({
     }
   }, [artists, fetchArtistsDetails]);
 
+  const artistsDetails = useMemo(() => {
+    return (
+      artistsDetailsData?.filter((artist) => artists.includes(artist.id)) || []
+    );
+  }, [artistsDetailsData, artists]);
+
+  console.log("artists", artists);
+
   const contextValue = {
     addArtists,
+    setArtists,
     removeArtist,
     addGenre,
     removeGenre,
     genres,
     artists,
-    artistsDetails: artistsDetails || [],
+    artistsDetails,
     fetchRecs,
     recommendations: recommendations || [],
     isSeedLimitReached,

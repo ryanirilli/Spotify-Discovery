@@ -224,8 +224,8 @@ function SpotifyTrack({
         w="100%"
         bg={isLoadingRecs ? "black" : "transparent"}
         _hover={{ boxShadow: "outline" }}
-        onMouseEnter={() => setCurTrack?.(rec.id)}
-        onClick={() => setCurTrack?.(rec.id)}
+        onMouseEnter={() => !isLoadingRecs && setCurTrack?.(rec.id)}
+        onClick={() => !isLoadingRecs && setCurTrack?.(rec.id)}
       >
         <Box position="relative" overflow="hidden">
           <AspectRatio
@@ -334,6 +334,7 @@ function SpotifyTrack({
                         <Box p={2}>
                           <Button
                             colorScheme="purple"
+                            borderRadius="full"
                             size="sm"
                             w="100%"
                             onClick={onClose}

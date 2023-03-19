@@ -30,15 +30,22 @@ export default function SpotifyCollectionCard({
       role="button"
       cursor="pointer"
       onClick={onSelectCollection}
-      border="1px"
       borderRadius="md"
-      borderColor="whiteAlpha.400"
-      _hover={{ borderColor: "whiteAlpha.600" }}
+      sx={{
+        "&:hover .spotify-collection-card-details": {
+          bg: "blackAlpha.900",
+        },
+      }}
     >
-      <AspectRatio borderTopRadius="md" mb={1} ratio={1} overflow="hidden">
+      <AspectRatio borderTopRadius="md" ratio={1} overflow="hidden">
         <LazyImage src={imgUrl} alt={""} />
       </AspectRatio>
-      <Box p={2}>
+      <Box
+        className="spotify-collection-card-details"
+        p={2}
+        bg="blackAlpha.400"
+        borderBottomRadius="md"
+      >
         <Heading
           ml={1}
           as="h4"

@@ -2,7 +2,7 @@ const homePageConfig = {
   selects: [
     {
       name: "vibey drive",
-      unSplashId: "lU4Dw5UhQJ8",
+      unSplashId: "uoMFPm5_Xg8",
       artists: [
         "4qKpLkR911SUlnd4HAtF79",
         "7EGwUS3c5dXduO4sMyLWC5",
@@ -13,12 +13,18 @@ const homePageConfig = {
     },
     {
       name: "sunday brunch",
-      unSplashId: "N_enD_8s3nI",
+      unSplashId: "6XvN2bN6P8o",
+      artists: [
+        "48nwxUvPJZkm8uPa7xMzmj",
+        "5cM1PvItlR21WUyBnsdMcn",
+        "3vbKDsSS70ZX9D2OcvbZmS",
+        "10GT4yz8c6xjjnPGtGPI1l",
+        "4XquDVA8pkg5Lx91No1JxB",
+      ],
     },
     {
       name: "overcast",
-      unSplashId: "Zssjjpod444",
-      coverPath: "/disco-stu-selects-covers/overcast.jpg",
+      unSplashId: "rRWyOn9gat4",
       artists: [
         "5o8Wylae9k23IEJMIiwd8s",
         "6FQqZYVfTNQ1pCqfkwVFEa",
@@ -29,7 +35,7 @@ const homePageConfig = {
     },
     {
       name: "summer dreamin'",
-      coverPath: "/disco-stu-selects-covers/summer-dreamin.jpg",
+      unSplashId: "m82uh_vamhg",
       artists: [
         "6eU0jV2eEZ8XTM7EmlguK6",
         "2WBJQGf1bT1kxuoqziH5g4",
@@ -40,11 +46,18 @@ const homePageConfig = {
     },
     {
       name: "garden variety",
-      coverPath: "/disco-stu-selects-covers/garden-variety.jpg",
+      unSplashId: "t6kr9bbHaVg",
     },
     {
       name: "Aural Pleasure",
-      unSplashId: "WaMMo0it6Vg",
+      unSplashId: "JhYnL-BiP18",
+      artists: [
+        "205i7E8fNVfojowcQSfK9m",
+        "4oLeXFyACqeem2VImYeBFe",
+        "0cmWgDlu9CwTgxPhf403hb",
+        "0GG2cWaonE4JPrjcCCQ1EG",
+        "4cUkGQyhLFqKHBtL58HYVp",
+      ],
     },
   ],
 };

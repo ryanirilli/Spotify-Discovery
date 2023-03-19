@@ -9,14 +9,12 @@ interface ISpotifyCollectionCard {
   name: string;
   unSplashId?: string;
   artists?: string[];
-  coverPath?: string;
 }
 
 export default function SpotifyCollectionCard({
   name,
   unSplashId,
   artists,
-  coverPath,
 }: ISpotifyCollectionCard) {
   const imgUrl = useUnsplashImage(unSplashId);
   const { addArtists, fetchRecs } =
@@ -38,7 +36,7 @@ export default function SpotifyCollectionCard({
       _hover={{ borderColor: "whiteAlpha.600" }}
     >
       <AspectRatio borderTopRadius="md" mb={1} ratio={1} overflow="hidden">
-        <LazyImage src={coverPath || imgUrl} alt={""} />
+        <LazyImage src={imgUrl} alt={""} />
       </AspectRatio>
       <Box p={2}>
         <Heading

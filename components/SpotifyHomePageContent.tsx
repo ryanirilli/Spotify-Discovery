@@ -24,7 +24,6 @@ export default function SpotifyHomePageContent() {
                 name={data.name}
                 unSplashId={data.unSplashId}
                 artists={data.artists}
-                coverPath={data.coverPath}
               />
             </Box>
           ))}

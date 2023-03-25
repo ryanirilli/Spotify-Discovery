@@ -23,6 +23,7 @@ export default function Home() {
       h="100vh"
       templateColumns={["1fr", null, null, "1fr 1fr"]}
       templateRows={["1fr 1fr", null, null, "1fr"]}
+      overflow="hidden"
     >
       <GridItem
         position="relative"

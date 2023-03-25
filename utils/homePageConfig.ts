@@ -47,6 +47,13 @@ const homePageConfig = {
     {
       name: "garden variety",
       unSplashId: "t6kr9bbHaVg",
+      artists: [
+        "6xrCU6zdcSTsG2hLrojpmI",
+        "4awnjjqiUnSBA4ucPVbF8R",
+        "4tNxq9NGKTKaX8OkZBLgf0",
+        "238y1dKPtMeFEpX3Y6H1Vr",
+        "7enBrBojgBJuPPdqTq4Z5F",
+      ],
     },
     {
       name: "Aural Pleasure",

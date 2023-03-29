@@ -116,6 +116,8 @@ export default function SpotifyAutocomplete() {
   const shouldShowResults =
     (Boolean(spotifyArtists?.length) && isResultsShowing) || isNew;
 
+  const isNewExperience = isNew && !spotifyArtists?.length;
+
   return (
     <Box
       position="relative"
@@ -155,11 +157,11 @@ export default function SpotifyAutocomplete() {
             maxH="xs"
             overflowY={isNew ? "hidden" : "scroll"}
             zIndex="modal"
-            bg={!isNew ? "gray.100" : "transparent"}
+            bg={isNewExperience ? "gray.100" : "transparent"}
             borderRadius="md"
             sx={scrollBarStyle}
           >
-            {isNew && !spotifyArtists?.length && (
+            {isNewExperience && (
               <Box p={4} bg="black" color="white">
                 <Text fontSize="xl">
                   &#x261D; Search for your favorite artist

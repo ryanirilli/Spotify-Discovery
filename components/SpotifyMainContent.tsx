@@ -6,7 +6,7 @@ import {
 } from "./SpotifyRecommendationsProvider";
 import SpotifyTracks from "./SpotifyTracks";
 import SpotifyRecommendationFilters from "./SpotifyRecommendationFilters";
-import SpotifyHomePageContent from "./SpotifyHomePageContent";
+import SpotifyDefaultContent from "./SpotifyDefaultContent";
 
 export default function SpotifyMainContent() {
   const { recommendations, isLoadingRecs } = useContext(
@@ -15,16 +15,18 @@ export default function SpotifyMainContent() {
 
   const { artists } = useContext(SpotifyRecommendationsContext) || {};
   const hasArtists = Boolean(artists?.length);
+  const hasContent =
+    hasArtists && (recommendations.length > 0 || isLoadingRecs);
 
   return (
     <>
-      {hasArtists && (recommendations.length > 0 || isLoadingRecs) ? (
+      {hasContent ? (
         <>
           <SpotifyRecommendationFilters />
           <SpotifyTracks />
         </>
       ) : (
-        <SpotifyHomePageContent />
+        <SpotifyDefaultContent />
       )}
     </>
   );

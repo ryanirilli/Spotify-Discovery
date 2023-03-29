@@ -11,7 +11,7 @@ type TTokenData = {
   scope: string;
 };
 
-export default async function SpotifyAUthCallback(
+export default async function SpotifyAuthCallback(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -41,13 +41,25 @@ export default async function SpotifyAUthCallback(
     },
   };
 
-  const response = await fetch(
-    "https://accounts.spotify.com/api/token",
-    authOptions
-  );
+  let access_token: string;
+  let refresh_token: string;
+  let expires_in: number;
 
-  const { access_token, refresh_token, expires_in } =
-    (await response.json()) as TTokenData;
+  try {
+    const response = await fetch(
+      "https://accounts.spotify.com/api/token",
+      authOptions
+    );
+
+    const data = (await response.json()) as TTokenData;
+    access_token = data.access_token;
+    refresh_token = data.refresh_token;
+    expires_in = data.expires_in;
+  } catch (err) {
+    console.log(err);
+    res.redirect(`/`);
+    return;
+  }
 
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("Set-Cookie", [
@@ -62,5 +74,5 @@ export default async function SpotifyAUthCallback(
     }),
   ]);
 
-  res.redirect(`/home`);
+  return res.redirect(`/home`);
 }

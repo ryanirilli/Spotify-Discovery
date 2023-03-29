@@ -1,5 +1,5 @@
 const homePageConfig = {
-  selects: [
+  defaultCollection: [
     {
       name: "vibey drive",
       unSplashId: "uoMFPm5_Xg8",

@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import SpotifyMainContent from "@/components/SpotifyMainContent";
 import SpotifyLeftSidebar from "@/components/SpotifyLeftSidebar";
+import { SpotifyAutocompleteProvider } from "@/components/SpotifyAutocomplete";
 
 export default async function Home() {
   const nextCookies = cookies();
@@ -18,16 +19,18 @@ export default async function Home() {
   }
 
   return (
-    <DesktopAppLayout
-      topNav={
-        <SpotifyTopNav>
-          <SpotifySeedControls />
-          <SpotifySeeds />
-        </SpotifyTopNav>
-      }
-      leftSidebar={<SpotifyLeftSidebar />}
-    >
-      <SpotifyMainContent />
-    </DesktopAppLayout>
+    <SpotifyAutocompleteProvider>
+      <DesktopAppLayout
+        topNav={
+          <SpotifyTopNav>
+            <SpotifySeedControls />
+            <SpotifySeeds />
+          </SpotifyTopNav>
+        }
+        leftSidebar={<SpotifyLeftSidebar />}
+      >
+        <SpotifyMainContent />
+      </DesktopAppLayout>
+    </SpotifyAutocompleteProvider>
   );
 }

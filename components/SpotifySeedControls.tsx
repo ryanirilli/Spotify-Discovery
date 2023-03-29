@@ -12,7 +12,7 @@ export default function SpotifySeedControls() {
     <Flex>
       <HStack px={2} flex={1}>
         <SpotifyAutocomplete />
-        {artists && artists.length > 0 && (
+        {(artists?.length ?? 0 > 0) && (
           <Button
             size="sm"
             variant="outline"

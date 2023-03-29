@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -27,7 +27,34 @@ import { TSpotifyArtist } from "@/types/SpotifyArtist";
 import scrollBarStyle from "@/utils/scrollBarStyle";
 import useListSelection from "@/utils/useListSelection";
 
+interface SpotifyAutocompleteContextType {
+  isNew: boolean;
+  setIsNew: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const SpotifyAutocompleteContext =
+  createContext<SpotifyAutocompleteContextType>(
+    {} as SpotifyAutocompleteContextType
+  );
+
+interface ISpotifyAutocompleteProvider {
+  children: React.ReactNode;
+}
+
+export function SpotifyAutocompleteProvider({
+  children,
+}: ISpotifyAutocompleteProvider) {
+  const [isNew, setIsNew] = useState<boolean>(false);
+
+  return (
+    <SpotifyAutocompleteContext.Provider value={{ isNew, setIsNew }}>
+      {children}
+    </SpotifyAutocompleteContext.Provider>
+  );
+}
+
 export default function SpotifyAutocomplete() {
+  const { isNew, setIsNew } = useContext(SpotifyAutocompleteContext);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [artist, setArtist] = useState("");
@@ -64,6 +91,12 @@ export default function SpotifyAutocomplete() {
     }
   }, [spotifyArtists, setIsResultsShowing]);
 
+  useEffect(() => {
+    if (isNew) {
+      inputRef.current?.focus();
+    }
+  }, [isNew]);
+
   const onFocus = () => {
     if (spotifyArtists?.length && !isResultsShowing) {
       setIsResultsShowing.on();
@@ -73,11 +106,15 @@ export default function SpotifyAutocomplete() {
   const onAddArtist = (artist: TSpotifyArtist) => {
     addArtists([artist.id]);
     setIsResultsShowing.off();
+    setIsNew(false);
     if (inputRef.current) {
       inputRef.current.value = "";
     }
     setTimeout(fetchRecs, 0);
   };
+
+  const shouldShowResults =
+    (Boolean(spotifyArtists?.length) && isResultsShowing) || isNew;
 
   return (
     <Box
@@ -104,7 +141,7 @@ export default function SpotifyAutocomplete() {
           onChange={(e) => setArtist(e.target.value)}
         />
       </InputGroup>
-      {Boolean(spotifyArtists?.length) && isResultsShowing && (
+      {shouldShowResults && (
         <Box
           boxShadow="dark-lg"
           position={"absolute"}
@@ -116,12 +153,19 @@ export default function SpotifyAutocomplete() {
           <List
             role="listbox"
             maxH="xs"
-            overflowY="scroll"
+            overflowY={isNew ? "hidden" : "scroll"}
             zIndex="modal"
             bg="gray.100"
             borderRadius="md"
             sx={scrollBarStyle}
           >
+            {isNew && !spotifyArtists?.length && (
+              <Box p={4} bg="black" color="white">
+                <Text fontSize="xl">
+                  &#x261D; Search for your favorite artist
+                </Text>
+              </Box>
+            )}
             {spotifyArtists?.map((artist, i) => {
               const isSelected = selectedIndex === i;
               return (

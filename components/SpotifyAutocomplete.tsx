@@ -157,7 +157,7 @@ export default function SpotifyAutocomplete() {
             maxH="xs"
             overflowY={isNew ? "hidden" : "scroll"}
             zIndex="modal"
-            bg={isNewExperience ? "gray.100" : "transparent"}
+            bg={isNewExperience ? "transparent" : "gray.100"}
             borderRadius="md"
             sx={scrollBarStyle}
           >

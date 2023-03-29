@@ -103,7 +103,7 @@ export default function SpotifyUserInfo() {
             </Text>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={onContinue} w="100%" colorScheme="purple">
+            <Button onClick={onContinue} w="100%" colorScheme="whiteAlpha">
               Continue
             </Button>
           </ModalFooter>

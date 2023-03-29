@@ -32,7 +32,7 @@ export function SpotifyCollectionCard({
 
   const blankContent = (
     <Flex
-      role="button"
+      py={2}
       onClick={() => setIsNew(true)}
       justifyContent="center"
       alignItems="center"
@@ -41,7 +41,7 @@ export function SpotifyCollectionCard({
       color="whiteAlpha.600"
       _hover={{ bg: "blackAlpha.700", color: "whiteAlpha.800" }}
       borderRadius="lg"
-      border="2px dashed"
+      border="1px dashed"
       borderColor="whiteAlpha.300"
       userSelect="none"
     >

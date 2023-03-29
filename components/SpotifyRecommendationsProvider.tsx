@@ -130,8 +130,6 @@ export default function SpotifyRecommendationsProvider({
     );
   }, [artistsDetailsData, artists]);
 
-  console.log("artists", artists);
-
   const contextValue = {
     addArtists,
     setArtists,

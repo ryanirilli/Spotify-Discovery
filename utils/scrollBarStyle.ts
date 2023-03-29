@@ -13,7 +13,7 @@ const scrollBarStyle = {
   },
 
   "&::-webkit-scrollbar-thumb:hover": {
-    backgroundColor: "var(--chakra-colors-purple-300)",
+    backgroundColor: "var(--chakra-colors-whiteAlpha-300)",
   },
 };
 
@@ -21,7 +21,7 @@ export default scrollBarStyle;
 
 export const topNavScrollBarStyle = {
   scrollbarWidth: "thin",
-  scrollbarColor: "var(--chakra-colors-purple-500) #F5F5F5",
+  scrollbarColor: "var(--chakra-colors-whiteAlpha-500) #F5F5F5",
   "&::-webkit-scrollbar": {
     width: "0.2em",
     height: "0.2em",
@@ -30,10 +30,10 @@ export const topNavScrollBarStyle = {
 
   "&::-webkit-scrollbar-thumb": {
     borderRadius: "10px",
-    backgroundColor: "var(--chakra-colors-purple-500)",
+    backgroundColor: "var(--chakra-colors-whiteAlpha-500)",
   },
 
   "&::-webkit-scrollbar-thumb:hover": {
-    backgroundColor: "var(--chakra-colors-purple-300)",
+    backgroundColor: "var(--chakra-colors-whiteAlpha-300)",
   },
 };

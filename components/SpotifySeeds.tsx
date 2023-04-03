@@ -50,31 +50,34 @@ export default function SpotifySeeds() {
         >
           {artistsDetails
             .filter((a) => artists.includes(a.id))
-            .map((artist) => (
-              <Box key={artist.id} mr={2}>
-                <Tag
-                  size="lg"
-                  borderRadius="full"
-                  variant="solid"
-                  colorScheme="blue"
-                >
-                  <Avatar
-                    src={artist.images[artist.images.length - 1].url}
-                    size="xs"
-                    name={artist.name}
-                    ml={-2}
-                    mr={2}
-                  />
-                  <TagLabel>{artist.name}</TagLabel>
-                  <TagCloseButton
-                    onClick={() => {
-                      removeArtist(artist.id);
-                      setTimeout(fetchRecs, 0);
-                    }}
-                  />
-                </Tag>
-              </Box>
-            ))}
+            .map((artist) => {
+              const artistImg = artist.images[artist.images.length - 1]?.url;
+              return (
+                <Box key={artist.id} mr={2}>
+                  <Tag
+                    size="lg"
+                    borderRadius="full"
+                    variant="solid"
+                    colorScheme="blue"
+                  >
+                    <Avatar
+                      src={artistImg}
+                      size="xs"
+                      name={artist.name}
+                      ml={-2}
+                      mr={2}
+                    />
+                    <TagLabel>{artist.name}</TagLabel>
+                    <TagCloseButton
+                      onClick={() => {
+                        removeArtist(artist.id);
+                        setTimeout(fetchRecs, 0);
+                      }}
+                    />
+                  </Tag>
+                </Box>
+              );
+            })}
           {genres.map((genre) => (
             <Box key={genre} mr={2}>
               <Tag

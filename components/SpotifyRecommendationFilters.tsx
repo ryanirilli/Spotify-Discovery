@@ -105,7 +105,7 @@ export default function SpotifyRecommendationFilters() {
                     <Button
                       isDisabled={!draftFilters.isDirty}
                       w="100%"
-                      colorScheme="whiteAlpha"
+                      colorScheme="purple"
                       onClick={() => {
                         onApply();
                         onClose();

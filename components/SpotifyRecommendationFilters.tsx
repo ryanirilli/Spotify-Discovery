@@ -14,9 +14,11 @@ import {
   Portal,
   Tag,
   TagLabel,
+  useOutsideClick,
 } from "@chakra-ui/react";
+import { on } from "events";
 import produce from "immer";
-import { useContext, useReducer } from "react";
+import { useContext, useReducer, useRef } from "react";
 import { IoFilter } from "react-icons/io5";
 import { TopNavHeightContext } from "./DesktopAppLayout";
 import {
@@ -57,6 +59,7 @@ const filtersReducer = (
 };
 
 export default function SpotifyRecommendationFilters() {
+  const ref = useRef<HTMLElement>();
   const [draftFilters, dispatch] = useReducer(filtersReducer, initialFilters);
 
   const { setFilters, filters, fetchRecs, recommendations } =
@@ -96,25 +99,33 @@ export default function SpotifyRecommendationFilters() {
                 </Button>
               </PopoverTrigger>
               <Portal>
-                <PopoverContent>
-                  <PopoverArrow />
-                  <PopoverBody>
-                    <SpotifyTempoFilter onChange={onChangeTempoRange} />
-                  </PopoverBody>
-                  <Box p={2}>
-                    <Button
-                      isDisabled={!draftFilters.isDirty}
-                      w="100%"
-                      colorScheme="purple"
-                      onClick={() => {
-                        onApply();
-                        onClose();
-                      }}
-                    >
-                      Apply
-                    </Button>
-                  </Box>
-                </PopoverContent>
+                <CloseOnOutsideClick onClose={onClose}>
+                  <PopoverContent>
+                    <PopoverArrow />
+                    <PopoverBody>
+                      <SpotifyTempoFilter
+                        value={[
+                          draftFilters.filters.target_tempo || 0,
+                          draftFilters.filters.max_tempo || 0,
+                        ]}
+                        onChange={onChangeTempoRange}
+                      />
+                      <Box p={2}>
+                        <Button
+                          isDisabled={!draftFilters.isDirty}
+                          w="100%"
+                          colorScheme="purple"
+                          onClick={() => {
+                            onApply();
+                            onClose();
+                          }}
+                        >
+                          Apply
+                        </Button>
+                      </Box>
+                    </PopoverBody>
+                  </PopoverContent>
+                </CloseOnOutsideClick>
               </Portal>
             </>
           )}
@@ -136,4 +147,19 @@ export default function SpotifyRecommendationFilters() {
       </Flex>
     </Box>
   ) : null;
+}
+
+function CloseOnOutsideClick({
+  children,
+  onClose,
+}: {
+  children: JSX.Element;
+  onClose: () => void;
+}) {
+  const ref = useRef(null);
+  useOutsideClick({
+    ref: ref,
+    handler: onClose,
+  });
+  return <div ref={ref}>{children}</div>;
 }

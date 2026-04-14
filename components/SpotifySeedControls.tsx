@@ -4,7 +4,7 @@ import { Button, Flex, HStack, Icon } from "@chakra-ui/react";
 import { useContext } from "react";
 import SpotifyAutocomplete from "./SpotifyAutocomplete";
 import { SpotifyRecommendationsContext } from "./SpotifyRecommendationsProvider";
-import { FaBackward } from "react-icons/fa";
+import { MdClose } from "react-icons/md";
 
 export default function SpotifySeedControls() {
   const { artists, setArtists } =
@@ -15,16 +15,18 @@ export default function SpotifySeedControls() {
         <SpotifyAutocomplete />
         {(artists?.length ?? 0 > 0) && (
           <Button
-            leftIcon={<Icon as={FaBackward} boxSize={4} />}
+            leftIcon={<Icon as={MdClose} boxSize={4} />}
             size="sm"
-            colorScheme="red"
-            borderRadius="full"
+            variant="ghost"
+            color="white"
+            _hover={{ bg: "whiteAlpha.200" }}
+            _active={{ bg: "whiteAlpha.300" }}
             onClick={() => {
               window.scroll(0, 0);
               setArtists?.([]);
             }}
           >
-            Reset Search
+            Clear all
           </Button>
         )}
       </HStack>

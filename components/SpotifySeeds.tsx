@@ -25,11 +25,17 @@ export default function SpotifySeeds() {
     fetchRecs,
     genres,
     removeGenre,
+    isArtistDisabled,
   } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
   const hasArtists = artistsDetails.length > 0;
+
+  // Render in insertion order so disabled (oldest) chips appear first.
+  const orderedArtistDetails = artists
+    .map((id) => artistsDetails.find((a) => a.id === id))
+    .filter((a): a is (typeof artistsDetails)[number] => Boolean(a));
 
   return (
     <>
@@ -48,36 +54,45 @@ export default function SpotifySeeds() {
             overflowScrolling: "touch",
           }}
         >
-          {artistsDetails
-            .filter((a) => artists.includes(a.id))
-            .map((artist) => {
-              const artistImg = artist.images[artist.images.length - 1]?.url;
-              return (
-                <Box key={artist.id} mr={2}>
-                  <Tag
-                    size="lg"
-                    borderRadius="full"
-                    variant="solid"
-                    colorScheme="blue"
-                  >
-                    <Avatar
-                      src={artistImg}
-                      size="xs"
-                      name={artist.name}
-                      ml={-2}
-                      mr={2}
-                    />
-                    <TagLabel>{artist.name}</TagLabel>
-                    <TagCloseButton
-                      onClick={() => {
-                        removeArtist(artist.id);
-                        setTimeout(fetchRecs, 0);
-                      }}
-                    />
-                  </Tag>
-                </Box>
-              );
-            })}
+          {orderedArtistDetails.map((artist) => {
+            const artistImg = artist.images[artist.images.length - 1]?.url;
+            const disabled = isArtistDisabled(artist.id);
+            return (
+              <Box
+                key={artist.id}
+                mr={2}
+                opacity={disabled ? 0.4 : 1}
+                transition="opacity 0.15s ease"
+                title={
+                  disabled
+                    ? "Disabled — remove a newer artist to re-enable"
+                    : undefined
+                }
+              >
+                <Tag
+                  size="lg"
+                  borderRadius="full"
+                  variant="solid"
+                  colorScheme="blue"
+                >
+                  <Avatar
+                    src={artistImg}
+                    size="xs"
+                    name={artist.name}
+                    ml={-2}
+                    mr={2}
+                  />
+                  <TagLabel>{artist.name}</TagLabel>
+                  <TagCloseButton
+                    onClick={() => {
+                      removeArtist(artist.id);
+                      setTimeout(fetchRecs, 0);
+                    }}
+                  />
+                </Tag>
+              </Box>
+            );
+          })}
           {genres.map((genre) => (
             <Box key={genre} mr={2}>
               <Tag

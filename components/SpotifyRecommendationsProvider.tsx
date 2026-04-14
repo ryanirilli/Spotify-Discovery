@@ -9,9 +9,13 @@ import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import { TSpotifyRecommendationsOptions } from "@/types/SpotifyRecommendationsOptions";
 import { artistsQuery } from "@/queries/spotifyArtitstsQuery";
 
+export const MAX_ENABLED_SEEDS = 5;
+
 export type TSpotifyRecommendationsContext = {
   artists: string[];
   artistsDetails: TSpotifyArtist[];
+  enabledArtists: string[];
+  isArtistDisabled: (id: string) => boolean;
   addArtists: (artist: string[]) => void;
   setArtists: (artist: string[]) => void;
   removeArtist: (artist: string) => void;
@@ -46,6 +50,22 @@ export default function SpotifyRecommendationsProvider({
   const [genres, setGenres] = useState<string[]>([]);
   const [filters, setFilters] = useState<TSpotifyRecommendationFilters>({});
 
+  // Only the most recently added artists (within the remaining seed budget
+  // after genres) are sent to the recommendations API. Older artists remain
+  // in `artists` but are treated as "disabled" seeds so the user can toggle
+  // them back in by removing a newer selection.
+  const enabledArtists = useMemo(() => {
+    const slots = Math.max(0, MAX_ENABLED_SEEDS - genres.length);
+    return artists.slice(-slots);
+  }, [artists, genres]);
+
+  const disabledCount = artists.length - enabledArtists.length;
+
+  const isArtistDisabled = (id: string) => {
+    const idx = artists.indexOf(id);
+    return idx !== -1 && idx < disabledCount;
+  };
+
   const {
     data: recommendations,
     refetch: fetchRecs,
@@ -53,14 +73,14 @@ export default function SpotifyRecommendationsProvider({
   } = useQuery<TSpotifyTrack[]>(
     ["spotifyRecommendations"],
     () => {
-      if (!artists.length && !genres.length) {
+      if (!enabledArtists.length && !genres.length) {
         return Promise.resolve([]);
       }
 
       document.body.scrollIntoView({ behavior: "smooth", block: "start" });
 
       const settings: TSpotifyRecommendationsOptions = {
-        artists,
+        artists: enabledArtists,
         genres,
         ...filters,
       };
@@ -73,9 +93,11 @@ export default function SpotifyRecommendationsProvider({
     }
   );
 
+  // Artists can now always be added (older ones are auto-disabled), so the
+  // seed limit only applies to genres.
   const isSeedLimitReached = useMemo(() => {
-    return artists.length + genres.length === 5;
-  }, [artists, genres]);
+    return genres.length >= MAX_ENABLED_SEEDS;
+  }, [genres]);
 
   const addArtists = (artist: string[]) => {
     const updatedArtists = produce(artists, (draft: string[]) => {
@@ -139,6 +161,8 @@ export default function SpotifyRecommendationsProvider({
     genres,
     artists,
     artistsDetails,
+    enabledArtists,
+    isArtistDisabled,
     fetchRecs,
     recommendations: recommendations || [],
     isSeedLimitReached,

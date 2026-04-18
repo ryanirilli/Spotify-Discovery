@@ -9,7 +9,7 @@ import SpotifyLeftSidebar from "@/components/SpotifyLeftSidebar";
 import { SpotifyAutocompleteProvider } from "@/components/SpotifyAutocomplete";
 
 export default async function Home() {
-  const nextCookies = cookies();
+  const nextCookies = await cookies();
   const { value: spotifyAccessToken } =
     nextCookies.get("spotify_access_token") || {};
   const { value: spotifyRefreshToken } =

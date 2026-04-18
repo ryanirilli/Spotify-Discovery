@@ -6,17 +6,11 @@ import spotifyAddTracksToPlaylist, {
 import { TSpotifyPlaylist } from "@/types/SpotifyPlaylist";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import scrollBarStyle from "@/utils/scrollBarStyle";
-import {
-  Box,
-  List,
-  ListItem,
-  Skeleton,
-  Text,
-  useToast,
-} from "@chakra-ui/react";
+import { toaster } from "@/utils/toaster";
+import { Box, List, Skeleton, Text } from "@chakra-ui/react";
 import { useContext } from "react";
 import { useDrop } from "react-dnd";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
 export default function SpotifyPlaylists() {
@@ -30,9 +24,9 @@ export default function SpotifyPlaylists() {
         maxH="50vh"
         overflowY="scroll"
         bg="blackAlpha.500"
-        sx={scrollBarStyle}
+        css={scrollBarStyle}
       >
-        <List>
+        <List.Root listStyle="none">
           {isLoading ? (
             <>
               <ListItemPlaceholder />
@@ -50,29 +44,24 @@ export default function SpotifyPlaylists() {
               <PlaylistItem key={playlist.id} playlist={playlist} />
             ))
           )}
-        </List>
+        </List.Root>
       </Box>
     </>
   );
 }
 
 function PlaylistItem({ playlist }: { playlist: TSpotifyPlaylist }) {
-  const toast = useToast();
-  const mutation = useMutation(
-    ({ playlistId, tracks }: TSpotifyAddToPlaylistArgs) =>
+  const mutation = useMutation({
+    mutationFn: ({ playlistId, tracks }: TSpotifyAddToPlaylistArgs) =>
       spotifyAddTracksToPlaylist({ playlistId, tracks }),
-    {
-      onSuccess: () => {
-        toast({
-          title: "Track added to playlist",
-          status: "success",
-          duration: 3000,
-          isClosable: false,
-          position: "top",
-        });
-      },
-    }
-  );
+    onSuccess: () => {
+      toaster.create({
+        title: "Track added to playlist",
+        type: "success",
+        duration: 3000,
+      });
+    },
+  });
 
   const [{ isOver }, dropRef] = useDrop(
     () => ({
@@ -87,12 +76,12 @@ function PlaylistItem({ playlist }: { playlist: TSpotifyPlaylist }) {
     [playlist, mutation]
   );
   return (
-    <ListItem
-      ref={dropRef}
+    <List.Item
+      ref={dropRef as unknown as React.Ref<HTMLLIElement>}
       px={4}
-      sx={{
+      css={{
         "& .spotify-playlist-list-item": {
-          color: isOver && "whiteAlpha.900",
+          color: isOver ? "whiteAlpha.900" : undefined,
         },
         "&:hover .spotify-playlist-list-item": {
           color: "whiteAlpha.900",
@@ -101,20 +90,20 @@ function PlaylistItem({ playlist }: { playlist: TSpotifyPlaylist }) {
     >
       <Text
         fontSize="small"
-        noOfLines={1}
+        lineClamp={1}
         color="whiteAlpha.500"
         className="spotify-playlist-list-item"
       >
         {playlist.name}
       </Text>
-    </ListItem>
+    </List.Item>
   );
 }
 
 function ListItemPlaceholder() {
   return (
-    <ListItem px={2} my={2} opacity={0.2}>
+    <List.Item px={2} my={2} opacity={0.2}>
       <Skeleton borderRadius="full" height="20px" />
-    </ListItem>
+    </List.Item>
   );
 }

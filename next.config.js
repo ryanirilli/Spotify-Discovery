@@ -1,13 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true    
-  },
+  allowedDevOrigins: ['127.0.0.1', 'localhost', '192.168.4.152'],
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'i.scdn.co'        
+        hostname: 'i.scdn.co'
       },
     ],
   },

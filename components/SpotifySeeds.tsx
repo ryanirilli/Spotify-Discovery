@@ -1,15 +1,7 @@
 "use client";
 
 import { useContext } from "react";
-import {
-  Avatar,
-  Box,
-  Icon,
-  Tag,
-  TagLabel,
-  TagCloseButton,
-  Flex,
-} from "@chakra-ui/react";
+import { Avatar, Box, Icon, Tag, Flex } from "@chakra-ui/react";
 import { MdLibraryMusic } from "react-icons/md";
 import {
   SpotifyRecommendationsContext,
@@ -48,7 +40,7 @@ export default function SpotifySeeds() {
           overflowX="scroll"
           w="100%"
           ml={[1, 0]}
-          sx={{
+          css={{
             ...topNavScrollBarStyle,
             WebkitOverflowScrolling: "touch",
             overflowScrolling: "touch",
@@ -69,47 +61,52 @@ export default function SpotifySeeds() {
                     : undefined
                 }
               >
-                <Tag
+                <Tag.Root
                   size="lg"
                   borderRadius="full"
                   variant="solid"
-                  colorScheme="blue"
+                  pl={0}
                 >
-                  <Avatar
-                    src={artistImg}
-                    size="xs"
-                    name={artist.name}
-                    ml={-2}
+                  <Tag.StartElement
+                    boxSize="24px"
+                    overflow="hidden"
+                    borderRadius="full"
                     mr={2}
-                  />
-                  <TagLabel>{artist.name}</TagLabel>
-                  <TagCloseButton
-                    onClick={() => {
-                      removeArtist(artist.id);
-                      setTimeout(fetchRecs, 0);
-                    }}
-                  />
-                </Tag>
+                  >
+                    <Avatar.Root boxSize="24px">
+                      <Avatar.Image src={artistImg} />
+                      <Avatar.Fallback name={artist.name} />
+                    </Avatar.Root>
+                  </Tag.StartElement>
+                  <Tag.Label>{artist.name}</Tag.Label>
+                  <Tag.EndElement>
+                    <Tag.CloseTrigger
+                      onClick={() => {
+                        removeArtist(artist.id);
+                        setTimeout(fetchRecs, 0);
+                      }}
+                    />
+                  </Tag.EndElement>
+                </Tag.Root>
               </Box>
             );
           })}
           {genres.map((genre) => (
             <Box key={genre} mr={2}>
-              <Tag
-                size="lg"
-                borderRadius="full"
-                variant="solid"
-                colorScheme="blue"
-              >
-                <Icon ml={-1} mr={2} as={MdLibraryMusic} color="white" />
-                <TagLabel textTransform="capitalize">{genre}</TagLabel>
-                <TagCloseButton
-                  onClick={() => {
-                    removeGenre(genre);
-                    setTimeout(fetchRecs, 0);
-                  }}
-                />
-              </Tag>
+              <Tag.Root size="lg" borderRadius="full" variant="solid">
+                <Tag.StartElement>
+                  <Icon ml={-1} mr={2} as={MdLibraryMusic} color="white" />
+                </Tag.StartElement>
+                <Tag.Label textTransform="capitalize">{genre}</Tag.Label>
+                <Tag.EndElement>
+                  <Tag.CloseTrigger
+                    onClick={() => {
+                      removeGenre(genre);
+                      setTimeout(fetchRecs, 0);
+                    }}
+                  />
+                </Tag.EndElement>
+              </Tag.Root>
             </Box>
           ))}
         </Flex>

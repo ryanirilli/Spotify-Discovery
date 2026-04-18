@@ -1,14 +1,21 @@
-"use client";
-import ChakraThemeProvider from "../theme/ChakraProvider";
-import { QueryClient, QueryClientProvider } from "react-query";
+import type { Metadata, Viewport } from "next";
+import Providers from "./providers";
 
-const queryClient = new QueryClient();
-
-queryClient.setDefaultOptions({
-  queries: {
-    staleTime: Infinity,
+export const metadata: Metadata = {
+  title: "Disco Stu",
+  openGraph: {
+    title: "Disco Stu - A better way to discover music on Spotify",
+    url: "https://discostu.app/",
+    images: ["https://discostu.app/meta-image.jpg"],
   },
-});
+  icons: { icon: "/favicon.ico" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export default function RootLayout({
   children,
@@ -17,11 +24,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head />
       <body>
-        <QueryClientProvider client={queryClient}>
-          <ChakraThemeProvider>{children}</ChakraThemeProvider>
-        </QueryClientProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

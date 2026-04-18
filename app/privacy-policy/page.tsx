@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Box,
-  Container,
-  Heading,
-  ListItem,
-  Text,
-  UnorderedList,
-} from "@chakra-ui/react";
+import { Box, Container, Heading, List, Text } from "@chakra-ui/react";
 
 export default function PrivacyPolicy() {
   return (
@@ -22,13 +15,13 @@ export default function PrivacyPolicy() {
           During this process, I ask for your permission to access the following
           scopes:
         </Text>
-        <UnorderedList mb={8}>
-          <ListItem>user-read-private</ListItem>{" "}
-          <ListItem>user-read-email</ListItem>
-          <ListItem>playlist-read-private</ListItem>{" "}
-          <ListItem>playlist-modify-private</ListItem>
-          <ListItem>playlist-modify-public</ListItem>
-        </UnorderedList>
+        <List.Root mb={8}>
+          <List.Item>user-read-private</List.Item>{" "}
+          <List.Item>user-read-email</List.Item>
+          <List.Item>playlist-read-private</List.Item>{" "}
+          <List.Item>playlist-modify-private</List.Item>
+          <List.Item>playlist-modify-public</List.Item>
+        </List.Root>
         <Text mb={8}>
           This allows me to access the necessary information to provide you with
           the services and features of my website. However, please note that I

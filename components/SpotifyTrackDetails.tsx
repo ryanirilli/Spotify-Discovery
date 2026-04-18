@@ -1,21 +1,9 @@
 "use client";
 
 import spotifyTrackDetailsQuery from "@/queries/spotifyTrackDetailsQuery";
-import {
-  List,
-  ListItem,
-  Skeleton,
-  Slider,
-  SliderFilledTrack,
-  SliderTrack,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Tr,
-} from "@chakra-ui/react";
+import { List, Skeleton, Slider, Table } from "@chakra-ui/react";
 import { ReactNode, useMemo } from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const attributes = new Set(["duration_ms", "tempo"]);
 
@@ -41,8 +29,9 @@ interface ISpotifyTrackDetails {
 }
 
 export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
-  const { data, isLoading } = useQuery(["spotifyTrackDetails", id], () => {
-    return spotifyTrackDetailsQuery(id);
+  const { data, isLoading } = useQuery({
+    queryKey: ["spotifyTrackDetails", id],
+    queryFn: () => spotifyTrackDetailsQuery(id),
   });
 
   const atts = useMemo(() => {
@@ -52,22 +41,22 @@ export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
     const nodes: ReactNode[] = [];
     attributes.forEach((key) =>
       nodes.push(
-        <Tr key={key}>
-          <Td>
+        <Table.Row key={key}>
+          <Table.Cell>
             {key.toLowerCase() === "duration_ms"
               ? "duration"
               : key.toLowerCase() === "tempo"
               ? "bpm"
               : key}
-          </Td>
-          <Td textAlign="right">
+          </Table.Cell>
+          <Table.Cell textAlign="right">
             {key.toLowerCase() === "duration_ms"
               ? msToMinAndSec(data[key])
               : key.toLowerCase() === "tempo"
               ? Number(data[key]).toFixed(1)
               : data[key]}
-          </Td>
-        </Tr>
+          </Table.Cell>
+        </Table.Row>
       )
     );
     return nodes;
@@ -80,28 +69,30 @@ export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
     const nodes: ReactNode[] = [];
     sliderAttributes.forEach((key) => {
       nodes.push(
-        <Tr key={key}>
-          <Td>{key === "valence" ? "positive vibe" : key}</Td>
-          <Td textAlign="right">
-            <Slider
-              aria-label={`${key} slider`}
-              defaultValue={data[key] * 100}
+        <Table.Row key={key}>
+          <Table.Cell>{key === "valence" ? "positive vibe" : key}</Table.Cell>
+          <Table.Cell textAlign="right">
+            <Slider.Root
+              aria-label={[`${key} slider`]}
+              defaultValue={[data[key] * 100]}
               min={0}
               max={100}
             >
-              <SliderTrack>
-                <SliderFilledTrack />
-              </SliderTrack>
-            </Slider>
-          </Td>
-        </Tr>
+              <Slider.Control>
+                <Slider.Track>
+                  <Slider.Range />
+                </Slider.Track>
+              </Slider.Control>
+            </Slider.Root>
+          </Table.Cell>
+        </Table.Row>
       );
     });
     return nodes;
   }, [data]);
 
   return isLoading ? (
-    <List>
+    <List.Root listStyle="none">
       <ListItemPlaceholder />
       <ListItemPlaceholder />
       <ListItemPlaceholder />
@@ -111,23 +102,23 @@ export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
       <ListItemPlaceholder />
       <ListItemPlaceholder />
       <ListItemPlaceholder />
-    </List>
+    </List.Root>
   ) : (
-    <TableContainer>
-      <Table size="sm">
-        <Tbody>
+    <Table.ScrollArea>
+      <Table.Root size="sm">
+        <Table.Body>
           {atts}
           {sliderAtts}
-        </Tbody>
-      </Table>
-    </TableContainer>
+        </Table.Body>
+      </Table.Root>
+    </Table.ScrollArea>
   );
 }
 
 function ListItemPlaceholder() {
   return (
-    <ListItem px={2} my={4} opacity={0.5}>
+    <List.Item px={2} my={4} opacity={0.5}>
       <Skeleton borderRadius="full" height="20px" />
-    </ListItem>
+    </List.Item>
   );
 }

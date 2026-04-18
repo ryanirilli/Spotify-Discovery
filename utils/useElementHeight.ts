@@ -1,6 +1,6 @@
 import React, { useState, useLayoutEffect } from "react";
 
-function useElementHeight(elementRef: React.RefObject<HTMLElement>) {
+function useElementHeight(elementRef: React.RefObject<HTMLElement | null>) {
   const [height, setHeight] = useState<number>(0);
 
   useLayoutEffect(() => {

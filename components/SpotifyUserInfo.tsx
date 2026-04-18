@@ -9,28 +9,21 @@ import {
   Box,
   IconButton,
   Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Flex,
   Button,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Dialog,
+  Portal,
+  CloseButton,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { VscDebugDisconnect } from "react-icons/vsc";
 import { FiChevronUp } from "react-icons/fi";
 import { FaUser } from "react-icons/fa";
 
 export default function SpotifyUserInfo() {
-  const { data } = useQuery("user", spotifyUserInfo);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { data } = useQuery({ queryKey: ["user"], queryFn: spotifyUserInfo });
+  const { open, onOpen, onClose, setOpen } = useDisclosure();
 
   const onContinue = async () => {
     const res = await fetch("/api/spotify-clear-session");
@@ -41,74 +34,90 @@ export default function SpotifyUserInfo() {
 
   return (
     <>
-      <HStack
-        bg="whiteAlpha.200"
-        pl={4}
-        borderRadius="full"
-        alignItems="center"
-      >
-        <Flex flex={1}>
-          <Avatar
-            icon={<Icon as={FaUser} fontSize="md" color="black" />}
-            bg="spotifyGreen"
-            ml={-4}
-            size="sm"
-          />
-          <Text ml={2} color="white" noOfLines={1}>
-            {data?.display_name}
-          </Text>
-        </Flex>
-        <Box>
-          <Menu>
-            <MenuButton
-              as={IconButton}
-              size="sm"
+      <Menu.Root>
+        <Menu.Trigger asChild>
+          <HStack
+            aria-label="Options"
+            bg="whiteAlpha.200"
+            pl={4}
+            pr={1}
+            py={1}
+            borderRadius="full"
+            alignItems="center"
+            cursor="pointer"
+            _hover={{ bg: "whiteAlpha.300" }}
+            _active={{ bg: "whiteAlpha.300" }}
+          >
+            <Flex flex={1} alignItems="center" minW={0}>
+              <Avatar.Root bg="spotifyGreen" ml={-4} size="sm">
+                <Avatar.Fallback>
+                  <Icon as={FaUser} fontSize="md" color="black" />
+                </Avatar.Fallback>
+              </Avatar.Root>
+              <Text ml={2} color="white" lineClamp={1}>
+                {data?.display_name}
+              </Text>
+            </Flex>
+            <Flex
+              boxSize={8}
               borderRadius="full"
-              aria-label="Options"
-              icon={<Icon as={FiChevronUp} />}
-              variant="ghost"
-              _hover={{
-                bg: "whiteAlpha.300",
-                color: "white",
-              }}
-              _active={{ bg: "whiteAlpha.300" }}
-            />
-            <MenuList bg="blackAlpha.900">
-              <MenuItem
+              alignItems="center"
+              justifyContent="center"
+              color="white"
+            >
+              <Icon as={FiChevronUp} />
+            </Flex>
+          </HStack>
+        </Menu.Trigger>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content bg="blackAlpha.900" color="white">
+              <Menu.Item
+                value="disconnect"
                 bg="transparent"
-                icon={<Icon boxSize={6} as={VscDebugDisconnect} />}
+                color="white"
+                _hover={{ bg: "whiteAlpha.200" }}
                 onClick={onOpen}
               >
+                <Icon boxSize={6} as={VscDebugDisconnect} />
                 Disconnect from Spotify
-              </MenuItem>
-            </MenuList>
-          </Menu>
-        </Box>
-      </HStack>
-      <Modal isOpen={isOpen} onClose={onClose} variant="spotifyModal">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Disconnect from Spotify</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody p={4}>
-            <Text mb={2}>
-              Sorry to see you go! In order to disconnect Disco Stu from your
-              Spotify account you need to remove access from this app.
-            </Text>
-            <Text>
-              By clicking continue you will end your session with Disco Stu and
-              be redirected to Spotify&apos;s &quot;Manage Apps&quot; page.
-              There you can locate the app titled &quot;Disco Stu&quot; and
-              click &quot;Remove Access&quot;
-            </Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={onContinue} w="100%" colorScheme="whiteAlpha">
-              Continue
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+              </Menu.Item>
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
+      </Menu.Root>
+      <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>Disconnect from Spotify</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size="sm" position="absolute" top={2} right={2} />
+              </Dialog.CloseTrigger>
+              <Dialog.Body p={4}>
+                <Text mb={2}>
+                  Sorry to see you go! In order to disconnect Disco Stu from
+                  your Spotify account you need to remove access from this app.
+                </Text>
+                <Text>
+                  By clicking continue you will end your session with Disco Stu
+                  and be redirected to Spotify&apos;s &quot;Manage Apps&quot;
+                  page. There you can locate the app titled &quot;Disco
+                  Stu&quot; and click &quot;Remove Access&quot;
+                </Text>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button onClick={onContinue} w="100%" colorPalette="whiteAlpha">
+                  Continue
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   );
 }

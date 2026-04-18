@@ -82,7 +82,7 @@ export function SpotifyCollectionCard({
       onClick={onSelectCollection}
       borderRadius="md"
       h="100%"
-      sx={{
+      css={{
         "&:hover .spotify-collection-card-details": {
           bg: "blackAlpha.900",
         },

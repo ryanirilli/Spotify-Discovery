@@ -20,10 +20,16 @@ const isSpotifySupported = () => {
 
 interface Props extends LinkProps {
   rec: TSpotifyTrack;
+  isExternal?: boolean;
   children: React.ReactNode;
 }
 
-const SpotifyLink: React.FC<Props> = ({ rec, children, ...rest }) => {
+const SpotifyLink: React.FC<Props> = ({
+  rec,
+  children,
+  isExternal,
+  ...rest
+}) => {
   const handleLinkClick = (
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
@@ -38,6 +44,7 @@ const SpotifyLink: React.FC<Props> = ({ rec, children, ...rest }) => {
   return (
     <Link
       {...rest}
+      {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       href={isSpotifySupported() ? rec.uri : rec.external_urls.spotify}
       onClick={handleLinkClick}
     >

@@ -7,18 +7,14 @@ import {
   Spacer,
   Input,
   InputGroup,
-  InputLeftElement,
   Icon,
   List,
-  ListItem,
   Text,
-  useBoolean,
-  useOutsideClick,
 } from "@chakra-ui/react";
 
 import { CgSearch } from "react-icons/cg";
 import { artistSearchQuery } from "@/queries/spotifyArtistSearchQuery";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
@@ -58,25 +54,33 @@ export default function SpotifyAutocomplete() {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [artist, setArtist] = useState("");
-  const [isResultsShowing, setIsResultsShowing] = useBoolean();
+  const [isResultsShowing, setIsResultsShowing] = useState(false);
   const { addArtists, artists, fetchRecs, isSeedLimitReached } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
-  useOutsideClick({
-    ref: containerRef,
-    handler: () => setIsResultsShowing.off(),
-  });
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsResultsShowing(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
-  const { data: spotifyArtists } = useQuery<TSpotifyArtist[]>(
-    ["spotifyArtist", artist],
-    () => {
+  const { data: spotifyArtists } = useQuery<TSpotifyArtist[]>({
+    queryKey: ["spotifyArtist", artist],
+    queryFn: () => {
       if (artist.length < 2) {
         return [];
       }
       return artistSearchQuery(artist);
-    }
-  );
+    },
+  });
 
   const { selectedIndex } = useListSelection<TSpotifyArtist>({
     initialItems: spotifyArtists || [],
@@ -87,9 +91,9 @@ export default function SpotifyAutocomplete() {
 
   useEffect(() => {
     if (spotifyArtists?.length) {
-      setIsResultsShowing.on();
+      setIsResultsShowing(true);
     }
-  }, [spotifyArtists, setIsResultsShowing]);
+  }, [spotifyArtists]);
 
   useEffect(() => {
     if (isNew) {
@@ -99,13 +103,13 @@ export default function SpotifyAutocomplete() {
 
   const onFocus = () => {
     if (spotifyArtists?.length && !isResultsShowing) {
-      setIsResultsShowing.on();
+      setIsResultsShowing(true);
     }
   };
 
   const onAddArtist = (artist: TSpotifyArtist) => {
     addArtists([artist.id]);
-    setIsResultsShowing.off();
+    setIsResultsShowing(false);
     setIsNew(false);
     if (inputRef.current) {
       inputRef.current.value = "";
@@ -126,12 +130,11 @@ export default function SpotifyAutocomplete() {
       w={["auto", "md"]}
       flex={1}
     >
-      <InputGroup size="sm">
-        <InputLeftElement
-          pointerEvents="none"
-          children={<Icon as={CgSearch} color="gray.500" />}
-        />
+      <InputGroup
+        startElement={<Icon as={CgSearch} color="gray.500" />}
+      >
         <Input
+          size="sm"
           borderRadius="full"
           borderColor="whiteAlpha.300"
           color="white"
@@ -152,14 +155,15 @@ export default function SpotifyAutocomplete() {
           w={["calc(100vw - 16px)", "100%"]}
           zIndex="dropdown"
         >
-          <List
+          <List.Root
+            listStyle="none"
             role="listbox"
             maxH="xs"
             overflowY={isNew ? "hidden" : "scroll"}
             zIndex="modal"
             bg={isNewExperience ? "transparent" : "gray.100"}
             borderRadius="md"
-            sx={scrollBarStyle}
+            css={scrollBarStyle}
           >
             {isNewExperience && (
               <Box p={4} bg="black" color="white">
@@ -171,7 +175,7 @@ export default function SpotifyAutocomplete() {
             {spotifyArtists?.map((artist, i) => {
               const isSelected = selectedIndex === i;
               return (
-                <ListItem
+                <List.Item
                   role="option"
                   aria-setsize={spotifyArtists.length}
                   aria-posinset={i + 1}
@@ -186,18 +190,17 @@ export default function SpotifyAutocomplete() {
                     <Spacer />
                     {!artists.includes(artist.id) && (
                       <Button
-                        colorScheme="purple"
                         size="xs"
-                        isDisabled={isSeedLimitReached ? true : false}
+                        disabled={isSeedLimitReached ? true : false}
                       >
                         Add
                       </Button>
                     )}
                   </Flex>
-                </ListItem>
+                </List.Item>
               );
             })}
-          </List>
+          </List.Root>
         </Box>
       )}
     </Box>

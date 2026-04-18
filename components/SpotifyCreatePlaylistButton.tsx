@@ -7,46 +7,41 @@ import scrollBarStyle from "@/utils/scrollBarStyle";
 import {
   Button,
   Box,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  useBoolean,
-  InputGroup,
+  Dialog,
+  Portal,
+  CloseButton,
   Input,
+  InputGroup,
   Icon,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { FormEvent, useContext, useRef, useState } from "react";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { SiApplemusic } from "react-icons/si";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
 export default function SpotifyCreatePlaylistButton() {
-  const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useBoolean();
-  const [isSaving, setIsSaving] = useBoolean();
-  const initialRef = useRef(null);
+  const dialog = useDisclosure();
+  const [isSaving, setIsSaving] = useState(false);
+  const initialRef = useRef<HTMLInputElement>(null);
   const [playlistName, setPlaylistName] = useState("");
   const { refetchPlaylists } = useContext(SpotifyPlaylistsContext) || {};
 
-  const mutation = useMutation(
-    ({ name }: TSpotifyCreatePlaylistArgs) => spotifyCreatePlaylist({ name }),
-    {
-      onSuccess: async () => {
-        await refetchPlaylists?.();
-        setIsSaving.off();
-        setIsCreatePlaylistOpen.off();
-        setPlaylistName("");
-      },
-    }
-  );
+  const mutation = useMutation({
+    mutationFn: ({ name }: TSpotifyCreatePlaylistArgs) =>
+      spotifyCreatePlaylist({ name }),
+    onSuccess: async () => {
+      await refetchPlaylists?.();
+      setIsSaving(false);
+      dialog.onClose();
+      setPlaylistName("");
+    },
+  });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     mutation.mutate({ name: playlistName });
-    setIsSaving.on();
+    setIsSaving(true);
   };
 
   return (
@@ -60,44 +55,51 @@ export default function SpotifyCreatePlaylistButton() {
             bg: "whiteAlpha.300",
             color: "white",
           }}
-          onClick={setIsCreatePlaylistOpen.on}
-          leftIcon={<Icon as={SiApplemusic} />}
+          onClick={dialog.onOpen}
         >
+          <Icon as={SiApplemusic} />
           Create Playlist
         </Button>
       </Box>
-      <Modal
-        initialFocusRef={initialRef}
-        isOpen={isCreatePlaylistOpen}
-        onClose={setIsCreatePlaylistOpen.off}
+      <Dialog.Root
+        open={dialog.open}
+        onOpenChange={(e) => dialog.setOpen(e.open)}
+        initialFocusEl={() => initialRef.current}
         scrollBehavior="inside"
-        variant="spotifyModal"
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Create Playlist</ModalHeader>
-          <ModalCloseButton />
-          <form onSubmit={onSubmit}>
-            <ModalBody sx={scrollBarStyle}>
-              <Box p={2} px={6}>
-                <InputGroup>
-                  <Input
-                    value={playlistName}
-                    onChange={(e) => setPlaylistName(e.target.value)}
-                    ref={initialRef}
-                    placeholder="Playlist Name"
-                  />
-                </InputGroup>
-              </Box>
-            </ModalBody>
-            <ModalFooter>
-              <Button isLoading={isSaving} colorScheme="purple" type="submit">
-                Create
-              </Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>Create Playlist</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size="sm" position="absolute" top={2} right={2} />
+              </Dialog.CloseTrigger>
+              <form onSubmit={onSubmit}>
+                <Dialog.Body css={scrollBarStyle}>
+                  <Box p={2} px={6}>
+                    <InputGroup>
+                      <Input
+                        value={playlistName}
+                        onChange={(e) => setPlaylistName(e.target.value)}
+                        ref={initialRef}
+                        placeholder="Playlist Name"
+                      />
+                    </InputGroup>
+                  </Box>
+                </Dialog.Body>
+                <Dialog.Footer>
+                  <Button loading={isSaving} type="submit">
+                    Create
+                  </Button>
+                </Dialog.Footer>
+              </form>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   );
 }

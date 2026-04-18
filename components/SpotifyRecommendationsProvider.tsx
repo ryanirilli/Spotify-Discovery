@@ -3,7 +3,7 @@
 import { createContext, ReactNode, useEffect, useMemo, useState } from "react";
 import produce from "immer";
 import spotifyRecommendations from "@/queries/spotifyRecommendations";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { TSpotifyArtist } from "@/types/SpotifyArtist";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import { TSpotifyRecommendationsOptions } from "@/types/SpotifyRecommendationsOptions";
@@ -70,9 +70,9 @@ export default function SpotifyRecommendationsProvider({
     data: recommendations,
     refetch: fetchRecs,
     isFetching: isLoadingRecs,
-  } = useQuery<TSpotifyTrack[]>(
-    ["spotifyRecommendations"],
-    () => {
+  } = useQuery<TSpotifyTrack[]>({
+    queryKey: ["spotifyRecommendations"],
+    queryFn: () => {
       if (!enabledArtists.length && !genres.length) {
         return Promise.resolve([]);
       }
@@ -87,11 +87,9 @@ export default function SpotifyRecommendationsProvider({
 
       return spotifyRecommendations(settings);
     },
-    {
-      enabled: false,
-      staleTime: 0,
-    }
-  );
+    enabled: false,
+    staleTime: 0,
+  });
 
   // Artists can now always be added (older ones are auto-disabled), so the
   // seed limit only applies to genres.
@@ -136,7 +134,9 @@ export default function SpotifyRecommendationsProvider({
 
   const { data: artistsDetailsData, refetch: fetchArtistsDetails } = useQuery<
     TSpotifyArtist[]
-  >("spotifyArtistsDetails", () => artistsQuery(artists), {
+  >({
+    queryKey: ["spotifyArtistsDetails"],
+    queryFn: () => artistsQuery(artists),
     enabled: false,
     staleTime: 0,
   });

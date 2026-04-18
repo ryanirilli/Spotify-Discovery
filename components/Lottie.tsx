@@ -17,7 +17,7 @@ function Lottie({
   isPlaying,
   onComplete,
   ...rest
-}: Props): JSX.Element {
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

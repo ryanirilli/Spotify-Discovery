@@ -4,33 +4,27 @@ import spotifyAddTracksToPlaylist, {
 import { TSpotifyPlaylist } from "@/types/SpotifyPlaylist";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import scrollBarStyle from "@/utils/scrollBarStyle";
+import { toaster } from "@/utils/toaster";
 import {
   Box,
   Image,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
+  Dialog,
+  Portal,
+  CloseButton,
   Flex,
   AspectRatio,
   InputGroup,
-  InputLeftElement,
   Icon,
   Input,
-  ModalCloseButton,
-  ModalBody,
   List,
-  ModalFooter,
   Button,
   Text,
-  ListItem,
   Spacer,
-  useToast,
 } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { CgSearch } from "react-icons/cg";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import SpotifyLink from "./SpotifyLink";
 
 interface ISpotifyAddTrackToPlaylistModal {
@@ -66,100 +60,107 @@ export default function SpotifyAddTrackToPlaylistModal({
   }, [playlists, playlistFilter]);
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClosePlaylistModal}
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={(e) => !e.open && onClosePlaylistModal()}
       scrollBehavior="inside"
-      variant="spotifyModal"
     >
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>
-          Add To Playlist
-          <Flex
-            color="white"
-            bg="black"
-            border="1px solid"
-            borderColor="whiteAlpha.300"
-            borderRightRadius="md"
-            overflow="hidden"
-            my={2}
-          >
-            <Box maxW={16} flex={1}>
-              <AspectRatio ratio={1} overflow="hidden">
-                {selectedTrackAlbumImageUrl && (
-                  <Image
-                    boxSize="cover"
-                    alt="selected track album art"
-                    src={selectedTrackAlbumImageUrl}
-                  />
-                )}
-              </AspectRatio>
-            </Box>
-            <Box p={2} flex={1}>
-              {selectedTrack && (
-                <>
-                  <SpotifyLink isExternal rec={selectedTrack}>
-                    <Text fontWeight="bold" fontSize="small" noOfLines={1}>
-                      {selectedTrack?.name}
-                    </Text>
-                  </SpotifyLink>
-                  <SpotifyLink isExternal rec={selectedTrack}>
-                    <Text
-                      fontWeight="normal"
-                      fontSize="small"
-                      noOfLines={1}
-                      transform="translateY(-3px)"
-                    >
-                      {selectedTrack?.artists.map((a) => a.name).join(", ")}
-                    </Text>
-                  </SpotifyLink>
-                </>
-              )}
-            </Box>
-            <Image
-              height="100%"
-              alt="spotify logo"
-              src="Spotify_Logo_RGB_White.png"
-              maxW="64px"
-              mr={2}
-              mt={2}
-            />
-          </Flex>
-          <InputGroup mt={4}>
-            <InputLeftElement
-              pointerEvents="none"
-              children={<Icon as={CgSearch} color="gray.500" />}
-            />
-            <Input
-              placeholder="Find a playlist"
-              value={playlistFilter}
-              onChange={(e) => setPlaylistFilter(e.target.value)}
-            />
-          </InputGroup>
-        </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody sx={scrollBarStyle}>
-          <List>
-            {filteredPlaylists.map((playlist: TSpotifyPlaylist) => {
-              return (
-                <SpotifyPlaylistListItem
-                  onSuccess={onClosePlaylistModal}
-                  key={playlist.id}
-                  playlist={playlist}
-                  selectedTrack={selectedTrack}
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header>
+              <Dialog.Title>Add To Playlist</Dialog.Title>
+              <Flex
+                color="white"
+                bg="black"
+                border="1px solid"
+                borderColor="whiteAlpha.300"
+                borderRightRadius="md"
+                overflow="hidden"
+                my={2}
+              >
+                <Box maxW={16} flex={1}>
+                  <AspectRatio ratio={1} overflow="hidden">
+                    {selectedTrackAlbumImageUrl ? (
+                      <Image
+                        alt="selected track album art"
+                        src={selectedTrackAlbumImageUrl}
+                      />
+                    ) : (
+                      <Box />
+                    )}
+                  </AspectRatio>
+                </Box>
+                <Box p={2} flex={1}>
+                  {selectedTrack && (
+                    <>
+                      <SpotifyLink isExternal rec={selectedTrack}>
+                        <Text fontWeight="bold" fontSize="small" lineClamp={1}>
+                          {selectedTrack?.name}
+                        </Text>
+                      </SpotifyLink>
+                      <SpotifyLink isExternal rec={selectedTrack}>
+                        <Text
+                          fontWeight="normal"
+                          fontSize="small"
+                          lineClamp={1}
+                          transform="translateY(-3px)"
+                        >
+                          {selectedTrack?.artists
+                            .map((a) => a.name)
+                            .join(", ")}
+                        </Text>
+                      </SpotifyLink>
+                    </>
+                  )}
+                </Box>
+                <Image
+                  height="100%"
+                  alt="spotify logo"
+                  src="Spotify_Logo_RGB_White.png"
+                  maxW="64px"
+                  mr={2}
+                  mt={2}
                 />
-              );
-            })}
-          </List>
-        </ModalBody>
-        <ModalFooter>
-          <Button w="100%" colorScheme="purple" onClick={onClosePlaylistModal}>
-            Done
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+              </Flex>
+              <InputGroup
+                mt={4}
+                startElement={<Icon as={CgSearch} color="gray.500" />}
+              >
+                <Input
+                  placeholder="Find a playlist"
+                  value={playlistFilter}
+                  onChange={(e) => setPlaylistFilter(e.target.value)}
+                />
+              </InputGroup>
+            </Dialog.Header>
+            <Dialog.CloseTrigger asChild>
+              <CloseButton size="sm" position="absolute" top={2} right={2} />
+            </Dialog.CloseTrigger>
+            <Dialog.Body css={scrollBarStyle}>
+              <List.Root listStyle="none">
+                {filteredPlaylists.map((playlist: TSpotifyPlaylist) => {
+                  return (
+                    <SpotifyPlaylistListItem
+                      onSuccess={onClosePlaylistModal}
+                      key={playlist.id}
+                      playlist={playlist}
+                      selectedTrack={selectedTrack}
+                    />
+                  );
+                })}
+              </List.Root>
+            </Dialog.Body>
+            <Dialog.Footer>
+              <Button w="100%" onClick={onClosePlaylistModal}>
+                Done
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   );
 }
 
@@ -174,26 +175,21 @@ function SpotifyPlaylistListItem({
   selectedTrack,
   onSuccess,
 }: ISpotifyPlaylistListItem) {
-  const toast = useToast();
-  const mutation = useMutation(
-    ({ playlistId, tracks }: TSpotifyAddToPlaylistArgs) =>
+  const mutation = useMutation({
+    mutationFn: ({ playlistId, tracks }: TSpotifyAddToPlaylistArgs) =>
       spotifyAddTracksToPlaylist({ playlistId, tracks }),
-    {
-      onSuccess: () => {
-        onSuccess();
-        toast({
-          title: "Track added to playlist",
-          status: "success",
-          duration: 3000,
-          isClosable: false,
-          position: "top",
-        });
-      },
-    }
-  );
+    onSuccess: () => {
+      onSuccess();
+      toaster.create({
+        title: "Track added to playlist",
+        type: "success",
+        duration: 3000,
+      });
+    },
+  });
 
   return (
-    <ListItem
+    <List.Item
       _hover={{ bg: "black" }}
       px={4}
       py={2}
@@ -216,9 +212,9 @@ function SpotifyPlaylistListItem({
         <Spacer />
         {!mutation.isSuccess ? (
           <Button
-            disabled={mutation.isLoading || mutation.isSuccess}
-            isLoading={mutation.isLoading}
-            colorScheme="blackAlpha"
+            disabled={mutation.isPending || mutation.isSuccess}
+            loading={mutation.isPending}
+            colorPalette="blackAlpha"
             size="sm"
           >
             Add
@@ -227,6 +223,6 @@ function SpotifyPlaylistListItem({
           <Icon mr={4} as={BsCheck2} color="green.500" />
         )}
       </Flex>
-    </ListItem>
+    </List.Item>
   );
 }

@@ -15,7 +15,6 @@ export default function SpotifySeedControls() {
         <SpotifyAutocomplete />
         {(artists?.length ?? 0 > 0) && (
           <Button
-            leftIcon={<Icon as={MdClose} boxSize={4} />}
             size="sm"
             variant="ghost"
             color="white"
@@ -26,6 +25,7 @@ export default function SpotifySeedControls() {
               setArtists?.([]);
             }}
           >
+            <Icon as={MdClose} boxSize={4} />
             Clear all
           </Button>
         )}

@@ -14,19 +14,12 @@ import {
   IconButton,
   Image,
   Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
+  Portal,
   Progress,
   Text,
-  Tooltip,
-  useBoolean,
   useBreakpointValue,
+  useDisclosure,
   VisuallyHidden,
   Wrap,
   WrapItem,
@@ -63,24 +56,24 @@ export default function SpotifyTracks() {
     null
   );
 
-  const [isShowingPlaylistsModal, setIsShowingPlaylistsModal] = useBoolean();
+  const playlistsModal = useDisclosure();
 
   const onAddTrackToPlaylist = useCallback(
     (track: TSpotifyTrack) => {
       setSelectedTrack(track);
-      setIsShowingPlaylistsModal.on();
+      playlistsModal.onOpen();
     },
-    [setSelectedTrack, setIsShowingPlaylistsModal]
+    [playlistsModal]
   );
 
   const onClose = useCallback(() => {
     setSelectedTrack(null);
-    setIsShowingPlaylistsModal.off();
-  }, [setSelectedTrack, setIsShowingPlaylistsModal]);
+    playlistsModal.onClose();
+  }, [playlistsModal]);
 
   return (
     <>
-      <Wrap spacing={0} px={4} pb={32}>
+      <Wrap gap={0} px={4} pb={32}>
         {recommendations.map((rec) => (
           <WrapItem
             w={["100%", null, "50%", "25%", null, "16.66%"]}
@@ -97,7 +90,7 @@ export default function SpotifyTracks() {
       <SpotifyAddTrackToPlaylistModal
         playlists={playlists}
         selectedTrack={selectedTrack}
-        isOpen={isShowingPlaylistsModal}
+        isOpen={playlistsModal.open}
         onClose={onClose}
       />
     </>
@@ -136,6 +129,8 @@ function SpotifyTrack({
   const [trackProgress, setTrackProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const detailsPopover = useDisclosure();
+
   const shouldFlipPopover = useBreakpointValue({
     base: false,
     md: true,
@@ -151,19 +146,52 @@ function SpotifyTrack({
     }
   }, [curTrack, rec, isLoadingRecs]);
 
-  const animateTrackProgress = () => {
-    if (previewRef.current !== null && !previewRef.current.paused) {
-      const { currentTime, duration } = previewRef.current;
-      let progress = (currentTime / duration) * 100;
-      setTrackProgress(progress);
-      requestAnimationFrame(animateTrackProgress);
+  // Close details popover when a different track becomes current.
+  useEffect(() => {
+    if (detailsPopover.open && curTrack !== rec.id) {
+      detailsPopover.onClose();
     }
-  };
+  }, [curTrack, rec.id, detailsPopover]);
+
+  // Drive the progress bar from the audio element's own events while playing.
+  // This avoids relying on HTMLMediaElement.play() promise timing and keeps
+  // updates in sync with React's render cycle.
+  useEffect(() => {
+    if (!isPlaying) return;
+    const el = previewRef.current;
+    if (!el) return;
+
+    let rafId: number | null = null;
+    const tick = () => {
+      if (el.paused || el.ended) {
+        rafId = null;
+        return;
+      }
+      if (el.duration > 0) {
+        setTrackProgress((el.currentTime / el.duration) * 100);
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    // Kick the loop once the element is actually playing. Use the native
+    // `playing` event to avoid racing the async play() promise; fall back
+    // to starting immediately if the element is already unpaused.
+    const onPlaying = () => {
+      if (rafId === null) rafId = requestAnimationFrame(tick);
+    };
+    el.addEventListener("playing", onPlaying);
+    if (!el.paused) onPlaying();
+
+    return () => {
+      el.removeEventListener("playing", onPlaying);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [isPlaying]);
 
   const playTrack = () => {
-    previewRef.current?.play();
+    const el = previewRef.current;
+    if (!el) return;
     setIsPlaying(true);
-    animateTrackProgress();
+    el.play().catch(() => {});
   };
 
   const pauseTrack = () => {
@@ -179,7 +207,8 @@ function SpotifyTrack({
     }
   };
 
-  const isTouchDevice = window.ontouchstart !== undefined;
+  const isTouchDevice =
+    typeof window !== "undefined" && window.ontouchstart !== undefined;
   const albumImageUrl = rec.album.images[0]?.url;
 
   const handleMouseEnter = () => {
@@ -217,12 +246,13 @@ function SpotifyTrack({
         connect={dragPreviewRef}
         src="/spotify-track-drag-image.svg"
       />
-      <Card
-        ref={dragRef}
+      <Card.Root
+        ref={dragRef as unknown as React.Ref<HTMLDivElement>}
         m={2}
         mb={[8, 2]}
         w="100%"
         bg={isLoadingRecs ? "black" : "transparent"}
+        borderWidth="0"
         _hover={{ boxShadow: "outline" }}
         onMouseEnter={() => !isLoadingRecs && setCurTrack?.(rec.id)}
         onClick={() => !isLoadingRecs && setCurTrack?.(rec.id)}
@@ -278,24 +308,45 @@ function SpotifyTrack({
         <VisuallyHidden>
           <audio src={rec.preview_url} ref={previewRef} loop />
         </VisuallyHidden>
-        <Progress variant="spotify" h={2} value={trackProgress} />
+        <Progress.Root h={2} value={trackProgress}>
+          <Progress.Track>
+            <Progress.Range
+              borderRightRadius="full"
+              transition="none"
+            />
+          </Progress.Track>
+        </Progress.Root>
         <Box bg="white" alignItems="center" borderBottomRadius="md">
           <Flex p={2}>
-            <Box flex={1}>
-              <Text fontWeight="bold" fontSize="small" noOfLines={1}>
+            <Box flex={1} minW={0}>
+              <Text fontWeight="bold" fontSize="small">
                 {isLoadingRecs ? (
                   "..."
                 ) : (
-                  <SpotifyLink isExternal rec={rec}>
+                  <SpotifyLink
+                    isExternal
+                    rec={rec}
+                    display="block"
+                    whiteSpace="nowrap"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                  >
                     {rec.name}
                   </SpotifyLink>
                 )}
               </Text>
-              <Text fontSize="small" noOfLines={1} color="gray.500">
+              <Text fontSize="small" color="gray.500">
                 {isLoadingRecs ? (
                   "..."
                 ) : (
-                  <SpotifyLink isExternal rec={rec}>
+                  <SpotifyLink
+                    isExternal
+                    rec={rec}
+                    display="block"
+                    whiteSpace="nowrap"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                  >
                     {rec.artists.map((a) => a.name).join(", ")}
                   </SpotifyLink>
                 )}
@@ -303,109 +354,98 @@ function SpotifyTrack({
             </Box>
           </Flex>
           <Flex>
-            <Popover isLazy flip={shouldFlipPopover} placement="top-start">
-              {({ isOpen, onClose }) => {
-                if (curTrack !== rec.id && isOpen) {
-                  onClose();
-                }
-                return (
-                  <>
-                    <PopoverTrigger>
-                      <Flex flex="1">
-                        <Tooltip hasArrow label="Track details" openDelay={500}>
-                          <IconButton
-                            variant="outline"
-                            size="sm"
-                            aria-label="Track details"
-                            icon={<Icon boxSize={4} as={BiBarChartAlt2} />}
-                            borderRadius={0}
-                            flex={1}
-                            borderRight="none"
-                            borderBottom="none"
-                            borderLeft="none"
-                          />
-                        </Tooltip>
-                      </Flex>
-                    </PopoverTrigger>
-                    <PopoverContent boxShadow="dark-lg">
-                      <PopoverArrow />
-                      <PopoverBody p={0}>
-                        <SpotifyTrackDetails id={rec.id} />
-                        <Box p={2}>
-                          <Button
-                            colorScheme="purple"
-                            borderRadius="full"
-                            size="sm"
-                            w="100%"
-                            onClick={onClose}
-                          >
-                            Done
-                          </Button>
-                        </Box>
-                      </PopoverBody>
-                    </PopoverContent>
-                  </>
-                );
+            <Popover.Root
+              lazyMount
+              open={detailsPopover.open}
+              onOpenChange={(e) => detailsPopover.setOpen(e.open)}
+              positioning={{
+                placement: "top-start",
+                flip: shouldFlipPopover,
               }}
-            </Popover>
-            <Tooltip hasArrow label="Add to playlist" openDelay={500}>
-              <IconButton
-                aria-label="Add to playlist database"
-                icon={<Icon boxSize={6} as={MdPlaylistAdd} />}
-                variant="outline"
-                size="sm"
-                borderRadius={0}
-                flex={1}
-                onClick={() => onAddTrackToPlaylist(rec)}
-                borderBottom="none"
-                borderRight="none"
-              />
-            </Tooltip>
-            <Menu>
-              <Tooltip hasArrow label="More options" openDelay={500}>
-                <MenuButton
-                  isDisabled={isSeedLimitReached}
-                  as={IconButton}
+            >
+              <Popover.Trigger asChild>
+                <IconButton
+                  variant="outline"
+                  size="sm"
+                  aria-label="Track details"
+                  borderRadius={0}
+                  flex={1}
+                  borderRight="none"
+                  borderBottom="none"
+                  borderLeft="none"
+                >
+                  <Icon boxSize={4} as={BiBarChartAlt2} />
+                </IconButton>
+              </Popover.Trigger>
+              <Portal>
+                <Popover.Positioner>
+                  <Popover.Content boxShadow="dark-lg">
+                    <Popover.Arrow />
+                    <Popover.Body p={0}>
+                      <SpotifyTrackDetails id={rec.id} />
+                      <Box p={2}>
+                        <Button
+                          borderRadius="full"
+                          size="sm"
+                          w="100%"
+                          onClick={detailsPopover.onClose}
+                        >
+                          Done
+                        </Button>
+                      </Box>
+                    </Popover.Body>
+                  </Popover.Content>
+                </Popover.Positioner>
+              </Portal>
+            </Popover.Root>
+            <IconButton
+              aria-label="Add to playlist database"
+              variant="outline"
+              size="sm"
+              borderRadius={0}
+              flex={1}
+              onClick={() => onAddTrackToPlaylist(rec)}
+              borderBottom="none"
+              borderRight="none"
+            >
+              <Icon boxSize={6} as={MdPlaylistAdd} />
+            </IconButton>
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <IconButton
+                  disabled={isSeedLimitReached}
                   aria-label="Add track or artist"
-                  icon={<Icon boxSize={6} as={MdExpandMore} />}
                   variant="outline"
                   size="sm"
                   borderRadius={0}
                   flex={1}
                   borderBottom="none"
                   borderRight="none"
-                />
-              </Tooltip>
-              <MenuList>
-                {/* <MenuItem
-                  onClick={() => onAddTrackToSeed()}
-                  icon={
-                    <Icon
-                      boxSize={6}
-                      as={RiAlbumLine}
-                      transform="translateY(2px)"
-                    />
-                  }
                 >
-                  Add track as seed
-                </MenuItem> */}
-                <MenuItem
-                  onClick={() => onAddArtistToSeed()}
-                  icon={
-                    <Icon
-                      boxSize={6}
-                      as={AiOutlineUserAdd}
-                      transform="translateY(2px)"
-                    />
-                  }
-                >
-                  Add artist as seed
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                  <Icon boxSize={6} as={MdExpandMore} />
+                </IconButton>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    <Menu.Item
+                      value="add-artist-as-seed"
+                      onClick={() => onAddArtistToSeed()}
+                    >
+                      <Icon
+                        boxSize={6}
+                        as={AiOutlineUserAdd}
+                        transform="translateY(2px)"
+                      />
+                      Add artist as seed
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
           </Flex>
         </Box>
-      </Card>
+      </Card.Root>
     </>
   );
 }

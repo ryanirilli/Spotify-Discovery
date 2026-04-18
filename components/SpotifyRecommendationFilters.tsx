@@ -7,18 +7,12 @@ import {
   HStack,
   Icon,
   Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
   Portal,
   Tag,
-  TagLabel,
-  useOutsideClick,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { on } from "events";
-import produce from "immer";
-import { useContext, useReducer, useRef } from "react";
+import { produce } from "immer";
+import { useContext, useReducer } from "react";
 import { IoFilter } from "react-icons/io5";
 import { TopNavHeightContext } from "./DesktopAppLayout";
 import {
@@ -59,8 +53,8 @@ const filtersReducer = (
 };
 
 export default function SpotifyRecommendationFilters() {
-  const ref = useRef<HTMLElement>();
   const [draftFilters, dispatch] = useReducer(filtersReducer, initialFilters);
+  const popover = useDisclosure();
 
   const { setFilters, filters, fetchRecs, recommendations } =
     useContext(SpotifyRecommendationsContext) || {};
@@ -85,81 +79,64 @@ export default function SpotifyRecommendationFilters() {
       zIndex="banner"
     >
       <Flex alignItems="center" ml={[1, 0]}>
-        <Popover>
-          {({ onClose }) => (
-            <>
-              <PopoverTrigger>
-                <Button
-                  leftIcon={<Icon as={IoFilter} />}
-                  size={["sm", "md"]}
-                  colorScheme="blackButton"
-                  borderRadius="full"
-                >
-                  Filters
-                </Button>
-              </PopoverTrigger>
-              <Portal>
-                <CloseOnOutsideClick onClose={onClose}>
-                  <PopoverContent>
-                    <PopoverArrow />
-                    <PopoverBody>
-                      <SpotifyTempoFilter
-                        value={[
-                          draftFilters.filters.target_tempo || 0,
-                          draftFilters.filters.max_tempo || 0,
-                        ]}
-                        onChange={onChangeTempoRange}
-                      />
-                      <Box p={2}>
-                        <Button
-                          isDisabled={!draftFilters.isDirty}
-                          w="100%"
-                          colorScheme="purple"
-                          onClick={() => {
-                            onApply();
-                            onClose();
-                          }}
-                        >
-                          Apply
-                        </Button>
-                      </Box>
-                    </PopoverBody>
-                  </PopoverContent>
-                </CloseOnOutsideClick>
-              </Portal>
-            </>
-          )}
-        </Popover>
+        <Popover.Root
+          open={popover.open}
+          onOpenChange={(e) => popover.setOpen(e.open)}
+        >
+          <Popover.Trigger asChild>
+            <Button
+              size={["sm", "md"]}
+              colorPalette="blackAlpha"
+              borderRadius="full"
+            >
+              <Icon as={IoFilter} />
+              Filters
+            </Button>
+          </Popover.Trigger>
+          <Portal>
+            <Popover.Positioner>
+              <Popover.Content>
+                <Popover.Arrow />
+                <Popover.Body>
+                  <SpotifyTempoFilter
+                    value={[
+                      draftFilters.filters.target_tempo || 0,
+                      draftFilters.filters.max_tempo || 0,
+                    ]}
+                    onChange={onChangeTempoRange}
+                  />
+                  <Box p={2}>
+                    <Button
+                      disabled={!draftFilters.isDirty}
+                      w="100%"
+                      onClick={() => {
+                        onApply();
+                        popover.onClose();
+                      }}
+                    >
+                      Apply
+                    </Button>
+                  </Box>
+                </Popover.Body>
+              </Popover.Content>
+            </Popover.Positioner>
+          </Portal>
+        </Popover.Root>
         <Box color="white" ml={2}>
           <HStack>
             {filters?.target_tempo && (
-              <Tag colorScheme="blue" size={["sm", "md"]} borderRadius="full">
-                <TagLabel>Target BPM {filters.target_tempo}</TagLabel>
-              </Tag>
+              <Tag.Root size={["sm", "md"]} borderRadius="full">
+                <Tag.Label>Target BPM {filters.target_tempo}</Tag.Label>
+              </Tag.Root>
             )}
             {filters?.max_tempo && (
-              <Tag colorScheme="blue" size={["sm", "md"]} borderRadius="full">
-                <TagLabel>Max BPM {filters.max_tempo}</TagLabel>
-              </Tag>
+              <Tag.Root size={["sm", "md"]} borderRadius="full">
+                <Tag.Label>Max BPM {filters.max_tempo}</Tag.Label>
+              </Tag.Root>
             )}
           </HStack>
         </Box>
       </Flex>
     </Box>
   ) : null;
-}
-
-function CloseOnOutsideClick({
-  children,
-  onClose,
-}: {
-  children: JSX.Element;
-  onClose: () => void;
-}) {
-  const ref = useRef(null);
-  useOutsideClick({
-    ref: ref,
-    handler: onClose,
-  });
-  return <div ref={ref}>{children}</div>;
 }

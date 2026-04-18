@@ -190,8 +190,14 @@ function SpotifyTrack({
   const playTrack = () => {
     const el = previewRef.current;
     if (!el) return;
+    // Call play() synchronously inside the user gesture so iOS Safari keeps
+    // the activation context; only flip state once playback actually starts.
+    const playPromise = el.play();
     setIsPlaying(true);
-    el.play().catch(() => {});
+    playPromise?.catch((err) => {
+      console.warn("Audio preview failed to play", err);
+      setIsPlaying(false);
+    });
   };
 
   const pauseTrack = () => {
@@ -306,7 +312,13 @@ function SpotifyTrack({
           </Flex>
         </Box>
         <VisuallyHidden>
-          <audio src={rec.preview_url} ref={previewRef} loop />
+          <audio
+            src={rec.preview_url}
+            ref={previewRef}
+            loop
+            preload="auto"
+            playsInline
+          />
         </VisuallyHidden>
         <Progress.Root h={2} value={trackProgress}>
           <Progress.Track>

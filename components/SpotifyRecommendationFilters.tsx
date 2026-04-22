@@ -8,6 +8,7 @@ import {
   Icon,
   Popover,
   Portal,
+  Switch,
   Tag,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -20,6 +21,7 @@ import {
   TSpotifyRecommendationFilters,
 } from "./SpotifyRecommendationsProvider";
 import SpotifyTempoFilter from "./SpotifyTempoFilter";
+import useHoverPreview from "@/utils/useHoverPreview";
 
 type TSpotifyRecommendationFilterState = {
   isDirty: boolean;
@@ -69,6 +71,7 @@ export default function SpotifyRecommendationFilters() {
   };
 
   const { topNavHeight } = useContext(TopNavHeightContext);
+  const [hoverPreviewEnabled, setHoverPreviewEnabled] = useHoverPreview();
 
   return Boolean(recommendations?.length) ? (
     <Box
@@ -122,7 +125,7 @@ export default function SpotifyRecommendationFilters() {
             </Popover.Positioner>
           </Portal>
         </Popover.Root>
-        <Box color="white" ml={2}>
+        <Box color="white" ml={2} flex={1} minW={0}>
           <HStack>
             {filters?.target_tempo ? (
               <Tag.Root size={["sm", "md"]} borderRadius="full">
@@ -154,6 +157,26 @@ export default function SpotifyRecommendationFilters() {
             ) : null}
           </HStack>
         </Box>
+        <Switch.Root
+          checked={hoverPreviewEnabled}
+          onCheckedChange={(e) => setHoverPreviewEnabled(e.checked)}
+          size={["sm", "md"]}
+          ml={2}
+          flexShrink={0}
+        >
+          <Switch.HiddenInput />
+          <Switch.Control
+            _checked={{
+              bg: "electricPurple.500",
+              borderColor: "electricPurple.500",
+            }}
+          >
+            <Switch.Thumb />
+          </Switch.Control>
+          <Switch.Label color="white" fontSize={["xs", "sm"]}>
+            Hover to preview
+          </Switch.Label>
+        </Switch.Root>
       </Flex>
     </Box>
   ) : null;

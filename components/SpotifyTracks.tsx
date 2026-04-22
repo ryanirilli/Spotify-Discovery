@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useRef, useState } from "react";
 import NextLink from "next/link";
+import { AiOutlineUserAdd } from "react-icons/ai";
 import { MdMoreHoriz, MdPlaylistAdd } from "react-icons/md";
 import {
   AspectRatio,
@@ -32,6 +33,7 @@ import { DragPreviewImage, useDrag } from "react-dnd";
 import LazyImage from "./LazyImage";
 import SpotifyLink from "./SpotifyLink";
 import SpotifyAddToPlaylistMenu from "./SpotifyAddToPlaylistMenu";
+import useHoverPreview from "@/utils/useHoverPreview";
 
 const lottiePlayerOptions = { animationData };
 
@@ -56,9 +58,17 @@ export default function SpotifyTracks() {
 }
 
 function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
-  const { isLoadingRecs } = useContext(
-    SpotifyRecommendationsContext
-  ) as TSpotifyRecommendationsContext;
+  const { isLoadingRecs, addArtists, fetchRecs, isSeedLimitReached } =
+    useContext(
+      SpotifyRecommendationsContext
+    ) as TSpotifyRecommendationsContext;
+  const artistId = rec.artists?.[0]?.id;
+  const onAddArtistToSeed = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!artistId || isSeedLimitReached) return;
+    addArtists([artistId]);
+    setTimeout(() => fetchRecs(), 0);
+  };
   const [_, dragRef, dragPreviewRef] = useDrag(() => ({
     type: "SpotifyTrack",
     collect: (monitor) => ({
@@ -155,16 +165,17 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
   const isTouchDevice =
     typeof window !== "undefined" && window.ontouchstart !== undefined;
   const albumImageUrl = rec.album.images[0]?.url;
+  const [hoverPreviewEnabled] = useHoverPreview();
 
   const handleMouseEnter = () => {
-    if (isTouchDevice) {
+    if (isTouchDevice || !hoverPreviewEnabled) {
       return;
     }
     onMouseEnterTimeoutRef.current = setTimeout(playTrack, 300);
   };
 
   const handleMouseLeave = () => {
-    if (isTouchDevice) {
+    if (isTouchDevice || !hoverPreviewEnabled) {
       return;
     }
     clearTimeout(onMouseEnterTimeoutRef.current!);
@@ -248,6 +259,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
         <Progress.Root h={2} value={trackProgress}>
           <Progress.Track>
             <Progress.Range
+              bg="electricPurple.500"
               borderRightRadius="full"
               transition="none"
             />
@@ -306,6 +318,17 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
                 </IconButton>
               }
             />
+            <IconButton
+              aria-label="Add artist as seed"
+              variant="ghost"
+              size="sm"
+              borderRadius={0}
+              flex={1}
+              disabled={!artistId || isSeedLimitReached}
+              onClick={onAddArtistToSeed}
+            >
+              <Icon boxSize={5} as={AiOutlineUserAdd} />
+            </IconButton>
             <IconButton
               aria-label="Open track details"
               variant="ghost"

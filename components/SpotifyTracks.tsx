@@ -1,24 +1,22 @@
 "use client";
 
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import NextLink from "next/link";
 import { MdExpandMore, MdPlaylistAdd } from "react-icons/md";
 import { BiBarChartAlt2 } from "react-icons/bi";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import {
   AspectRatio,
   Box,
-  Button,
   Card,
   Flex,
   Icon,
   IconButton,
   Image,
   Menu,
-  Popover,
   Portal,
   Progress,
   Text,
-  useBreakpointValue,
   useDisclosure,
   VisuallyHidden,
   Wrap,
@@ -37,7 +35,6 @@ import {
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 import animationData from "@/public/sound-bars.json";
 import Lottie from "./Lottie";
-import SpotifyTrackDetails from "./SpotifyTrackDetails";
 import { DragPreviewImage, useDrag } from "react-dnd";
 import LazyImage from "./LazyImage";
 import SpotifyLink from "./SpotifyLink";
@@ -129,13 +126,6 @@ function SpotifyTrack({
   const [trackProgress, setTrackProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const detailsPopover = useDisclosure();
-
-  const shouldFlipPopover = useBreakpointValue({
-    base: false,
-    md: true,
-  });
-
   useEffect(() => {
     const isPlaying = previewRef.current && !previewRef.current.paused;
     const isPlayingButNotCurrentTrack = isPlaying && curTrack !== rec.id;
@@ -145,13 +135,6 @@ function SpotifyTrack({
       pauseTrack();
     }
   }, [curTrack, rec, isLoadingRecs]);
-
-  // Close details popover when a different track becomes current.
-  useEffect(() => {
-    if (detailsPopover.open && curTrack !== rec.id) {
-      detailsPopover.onClose();
-    }
-  }, [curTrack, rec.id, detailsPopover]);
 
   // Drive the progress bar from the audio element's own events while playing.
   // This avoids relying on HTMLMediaElement.play() promise timing and keeps
@@ -366,50 +349,21 @@ function SpotifyTrack({
             </Box>
           </Flex>
           <Flex>
-            <Popover.Root
-              lazyMount
-              open={detailsPopover.open}
-              onOpenChange={(e) => detailsPopover.setOpen(e.open)}
-              positioning={{
-                placement: "top-start",
-                flip: shouldFlipPopover,
-              }}
+            <IconButton
+              variant="outline"
+              size="sm"
+              aria-label="Track details"
+              borderRadius={0}
+              flex={1}
+              borderRight="none"
+              borderBottom="none"
+              borderLeft="none"
+              asChild
             >
-              <Popover.Trigger asChild>
-                <IconButton
-                  variant="outline"
-                  size="sm"
-                  aria-label="Track details"
-                  borderRadius={0}
-                  flex={1}
-                  borderRight="none"
-                  borderBottom="none"
-                  borderLeft="none"
-                >
-                  <Icon boxSize={4} as={BiBarChartAlt2} />
-                </IconButton>
-              </Popover.Trigger>
-              <Portal>
-                <Popover.Positioner>
-                  <Popover.Content boxShadow="dark-lg">
-                    <Popover.Arrow />
-                    <Popover.Body p={0}>
-                      <SpotifyTrackDetails id={rec.id} />
-                      <Box p={2}>
-                        <Button
-                          borderRadius="full"
-                          size="sm"
-                          w="100%"
-                          onClick={detailsPopover.onClose}
-                        >
-                          Done
-                        </Button>
-                      </Box>
-                    </Popover.Body>
-                  </Popover.Content>
-                </Popover.Positioner>
-              </Portal>
-            </Popover.Root>
+              <NextLink href={`/track/${rec.id}`}>
+                <Icon boxSize={4} as={BiBarChartAlt2} />
+              </NextLink>
+            </IconButton>
             <IconButton
               aria-label="Add to playlist database"
               variant="outline"

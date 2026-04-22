@@ -1,7 +1,8 @@
 "use client";
 import useUnsplashImage from "@/utils/useUnsplashImage";
-import { AspectRatio, Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { AspectRatio, Box, Flex, Heading } from "@chakra-ui/react";
 import { useContext } from "react";
+import { useRouter } from "next/navigation";
 import LazyImage from "./LazyImage";
 import { SpotifyAutocompleteContext } from "./SpotifyAutocomplete";
 import { SpotifyRecommendationsContext } from "./SpotifyRecommendationsProvider";
@@ -20,14 +21,18 @@ export function SpotifyCollectionCard({
   isBlank,
 }: ISpotifyCollectionCard) {
   const imgUrl = useUnsplashImage(unSplashId);
-  const { addArtists, fetchRecs } =
-    useContext(SpotifyRecommendationsContext) || {};
+  const router = useRouter();
+  const { setArtists } = useContext(SpotifyRecommendationsContext) || {};
 
   const { setIsNew } = useContext(SpotifyAutocompleteContext);
 
   const onSelectCollection = () => {
-    artists && addArtists?.(artists);
-    fetchRecs && setTimeout(fetchRecs, 0);
+    if (!artists?.length) return;
+    // Reset seeds to just this collection's artists so the resulting
+    // /search URL matches the collection selection.
+    setArtists?.(artists);
+    const params = new URLSearchParams({ artists: artists.join(",") });
+    router.push(`/search?${params.toString()}`);
   };
 
   const blankContent = (

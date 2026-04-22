@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Box,
   Button,
@@ -51,6 +52,8 @@ export function SpotifyAutocompleteProvider({
 
 export default function SpotifyAutocomplete() {
   const { isNew, setIsNew } = useContext(SpotifyAutocompleteContext);
+  const router = useRouter();
+  const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [artist, setArtist] = useState("");
@@ -114,7 +117,13 @@ export default function SpotifyAutocomplete() {
     if (inputRef.current) {
       inputRef.current.value = "";
     }
-    setTimeout(fetchRecs, 0);
+    if (pathname === "/search") {
+      setTimeout(fetchRecs, 0);
+    } else {
+      // On /home or /track/[id], jump to /search — SpotifySearchSync will
+      // mirror the current provider state into the URL and fetch.
+      router.push("/search");
+    }
   };
 
   const shouldShowResults =

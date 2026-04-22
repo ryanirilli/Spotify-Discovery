@@ -104,8 +104,20 @@ export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
       <ListItemPlaceholder />
     </List.Root>
   ) : (
-    <Table.ScrollArea>
-      <Table.Root size="sm">
+    <Table.ScrollArea bg="transparent">
+      <Table.Root
+        size="sm"
+        bg="transparent"
+        css={{
+          "& tr": { background: "transparent !important" },
+          "& td": {
+            background: "transparent !important",
+            border: "none",
+            color: "var(--chakra-colors-whiteAlpha-900)",
+            textTransform: "capitalize",
+          },
+        }}
+      >
         <Table.Body>
           {atts}
           {sliderAtts}

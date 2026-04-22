@@ -1,10 +1,8 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import NextLink from "next/link";
-import { MdExpandMore, MdPlaylistAdd } from "react-icons/md";
-import { BiBarChartAlt2 } from "react-icons/bi";
-import { AiOutlineUserAdd } from "react-icons/ai";
+import { MdMoreHoriz, MdPlaylistAdd } from "react-icons/md";
 import {
   AspectRatio,
   Box,
@@ -13,11 +11,8 @@ import {
   Icon,
   IconButton,
   Image,
-  Menu,
-  Portal,
   Progress,
   Text,
-  useDisclosure,
   VisuallyHidden,
   Wrap,
   WrapItem,
@@ -27,82 +22,43 @@ import {
   TSpotifyRecommendationsContext,
 } from "./SpotifyRecommendationsProvider";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
-import { TSpotifyArtist } from "@/types/SpotifyArtist";
 import {
   SpotifyCurrentTrackContext,
   TSpotifyCurrentTrackContext,
 } from "./SpotifyCurrentTrackProvider";
-import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 import animationData from "@/public/sound-bars.json";
 import Lottie from "./Lottie";
 import { DragPreviewImage, useDrag } from "react-dnd";
 import LazyImage from "./LazyImage";
 import SpotifyLink from "./SpotifyLink";
-import SpotifyAddTrackToPlaylistModal from "./SpotifyAddTrackToPlaylistModal";
+import SpotifyAddToPlaylistMenu from "./SpotifyAddToPlaylistMenu";
 
 const lottiePlayerOptions = { animationData };
 
 export default function SpotifyTracks() {
-  const { recommendations, isLoadingRecs } = useContext(
+  const { recommendations } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
-  const { playlists } = useContext(SpotifyPlaylistsContext) || {};
-
-  const [selectedTrack, setSelectedTrack] = useState<TSpotifyTrack | null>(
-    null
-  );
-
-  const playlistsModal = useDisclosure();
-
-  const onAddTrackToPlaylist = useCallback(
-    (track: TSpotifyTrack) => {
-      setSelectedTrack(track);
-      playlistsModal.onOpen();
-    },
-    [playlistsModal]
-  );
-
-  const onClose = useCallback(() => {
-    setSelectedTrack(null);
-    playlistsModal.onClose();
-  }, [playlistsModal]);
-
   return (
-    <>
-      <Wrap gap={0} px={4} pb={32}>
-        {recommendations.map((rec) => (
-          <WrapItem
-            w={["100%", null, "50%", "25%", null, "16.66%"]}
-            key={rec.id}
-            position="relative"
-          >
-            <SpotifyTrack
-              rec={rec}
-              onAddTrackToPlaylist={onAddTrackToPlaylist}
-            />
-          </WrapItem>
-        ))}
-      </Wrap>
-      <SpotifyAddTrackToPlaylistModal
-        playlists={playlists}
-        selectedTrack={selectedTrack}
-        isOpen={playlistsModal.open}
-        onClose={onClose}
-      />
-    </>
+    <Wrap gap={0} px={4} pb={32}>
+      {recommendations.map((rec) => (
+        <WrapItem
+          w={["100%", null, "50%", "25%", null, "16.66%"]}
+          key={rec.id}
+          position="relative"
+        >
+          <SpotifyTrack rec={rec} />
+        </WrapItem>
+      ))}
+    </Wrap>
   );
 }
 
-function SpotifyTrack({
-  rec,
-  onAddTrackToPlaylist,
-}: {
-  rec: TSpotifyTrack;
-  onAddTrackToPlaylist: (track: TSpotifyTrack) => void;
-}) {
-  const { isSeedLimitReached, addArtists, fetchRecs, isLoadingRecs } =
-    useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
+function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
+  const { isLoadingRecs } = useContext(
+    SpotifyRecommendationsContext
+  ) as TSpotifyRecommendationsContext;
   const [_, dragRef, dragPreviewRef] = useDrag(() => ({
     type: "SpotifyTrack",
     collect: (monitor) => ({
@@ -213,20 +169,6 @@ function SpotifyTrack({
     }
     clearTimeout(onMouseEnterTimeoutRef.current!);
     pauseTrack();
-  };
-
-  const onAddArtistToSeed = async () => {
-    let artist: TSpotifyArtist | null = null;
-    try {
-      const res = await fetch(
-        `/api/spotify-get-artist-details?artistId=${rec.artists[0].id}`
-      );
-      artist = await res.json();
-    } catch (error) {
-      console.error(error);
-    }
-    artist && addArtists([artist.id]);
-    setTimeout(() => fetchRecs(), 0);
   };
 
   return (
@@ -349,66 +291,36 @@ function SpotifyTrack({
             </Box>
           </Flex>
           <Flex>
-            <IconButton
-              variant="outline"
-              size="sm"
-              aria-label="Track details"
-              borderRadius={0}
-              flex={1}
-              borderRight="none"
-              borderBottom="none"
-              borderLeft="none"
-              asChild
-            >
-              <NextLink href={`/track/${rec.id}`}>
-                <Icon boxSize={4} as={BiBarChartAlt2} />
-              </NextLink>
-            </IconButton>
-            <IconButton
-              aria-label="Add to playlist database"
-              variant="outline"
-              size="sm"
-              borderRadius={0}
-              flex={1}
-              onClick={() => onAddTrackToPlaylist(rec)}
-              borderBottom="none"
-              borderRight="none"
-            >
-              <Icon boxSize={6} as={MdPlaylistAdd} />
-            </IconButton>
-            <Menu.Root>
-              <Menu.Trigger asChild>
+            <SpotifyAddToPlaylistMenu
+              track={rec}
+              trigger={
                 <IconButton
-                  disabled={isSeedLimitReached}
-                  aria-label="Add track or artist"
-                  variant="outline"
+                  aria-label="Add to playlist"
+                  variant="ghost"
                   size="sm"
                   borderRadius={0}
                   flex={1}
-                  borderBottom="none"
-                  borderRight="none"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <Icon boxSize={6} as={MdExpandMore} />
+                  <Icon boxSize={6} as={MdPlaylistAdd} />
                 </IconButton>
-              </Menu.Trigger>
-              <Portal>
-                <Menu.Positioner>
-                  <Menu.Content>
-                    <Menu.Item
-                      value="add-artist-as-seed"
-                      onClick={() => onAddArtistToSeed()}
-                    >
-                      <Icon
-                        boxSize={6}
-                        as={AiOutlineUserAdd}
-                        transform="translateY(2px)"
-                      />
-                      Add artist as seed
-                    </Menu.Item>
-                  </Menu.Content>
-                </Menu.Positioner>
-              </Portal>
-            </Menu.Root>
+              }
+            />
+            <IconButton
+              aria-label="Open track details"
+              variant="ghost"
+              size="sm"
+              borderRadius={0}
+              flex={1}
+              asChild
+            >
+              <NextLink
+                href={`/track/${rec.id}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Icon boxSize={6} as={MdMoreHoriz} />
+              </NextLink>
+            </IconButton>
           </Flex>
         </Box>
       </Card.Root>

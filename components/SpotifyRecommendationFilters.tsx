@@ -124,16 +124,34 @@ export default function SpotifyRecommendationFilters() {
         </Popover.Root>
         <Box color="white" ml={2}>
           <HStack>
-            {filters?.target_tempo && (
+            {filters?.target_tempo ? (
               <Tag.Root size={["sm", "md"]} borderRadius="full">
                 <Tag.Label>Target BPM {filters.target_tempo}</Tag.Label>
+                <Tag.EndElement>
+                  <Tag.CloseTrigger
+                    onClick={() => {
+                      const { target_tempo, ...rest } = filters;
+                      setFilters?.(rest);
+                      setTimeout(() => fetchRecs?.(), 0);
+                    }}
+                  />
+                </Tag.EndElement>
               </Tag.Root>
-            )}
-            {filters?.max_tempo && (
+            ) : null}
+            {filters?.max_tempo ? (
               <Tag.Root size={["sm", "md"]} borderRadius="full">
                 <Tag.Label>Max BPM {filters.max_tempo}</Tag.Label>
+                <Tag.EndElement>
+                  <Tag.CloseTrigger
+                    onClick={() => {
+                      const { max_tempo, ...rest } = filters;
+                      setFilters?.(rest);
+                      setTimeout(() => fetchRecs?.(), 0);
+                    }}
+                  />
+                </Tag.EndElement>
               </Tag.Root>
-            )}
+            ) : null}
           </HStack>
         </Box>
       </Flex>

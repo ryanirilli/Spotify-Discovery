@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode } from "react";
+import { createContext, ReactNode, useMemo } from "react";
 import { TSpotifyPlaylist } from "@/types/SpotifyPlaylist";
 import spotifyUserPlaylists from "@/queries/spotifyUserPlaylists";
 import { useQuery } from "@tanstack/react-query";
@@ -32,14 +32,25 @@ export default function SpotifyPlaylistsProvider({
   // Spotify can return the same playlist ID more than once (e.g. when a
   // user both owns and follows the same playlist). Deduplicate by ID so
   // consumers never receive duplicates and React keys stay unique.
-  const uniquePlaylists = Array.from(
-    new Map((playlists || []).map((p) => [p.id, p])).values()
+  // Memoize both the deduped list and the context value so every consumer
+  // (one per track card) doesn't re-render whenever this provider renders.
+  const uniquePlaylists = useMemo(
+    () =>
+      Array.from(new Map((playlists || []).map((p) => [p.id, p])).values()),
+    [playlists]
+  );
+
+  const value = useMemo(
+    () => ({
+      playlists: uniquePlaylists,
+      isLoading,
+      refetchPlaylists,
+    }),
+    [uniquePlaylists, isLoading, refetchPlaylists]
   );
 
   return (
-    <SpotifyPlaylistsContext.Provider
-      value={{ playlists: uniquePlaylists, isLoading, refetchPlaylists }}
-    >
+    <SpotifyPlaylistsContext.Provider value={value}>
       {children}
     </SpotifyPlaylistsContext.Provider>
   );

@@ -7,6 +7,7 @@ import {
   Heading,
   Icon,
   Image,
+  Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { BsSpotify } from "react-icons/bs";
@@ -22,44 +23,47 @@ export default function Home() {
       overflow="hidden"
     >
       <GridItem
-        position="relative"
-        overflow={["hidden", null, null, "visible"]}
-        p={[8]}
-        bg={["electricPurple.700", null, null, "transparent"]}
-      >
-        <Image
-          w={["100%", "100%"]}
-          position={["relative", null, "absolute"]}
-          left={0}
-          bottom={0}
-          transform={[
-            "translateY(0%)",
-            null,
-            "translateY(65%)",
-            "translateY(50%)",
-          ]}
-          mr={14}
-          src="/SVG/disco-stu.svg"
-          alt="Disco Stu"
-        />
-      </GridItem>
-      <GridItem
         color="white"
         display="flex"
         alignItems={["top", "center"]}
-        justifyContent="center"
+        justifyContent={["center", null, null, "flex-end"]}
+        order={[2, null, null, 1]}
+        px={[6, 8, 12, 16]}
       >
-        <Box textAlign="center" mt={[8, 0]} zIndex="base">
-          <Heading>Better Music Discovery</Heading>
-          <Heading as="h2" size="md" fontWeight="light">
-            for Curators, Tastemakers, and Djs
+        <Box
+          textAlign={["center", null, null, "left"]}
+          mt={[8, 0]}
+          zIndex="base"
+          maxW={["100%", null, null, "560px"]}
+        >
+          <Heading
+            as="h1"
+            fontSize={["4xl", "5xl", "6xl", "7xl"]}
+            lineHeight="1.05"
+            letterSpacing="-0.02em"
+            fontWeight="bold"
+          >
+            Crate digging for the streaming age.
           </Heading>
+          <Text
+            mt={[4, 6]}
+            fontSize={["md", "lg", "xl"]}
+            fontWeight="light"
+            color="whiteAlpha.800"
+            lineHeight="1.5"
+          >
+            Built for curators, tastemakers, and DJs tired of hearing the
+            algorithm&apos;s greatest hits.
+          </Text>
           <Button
-            mt={8}
+            mt={[6, 8]}
             loading={isLoggingIn}
             onClick={() => setIsLoggingIn(true)}
             borderRadius="full"
-            border="1px solid rgb(255 255 255 / 25%)"
+            bg="electricPurple.500"
+            color="white"
+            _hover={{ bg: "electricPurple.400" }}
+            _active={{ bg: "electricPurple.600" }}
             minW="200px"
             size="lg"
             asChild
@@ -70,6 +74,28 @@ export default function Home() {
             </a>
           </Button>
         </Box>
+      </GridItem>
+      <GridItem
+        position="relative"
+        overflow={["hidden", null, null, "visible"]}
+        p={[8]}
+        order={[1, null, null, 2]}
+      >
+        <Image
+          w={["100%", "100%"]}
+          position={["relative", null, "absolute"]}
+          right={[0, null, 8, 16]}
+          bottom={0}
+          transform={[
+            "translateY(0%)",
+            null,
+            "translateY(65%)",
+            "translateY(50%)",
+          ]}
+          ml={14}
+          src="/SVG/disco-stu.svg"
+          alt="Disco Stu"
+        />
       </GridItem>
     </Grid>
   );

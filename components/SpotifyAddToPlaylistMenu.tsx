@@ -37,6 +37,7 @@ interface ISpotifyAddToPlaylistMenu {
   track: TSpotifyTrack;
   /** Element that opens the popover when clicked. Must accept a ref. */
   trigger: ReactElement;
+  onOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -52,13 +53,17 @@ interface ISpotifyAddToPlaylistMenu {
 export default function SpotifyAddToPlaylistMenu({
   track,
   trigger,
+  onOpenChange,
 }: ISpotifyAddToPlaylistMenu) {
   const [open, setOpen] = useState(false);
 
   return (
     <Popover.Root
       open={open}
-      onOpenChange={(e) => setOpen(e.open)}
+      onOpenChange={(e) => {
+        setOpen(e.open);
+        onOpenChange?.(e.open);
+      }}
       positioning={{ placement: "bottom-end" }}
       lazyMount
       unmountOnExit

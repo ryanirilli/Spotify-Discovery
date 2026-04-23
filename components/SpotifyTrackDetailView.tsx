@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { AiOutlineUserAdd } from "react-icons/ai";
-import { MdArrowBack, MdPlaylistAdd } from "react-icons/md";
+import { MdAdd, MdArrowBack, MdPlaylistAdd } from "react-icons/md";
 
 import spotifyTrackQuery from "@/queries/spotifyTrackQuery";
 import spotifyArtistDetailsQuery from "@/queries/spotifyArtistDetailsQuery";
@@ -28,6 +28,8 @@ import spotifyGetAlbumTracksQuery from "@/queries/spotifyGetAlbumTracksQuery";
 import scrollBarStyle from "@/utils/scrollBarStyle";
 import { TSpotifyAlbum } from "@/types/SpotifyAlbum";
 import { TSpotifyAlbumTrack } from "@/types/SpotifyAlbumTrack";
+import animationData from "@/public/sound-bars.json";
+import Lottie from "./Lottie";
 import SpotifyTrackDetails from "./SpotifyTrackDetails";
 import SpotifyLink from "./SpotifyLink";
 import SpotifyAddToPlaylistMenu from "./SpotifyAddToPlaylistMenu";
@@ -39,6 +41,8 @@ import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
 } from "./SpotifyRecommendationsProvider";
+
+const lottiePlayerOptions = { animationData };
 
 export default function SpotifyTrackDetailView({ id }: { id: string }) {
   const router = useRouter();
@@ -65,6 +69,8 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
+  const [trackProgress, setTrackProgress] = useState(0);
+  const [menuOpenTrackId, setMenuOpenTrackId] = useState<string | null>(null);
 
   const { curTrack, setCurTrack } =
     useContext<TSpotifyCurrentTrackContext | null>(
@@ -89,6 +95,35 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!playingTrackId) {
+      setTrackProgress(0);
+      return;
+    }
+    const el = audioRef.current;
+    if (!el) return;
+    let rafId: number | null = null;
+    const tick = () => {
+      if (!el || el.paused || el.ended) {
+        rafId = null;
+        return;
+      }
+      if (el.duration > 0) {
+        setTrackProgress((el.currentTime / el.duration) * 100);
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    const onPlaying = () => {
+      if (rafId === null) rafId = requestAnimationFrame(tick);
+    };
+    el.addEventListener("playing", onPlaying);
+    if (!el.paused) onPlaying();
+    return () => {
+      el.removeEventListener("playing", onPlaying);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [playingTrackId]);
+
   const playPreview = (previewTrack: TSpotifyAlbumTrack) => {
     const el = audioRef.current;
     if (!el || !previewTrack.preview_url) return;
@@ -111,9 +146,36 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
   const onTrackMouseEnter = (previewTrack: TSpotifyAlbumTrack) => {
     const isTouch =
       typeof window !== "undefined" && window.ontouchstart !== undefined;
-    if (isTouch) return;
+    if (isTouch || menuOpenTrackId) return;
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => playPreview(previewTrack), 300);
+  };
+
+  const onMenuOpenChange = (trackId: string, open: boolean) => {
+    if (open) {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = null;
+      }
+      audioRef.current?.pause();
+      setPlayingTrackId(null);
+      setMenuOpenTrackId(trackId);
+    } else {
+      setMenuOpenTrackId((cur) => (cur === trackId ? null : cur));
+    }
+  };
+
+  const onTrackClick = (previewTrack: TSpotifyAlbumTrack) => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    if (playingTrackId === previewTrack.id) {
+      audioRef.current?.pause();
+      setPlayingTrackId(null);
+    } else {
+      playPreview(previewTrack);
+    }
   };
 
   const onAddArtistToSeed = () => {
@@ -286,8 +348,12 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                   key={album.id}
                   album={album}
                   playingTrackId={playingTrackId}
+                  menuOpenTrackId={menuOpenTrackId}
+                  trackProgress={trackProgress}
                   onTrackMouseEnter={onTrackMouseEnter}
                   onTrackMouseLeave={stopPreview}
+                  onTrackClick={onTrackClick}
+                  onMenuOpenChange={onMenuOpenChange}
                 />
               ))}
             </Accordion.Root>
@@ -305,15 +371,23 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
 interface IAlbumAccordionItem {
   album: TSpotifyAlbum;
   playingTrackId: string | null;
+  menuOpenTrackId: string | null;
+  trackProgress: number;
   onTrackMouseEnter: (track: TSpotifyAlbumTrack) => void;
   onTrackMouseLeave: () => void;
+  onTrackClick: (track: TSpotifyAlbumTrack) => void;
+  onMenuOpenChange: (trackId: string, open: boolean) => void;
 }
 
 function AlbumAccordionItem({
   album,
   playingTrackId,
+  menuOpenTrackId,
+  trackProgress,
   onTrackMouseEnter,
   onTrackMouseLeave,
+  onTrackClick,
+  onMenuOpenChange,
 }: IAlbumAccordionItem) {
   const [hasOpened, setHasOpened] = useState(false);
 
@@ -377,15 +451,19 @@ function AlbumAccordionItem({
               {tracks.map((track) => {
                 const playable = Boolean(track.preview_url);
                 const isActive = playingTrackId === track.id;
+                const isMenuOpen = menuOpenTrackId === track.id;
+                const showActions = isActive || isMenuOpen;
                 return (
                   <Flex
                     key={track.id}
+                    position="relative"
                     alignItems="center"
                     justifyContent="space-between"
                     py={2}
                     px={3}
                     borderRadius="sm"
-                    bg={isActive ? "whiteAlpha.200" : "transparent"}
+                    borderTop="1px solid transparent"
+                    bg={showActions ? "whiteAlpha.200" : "transparent"}
                     opacity={playable ? 1 : 0.5}
                     cursor={playable ? "pointer" : "default"}
                     transition="background 0.15s"
@@ -394,29 +472,118 @@ function AlbumAccordionItem({
                       playable && onTrackMouseEnter(track)
                     }
                     onMouseLeave={onTrackMouseLeave}
+                    onClick={() => playable && onTrackClick(track)}
                   >
+                    <Box
+                      position="absolute"
+                      top="-1px"
+                      left={0}
+                      h="1px"
+                      w={isActive ? `${trackProgress}%` : "0%"}
+                      bg="electricPurple.500"
+                      pointerEvents="none"
+                    />
                     <Flex gap={3} minW={0} flex={1} alignItems="center">
-                      <Text
-                        fontSize="sm"
-                        color="gray.400"
+                      <Box
+                        position="relative"
                         w="24px"
-                        textAlign="right"
+                        h="20px"
                         flexShrink={0}
+                        overflow="hidden"
                       >
-                        {track.track_number}
-                      </Text>
+                        <Flex
+                          position="absolute"
+                          inset={0}
+                          alignItems="center"
+                          justifyContent="flex-end"
+                          transition="transform 0.25s ease-in-out"
+                          transform={`translateY(${isActive ? "-100%" : "0%"})`}
+                        >
+                          <Text fontSize="sm" color="gray.400">
+                            {track.track_number}
+                          </Text>
+                        </Flex>
+                        <Flex
+                          position="absolute"
+                          inset={0}
+                          alignItems="center"
+                          justifyContent="flex-end"
+                          transition="transform 0.25s ease-in-out"
+                          transform={`translateY(${isActive ? "0%" : "100%"})`}
+                        >
+                          <Lottie
+                            lottiePlayerOptions={lottiePlayerOptions}
+                            isPlaying={isActive}
+                            w="20px"
+                            h="20px"
+                          />
+                        </Flex>
+                      </Box>
                       <Text fontSize="sm" lineClamp={1}>
                         {track.name}
                       </Text>
                     </Flex>
-                    <Text
-                      fontSize="xs"
-                      color="gray.400"
+                    <Flex
+                      position="relative"
                       flexShrink={0}
                       ml={2}
+                      overflow="hidden"
+                      alignItems="center"
                     >
-                      {msToMinSec(track.duration_ms)}
-                    </Text>
+                      <Box
+                        transition="transform 0.25s ease-in-out"
+                        transform={`translateY(${showActions ? "0%" : "100%"})`}
+                      >
+                        <SpotifyAddToPlaylistMenu
+                          track={{
+                            id: track.id,
+                            name: track.name,
+                            preview_url: track.preview_url ?? "",
+                            artists: track.artists,
+                            uri: track.uri,
+                            external_urls: track.external_urls,
+                            album: {
+                              name: album.name,
+                              preview_url: "",
+                              images: album.images,
+                            },
+                          }}
+                          onOpenChange={(open) =>
+                            onMenuOpenChange(track.id, open)
+                          }
+                          trigger={
+                            <Button
+                              aria-label="Add to playlist"
+                              size="xs"
+                              borderRadius="full"
+                              bg="electricPurple.500"
+                              color="white"
+                              fontWeight="semibold"
+                              _hover={{ bg: "electricPurple.400" }}
+                              _active={{ bg: "electricPurple.600" }}
+                              tabIndex={showActions ? 0 : -1}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Icon as={MdAdd} boxSize={4} />
+                              Add to playlist
+                            </Button>
+                          }
+                        />
+                      </Box>
+                      <Flex
+                        position="absolute"
+                        inset={0}
+                        alignItems="center"
+                        justifyContent="flex-end"
+                        pointerEvents="none"
+                        transition="transform 0.25s ease-in-out"
+                        transform={`translateY(${showActions ? "-100%" : "0%"})`}
+                      >
+                        <Text fontSize="xs" color="gray.400">
+                          {msToMinSec(track.duration_ms)}
+                        </Text>
+                      </Flex>
+                    </Flex>
                   </Flex>
                 );
               })}

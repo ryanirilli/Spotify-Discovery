@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState, ViewTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Accordion,
@@ -266,13 +266,15 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
               <Box borderRadius="md" overflow="hidden" bg="whiteAlpha.100">
                 <AspectRatio ratio={1}>
                   {albumImageUrl ? (
-                    <Image
-                      alt={`${track.album.name} cover art`}
-                      src={albumImageUrl}
-                      w="100%"
-                      h="100%"
-                      objectFit="cover"
-                    />
+                    <ViewTransition name={`album-art-${track.id}`} share="morph">
+                      <Image
+                        alt={`${track.album.name} cover art`}
+                        src={albumImageUrl}
+                        w="100%"
+                        h="100%"
+                        objectFit="cover"
+                      />
+                    </ViewTransition>
                   ) : (
                     <Box />
                   )}

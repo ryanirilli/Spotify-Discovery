@@ -1,7 +1,8 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState, ViewTransition } from "react";
 import NextLink from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { MdMoreHoriz, MdPlaylistAdd } from "react-icons/md";
 import {
@@ -85,6 +86,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
     useContext<TSpotifyCurrentTrackContext | null>(
       SpotifyCurrentTrackContext
     ) || {};
+  const queryClient = useQueryClient();
   const previewRef = useRef<HTMLAudioElement>(null);
   const onMouseEnterTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -209,12 +211,14 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
           >
             <Box>
               {albumImageUrl && !isLoadingRecs && (
-                <LazyImage
-                  w="100%"
-                  objectFit={"cover"}
-                  src={albumImageUrl}
-                  alt="album art"
-                />
+                <ViewTransition name={`album-art-${rec.id}`} share="morph">
+                  <LazyImage
+                    w="100%"
+                    objectFit={"cover"}
+                    src={albumImageUrl}
+                    alt="album art"
+                  />
+                </ViewTransition>
               )}
             </Box>
           </AspectRatio>
@@ -339,7 +343,10 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
             >
               <NextLink
                 href={`/track/${rec.id}`}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  queryClient.setQueryData(["spotifyTrack", rec.id], rec);
+                }}
               >
                 <Icon boxSize={6} as={MdMoreHoriz} />
               </NextLink>

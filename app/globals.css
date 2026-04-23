@@ -1,0 +1,55 @@
+/* View transitions: sequential fade (old out, then new in) + morphing album art */
+
+::view-transition-group(root) {
+  animation-duration: 400ms;
+}
+
+::view-transition-old(root) {
+  animation: 200ms ease-in both vt-fade-out;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: 200ms ease-out 200ms both vt-fade-in;
+  mix-blend-mode: normal;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Album art morph spans the full sequence so it glides continuously across the fade gap.
+   Strong ease-in-out (easeInOutQuint) — slow start, fast middle, slow finish.
+   Source and destination images share the same URL, so the default plus-lighter
+   crossfade between identical pixels sums to 1 at every frame and is invisible —
+   don't override it, override kills one-frame the browser needs to align. */
+::view-transition-group(.morph) {
+  animation-duration: 550ms;
+  animation-timing-function: cubic-bezier(0.83, 0, 0.17, 1);
+  z-index: 10;
+}
+::view-transition-old(.morph),
+::view-transition-new(.morph) {
+  animation-duration: 550ms;
+  animation-timing-function: cubic-bezier(0.83, 0, 0.17, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

@@ -18,11 +18,13 @@ import {
   Portal,
   Spinner,
   Text,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
 import { CgSearch } from "react-icons/cg";
 import { SiApplemusic } from "react-icons/si";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
+import BottomSheet from "./ui/BottomSheet";
 import spotifyAddTracksToPlaylist, {
   TSpotifyAddToPlaylistArgs,
 } from "@/mutations/spotifyAddTracksToPlaylistMutation";
@@ -57,13 +59,43 @@ export default function SpotifyAddToPlaylistMenu({
 }: ISpotifyAddToPlaylistMenu) {
   const [open, setOpen] = useState(false);
 
+  // Resolves client-side only — SSR returns undefined, so we fall through to
+  // the popover path on first paint and swap to the sheet once we know the
+  // viewport is narrow.
+  const isMobile = useBreakpointValue(
+    { base: true, md: false },
+    { ssr: false }
+  );
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    onOpenChange?.(nextOpen);
+  };
+
+  if (isMobile) {
+    return (
+      <BottomSheet
+        open={open}
+        onOpenChange={handleOpenChange}
+        trigger={trigger}
+        title="Add to playlist"
+      >
+        {open && (
+          <MenuBody
+            track={track}
+            onClose={() => setOpen(false)}
+            autoFocusInput={false}
+            fillHeight
+          />
+        )}
+      </BottomSheet>
+    );
+  }
+
   return (
     <Popover.Root
       open={open}
-      onOpenChange={(e) => {
-        setOpen(e.open);
-        onOpenChange?.(e.open);
-      }}
+      onOpenChange={(e) => handleOpenChange(e.open)}
       positioning={{ placement: "bottom-end" }}
       lazyMount
       unmountOnExit
@@ -104,6 +136,10 @@ export default function SpotifyAddToPlaylistMenu({
 interface IMenuBody {
   track: TSpotifyTrack;
   onClose: () => void;
+  /** Defaults to true for the popover variant; mobile sheet opts out. */
+  autoFocusInput?: boolean;
+  /** When true, the list flex-fills its container instead of capping at 280px. */
+  fillHeight?: boolean;
 }
 
 /**
@@ -111,7 +147,12 @@ interface IMenuBody {
  * open — so context subscriptions, mutation subscribers, and the filter/list
  * JSX are paid for exactly once (for the opened popover), not once per card.
  */
-function MenuBody({ track, onClose }: IMenuBody) {
+function MenuBody({
+  track,
+  onClose,
+  autoFocusInput = true,
+  fillHeight = false,
+}: IMenuBody) {
   const { playlists, isLoading, refetchPlaylists } =
     useContext(SpotifyPlaylistsContext) || {
       playlists: [],
@@ -214,14 +255,18 @@ function MenuBody({ track, onClose }: IMenuBody) {
   };
 
   return (
-    <>
-      <Box p={2} borderBottomWidth="1px" borderColor="whiteAlpha.200">
+    <Flex
+      direction="column"
+      h={fillHeight ? "100%" : undefined}
+      minH={0}
+    >
+      <Box p={2}>
         <InputGroup
           startElement={<Icon as={CgSearch} color="gray.400" />}
         >
           <Input
             ref={inputRef}
-            autoFocus
+            autoFocus={autoFocusInput}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Find or create a playlist"
@@ -242,7 +287,14 @@ function MenuBody({ track, onClose }: IMenuBody) {
         </InputGroup>
       </Box>
 
-      <Box maxH="280px" overflowY="auto" css={scrollBarStyle} py={1}>
+      <Box
+        maxH={fillHeight ? undefined : "280px"}
+        flex={fillHeight ? 1 : undefined}
+        minH={0}
+        overflowY="auto"
+        css={scrollBarStyle}
+        py={1}
+      >
         {showCreateRow && (
           <PopoverRow
             onClick={onCreate}
@@ -285,7 +337,7 @@ function MenuBody({ track, onClose }: IMenuBody) {
           ))
         )}
       </Box>
-    </>
+    </Flex>
   );
 }
 

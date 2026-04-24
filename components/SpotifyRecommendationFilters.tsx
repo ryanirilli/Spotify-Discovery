@@ -75,7 +75,8 @@ export default function SpotifyRecommendationFilters() {
 
   return Boolean(recommendations?.length) ? (
     <Box
-      bgGradient="linear(to-b, blackAlpha.700, transparent)"
+      bg="gray.900/70"
+      backdropFilter="blur(12px) saturate(140%)"
       p={[1, 2]}
       position="sticky"
       top={`${topNavHeight}px`}
@@ -163,6 +164,7 @@ export default function SpotifyRecommendationFilters() {
           size={["sm", "md"]}
           ml={2}
           flexShrink={0}
+          display={["none", "flex"]}
         >
           <Switch.HiddenInput />
           <Switch.Control

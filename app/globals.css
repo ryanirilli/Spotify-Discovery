@@ -29,6 +29,65 @@
   }
 }
 
+.disco-stu-title {
+  color: #0382f8;
+  filter: brightness(0.92) saturate(1.05);
+  text-shadow: 0 0 8px rgba(3, 130, 248, 0.32);
+  will-change: color, filter, text-shadow;
+  animation: disco-stu-title-wave 8s ease-in-out infinite;
+}
+
+@keyframes disco-stu-title-wave {
+  0%,
+  100% {
+    color: #0382f8;
+    filter: brightness(0.9) saturate(1.05);
+    text-shadow:
+      0 0 8px rgba(3, 130, 248, 0.32),
+      0 0 18px rgba(3, 130, 248, 0.18);
+  }
+
+  16% {
+    color: #31d7ff;
+    filter: brightness(1.08) saturate(1.18);
+    text-shadow:
+      0 0 10px rgba(49, 215, 255, 0.42),
+      0 0 24px rgba(3, 130, 248, 0.26);
+  }
+
+  34% {
+    color: #755dff;
+    filter: brightness(0.98) saturate(1.12);
+    text-shadow:
+      0 0 10px rgba(117, 93, 255, 0.38),
+      0 0 22px rgba(3, 130, 248, 0.22);
+  }
+
+  52% {
+    color: #e84dff;
+    filter: brightness(1.06) saturate(1.16);
+    text-shadow:
+      0 0 10px rgba(232, 77, 255, 0.38),
+      0 0 24px rgba(3, 130, 248, 0.22);
+  }
+
+  70% {
+    color: #08f8bc;
+    filter: brightness(1.04) saturate(1.16);
+    text-shadow:
+      0 0 10px rgba(8, 248, 188, 0.36),
+      0 0 22px rgba(3, 130, 248, 0.22);
+  }
+
+  86% {
+    color: #0471d5;
+    filter: brightness(0.82) saturate(0.96);
+    text-shadow:
+      0 0 6px rgba(3, 130, 248, 0.24),
+      0 0 14px rgba(3, 130, 248, 0.12);
+  }
+}
+
 /* Album art morph spans the full sequence so it glides continuously across the fade gap.
    Strong ease-in-out (easeInOutQuint) — slow start, fast middle, slow finish.
    Source and destination images share the same URL, so the default plus-lighter
@@ -51,5 +110,12 @@
   ::view-transition-group(*) {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
+  }
+
+  .disco-stu-title {
+    animation: none;
+    color: #31d7ff;
+    filter: none;
+    text-shadow: 0 0 10px rgba(3, 130, 248, 0.35);
   }
 }

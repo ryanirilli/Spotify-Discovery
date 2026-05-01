@@ -9,8 +9,14 @@ import {
   Image,
   Text,
 } from "@chakra-ui/react";
+import { Monoton } from "next/font/google";
 import { useState } from "react";
 import { BsSpotify } from "react-icons/bs";
+
+const monoton = Monoton({
+  subsets: ["latin"],
+  weight: "400",
+});
 
 export default function Home() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -18,6 +24,7 @@ export default function Home() {
     <Grid
       bg="gray.900"
       h="100vh"
+      position="relative"
       templateColumns={["1fr", null, null, "1fr 1fr"]}
       templateRows={["1fr 1fr", null, null, "1fr"]}
       overflow="hidden"
@@ -36,6 +43,14 @@ export default function Home() {
           zIndex="base"
           maxW={["100%", null, null, "560px"]}
         >
+          <Text
+            className={`${monoton.className} disco-stu-title`}
+            mb={[4, 5, 6]}
+            fontSize={["2xl", "3xl", "4xl"]}
+            lineHeight="1"
+          >
+            Disco Stu
+          </Text>
           <Heading
             as="h1"
             fontSize={["4xl", "5xl", "6xl", "7xl"]}
@@ -82,17 +97,13 @@ export default function Home() {
         order={[1, null, null, 2]}
       >
         <Image
-          w={["100%", "100%"]}
-          position={["relative", null, "absolute"]}
-          right={[0, null, 8, 16]}
+          w={["84%", "88%", "76%", "100%"]}
+          mx={["auto", null, null, 0]}
+          position={["relative", null, null, "absolute"]}
+          right={[0, null, null, 16]}
           bottom={0}
-          transform={[
-            "translateY(0%)",
-            null,
-            "translateY(65%)",
-            "translateY(50%)",
-          ]}
-          ml={14}
+          transform={["translateY(0%)", null, null, "translateY(50%)"]}
+          ml={[0, null, null, 14]}
           src="/SVG/disco-stu.svg"
           alt="Disco Stu"
         />

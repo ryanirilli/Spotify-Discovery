@@ -33,8 +33,8 @@ export default function Home() {
         color="white"
         display="flex"
         alignItems={["top", "center"]}
-        justifyContent={["center", null, null, "flex-end"]}
-        order={[2, null, null, 1]}
+        justifyContent={["center", null, null, "flex-start"]}
+        order={[2, null, null, 2]}
         px={[6, 8, 12, 16]}
       >
         <Box
@@ -91,10 +91,11 @@ export default function Home() {
         </Box>
       </GridItem>
       <GridItem
+        className="hero-art-panel"
         position="relative"
         overflow={["hidden", null, null, "visible"]}
         p={[8]}
-        order={[1, null, null, 2]}
+        order={[1, null, null, 1]}
       >
         <Image
           w={["84%", "88%", "76%", "100%"]}

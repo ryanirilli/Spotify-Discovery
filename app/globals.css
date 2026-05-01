@@ -88,6 +88,22 @@
   }
 }
 
+.hero-art-panel {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M0 0H1200V760C1150 744 1100 744 1050 760C1000 776 950 776 900 760C850 744 800 744 750 760C700 776 650 776 600 760C550 744 500 744 450 760C400 776 350 776 300 760C250 744 200 744 150 760C100 776 50 776 0 760Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' preserveAspectRatio='none'%3E%3Cpath fill='white' d='M0 0H1200V760C1150 744 1100 744 1050 760C1000 776 950 776 900 760C850 744 800 744 750 760C700 776 650 776 600 760C550 744 500 744 450 760C400 776 350 776 300 760C250 744 200 744 150 760C100 776 50 776 0 760Z'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+@media (min-width: 62em) {
+  .hero-art-panel {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
 /* Album art morph spans the full sequence so it glides continuously across the fade gap.
    Strong ease-in-out (easeInOutQuint) — slow start, fast middle, slow finish.
    Source and destination images share the same URL, so the default plus-lighter

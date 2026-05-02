@@ -22,6 +22,7 @@ import {
 } from "./SpotifyRecommendationsProvider";
 import SpotifyTempoFilter from "./SpotifyTempoFilter";
 import useHoverPreview from "@/utils/useHoverPreview";
+import SpotifyShareCollectionButton from "./SpotifyShareCollectionButton";
 
 type TSpotifyRecommendationFilterState = {
   isDirty: boolean;
@@ -158,6 +159,7 @@ export default function SpotifyRecommendationFilters() {
             ) : null}
           </HStack>
         </Box>
+        <SpotifyShareCollectionButton />
         <Switch.Root
           checked={hoverPreviewEnabled}
           onCheckedChange={(e) => setHoverPreviewEnabled(e.checked)}

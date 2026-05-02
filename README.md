@@ -14,6 +14,23 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Collections storage
+
+Shared collections use Vercel Marketplace Postgres, Vercel Blob, and OpenAI image generation. Configure these environment variables locally and in Vercel:
+
+```bash
+DATABASE_URL=
+BLOB_READ_WRITE_TOKEN=
+OPENAI_API_KEY=
+OPENAI_IMAGE_MODEL=gpt-image-2 # optional
+```
+
+After provisioning Postgres, apply the schema:
+
+```bash
+npm run db:migrate
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 [API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.

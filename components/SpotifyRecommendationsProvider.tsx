@@ -8,8 +8,17 @@ import { TSpotifyArtist } from "@/types/SpotifyArtist";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import { TSpotifyRecommendationsOptions } from "@/types/SpotifyRecommendationsOptions";
 import { artistsQuery } from "@/queries/spotifyArtitstsQuery";
+import {
+  getEnabledArtistsForConfig,
+  MAX_ENABLED_SEEDS,
+} from "@/utils/spotifySearchConfig";
+import {
+  TSpotifyRecommendationFilters,
+  TSpotifySearchConfig,
+} from "@/types/SpotifySearchConfig";
 
-export const MAX_ENABLED_SEEDS = 5;
+export { MAX_ENABLED_SEEDS };
+export type { TSpotifyRecommendationFilters, TSpotifySearchConfig };
 
 export type TSpotifyRecommendationsContext = {
   artists: string[];
@@ -18,6 +27,7 @@ export type TSpotifyRecommendationsContext = {
   isArtistDisabled: (id: string) => boolean;
   addArtists: (artist: string[]) => void;
   setArtists: (artist: string[]) => void;
+  setSearchConfig: (config: TSpotifySearchConfig) => void;
   removeArtist: (artist: string) => void;
   addGenre: (genre: string) => void;
   removeGenre: (genre: string) => void;
@@ -28,11 +38,6 @@ export type TSpotifyRecommendationsContext = {
   filters: TSpotifyRecommendationFilters;
   setFilters: (filters: TSpotifyRecommendationFilters) => void;
   isLoadingRecs: boolean;
-};
-
-export type TSpotifyRecommendationFilters = {
-  target_tempo?: number;
-  max_tempo?: number;
 };
 
 interface ISpotifyRecommendationsProvider {
@@ -55,9 +60,8 @@ export default function SpotifyRecommendationsProvider({
   // in `artists` but are treated as "disabled" seeds so the user can toggle
   // them back in by removing a newer selection.
   const enabledArtists = useMemo(() => {
-    const slots = Math.max(0, MAX_ENABLED_SEEDS - genres.length);
-    return artists.slice(-slots);
-  }, [artists, genres]);
+    return getEnabledArtistsForConfig({ artists, genres, filters });
+  }, [artists, genres, filters]);
 
   const disabledCount = artists.length - enabledArtists.length;
 
@@ -103,6 +107,12 @@ export default function SpotifyRecommendationsProvider({
       return draft;
     });
     setArtists(updatedArtists);
+  };
+
+  const setSearchConfig = (config: TSpotifySearchConfig) => {
+    setArtists(config.artists);
+    setGenres(config.genres);
+    setFilters(config.filters);
   };
 
   const removeArtist = (artist: string) => {
@@ -155,6 +165,7 @@ export default function SpotifyRecommendationsProvider({
   const contextValue = {
     addArtists,
     setArtists,
+    setSearchConfig,
     removeArtist,
     addGenre,
     removeGenre,

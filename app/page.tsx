@@ -46,7 +46,7 @@ export default function Home() {
           <Text
             className={`${monoton.className} disco-stu-title`}
             mb={[4, 5, 6]}
-            fontSize={["2xl", "3xl", "4xl"]}
+            fontSize={["4xl", "5xl", "6xl", "7xl"]}
             lineHeight="1"
           >
             Disco Stu

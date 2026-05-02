@@ -15,6 +15,13 @@ import {
 } from "@/utils/spotifySearchConfig";
 import { TSpotifyCollectionArtistSnapshot } from "@/types/SpotifyCollection";
 
+// Cover generation runs in the background via waitUntil after the 201
+// response is sent, so the function lifetime needs to accommodate the full
+// OpenAI image-generation roundtrip even if the client disconnects.
+export const config = {
+  maxDuration: 300,
+};
+
 const MAX_TITLE_LENGTH = 80;
 
 function normalizeTitle(value: unknown) {

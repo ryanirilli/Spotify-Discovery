@@ -79,10 +79,15 @@ export default function SpotifySearchSync() {
   useEffect(() => {
     if (!hydratedRef.current) return;
     if (pathname !== "/search") return;
-    if (artists.length === 0 && genres.length === 0) {
-      router.replace("/home");
-    }
-  }, [artists.length, genres.length, pathname, router]);
+    if (artists.length > 0 || genres.length > 0) return;
+    // If the URL still carries seeds the provider hasn't caught up yet
+    // (this fires on initial mount before setSearchConfig commits).
+    const urlConfig = parseSearchConfigFromParams(
+      searchParams ?? new URLSearchParams()
+    );
+    if (urlConfig.artists.length > 0 || urlConfig.genres.length > 0) return;
+    router.replace("/home");
+  }, [artists.length, genres.length, pathname, router, searchParams]);
 
   return null;
 }

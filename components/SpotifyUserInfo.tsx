@@ -13,13 +13,13 @@ import {
   Button,
   Dialog,
   Portal,
-  CloseButton,
   useDisclosure,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { VscDebugDisconnect } from "react-icons/vsc";
 import { FiChevronUp } from "react-icons/fi";
 import { FaUser } from "react-icons/fa";
+import DialogCloseButton from "./DialogCloseButton";
 
 export default function SpotifyUserInfo() {
   const { data } = useQuery({ queryKey: ["user"], queryFn: spotifyUserInfo });
@@ -95,7 +95,7 @@ export default function SpotifyUserInfo() {
                 <Dialog.Title>Disconnect from Spotify</Dialog.Title>
               </Dialog.Header>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size="sm" position="absolute" top={2} right={2} />
+                <DialogCloseButton />
               </Dialog.CloseTrigger>
               <Dialog.Body p={4}>
                 <Text mb={2}>

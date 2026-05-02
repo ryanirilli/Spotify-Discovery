@@ -24,6 +24,53 @@ const config = defineConfig({
     },
   },
   theme: {
+    recipes: {
+      // Normalize all <Input /> instances across the app. Components that
+      // need a bespoke look (e.g. the artist autocomplete) opt out via the
+      // `unstyled` prop, which bypasses this recipe entirely.
+      input: {
+        base: {
+          color: "white",
+          _placeholder: { color: "gray.400" },
+        },
+        variants: {
+          variant: {
+            outline: {
+              bg: "whiteAlpha.100",
+              borderWidth: "1px",
+              borderColor: "transparent",
+              focusVisibleRing: "none",
+              _focusVisible: {
+                borderColor: "electricPurple.500",
+                boxShadow: "none",
+              },
+            },
+            subtle: {
+              bg: "whiteAlpha.100",
+              borderWidth: "1px",
+              borderColor: "transparent",
+              focusVisibleRing: "none",
+              _focusVisible: {
+                borderColor: "electricPurple.500",
+                boxShadow: "none",
+              },
+            },
+          },
+        },
+      },
+    },
+    slotRecipes: {
+      // Darker, blurred backdrop on every Dialog/Drawer for stronger focus.
+      dialog: {
+        slots: ["backdrop"],
+        base: {
+          backdrop: {
+            bg: "blackAlpha.800",
+            backdropFilter: "blur(8px)",
+          },
+        },
+      },
+    },
     tokens: {
       colors: {
         // Electric purple — brand accent used for all CTAs and highlights.

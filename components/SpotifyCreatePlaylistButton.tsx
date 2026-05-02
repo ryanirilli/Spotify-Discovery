@@ -9,7 +9,6 @@ import {
   Box,
   Dialog,
   Portal,
-  CloseButton,
   Input,
   InputGroup,
   Icon,
@@ -18,6 +17,7 @@ import {
 import { FormEvent, useContext, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { SiApplemusic } from "react-icons/si";
+import DialogCloseButton from "./DialogCloseButton";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
 export default function SpotifyCreatePlaylistButton() {
@@ -75,7 +75,7 @@ export default function SpotifyCreatePlaylistButton() {
                 <Dialog.Title>Create Playlist</Dialog.Title>
               </Dialog.Header>
               <Dialog.CloseTrigger asChild>
-                <CloseButton size="sm" position="absolute" top={2} right={2} />
+                <DialogCloseButton />
               </Dialog.CloseTrigger>
               <form onSubmit={onSubmit}>
                 <Dialog.Body css={scrollBarStyle}>

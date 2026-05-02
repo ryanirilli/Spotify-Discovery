@@ -270,10 +270,6 @@ function MenuBody({
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Find or create a playlist"
-            variant="subtle"
-            bg="whiteAlpha.100"
-            color="white"
-            _placeholder={{ color: "gray.400" }}
             onKeyDown={(e) => {
               if (e.key !== "Enter") return;
               e.preventDefault();

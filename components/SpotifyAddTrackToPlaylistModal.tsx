@@ -10,7 +10,6 @@ import {
   Image,
   Dialog,
   Portal,
-  CloseButton,
   Flex,
   AspectRatio,
   InputGroup,
@@ -21,6 +20,7 @@ import {
   Text,
   Spacer,
 } from "@chakra-ui/react";
+import DialogCloseButton from "./DialogCloseButton";
 import { useCallback, useMemo, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { CgSearch } from "react-icons/cg";
@@ -136,7 +136,7 @@ export default function SpotifyAddTrackToPlaylistModal({
               </InputGroup>
             </Dialog.Header>
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" position="absolute" top={2} right={2} />
+              <DialogCloseButton />
             </Dialog.CloseTrigger>
             <Dialog.Body css={scrollBarStyle}>
               <List.Root listStyle="none">

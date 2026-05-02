@@ -6,6 +6,7 @@ import setSpotifyAccessToken from "@/lib/setSpotifyAccessToken";
 import { getDb } from "@/db";
 import { collections } from "@/db/schema";
 import { generateCollectionCover } from "@/lib/collections/generateCollectionCover";
+import { isCollectionTitleAppropriate } from "@/lib/collections/moderateTitle";
 import { serializeCollection } from "@/lib/collections/serializeCollection";
 import {
   getEnabledArtistsForConfig,
@@ -73,10 +74,17 @@ export default async function SpotifyCollections(
         .json({ error: "Collection requires at least one artist or genre" });
     }
 
-    const [me, artistSnapshot] = await Promise.all([
+    const [me, artistSnapshot, titleOk] = await Promise.all([
       spotifyApi.getMe(),
       getArtistSnapshot(getEnabledArtistsForConfig(config)),
+      isCollectionTitleAppropriate(title),
     ]);
+
+    if (!titleOk) {
+      return res
+        .status(400)
+        .json({ error: "Please choose a different title" });
+    }
     const ownerId = me.body.id;
 
     if (!ownerId) {

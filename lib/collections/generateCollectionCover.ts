@@ -64,19 +64,24 @@ export async function generateCollectionCover({
     const imageUrls = artists
       .map((artist) => artist.imageUrl)
       .filter((url): url is string => Boolean(url))
-      .slice(0, 5);
+      .slice(0, 2);
     const imageFiles = await Promise.all(imageUrls.map(imageUrlToFile));
     const openai = getOpenAIClient();
+    const model = process.env.OPENAI_IMAGE_MODEL || DEFAULT_IMAGE_MODEL;
     const result =
       imageFiles.length > 0
         ? await openai.images.edit({
-            model: process.env.OPENAI_IMAGE_MODEL || DEFAULT_IMAGE_MODEL,
+            model,
             image: imageFiles,
             prompt: buildPrompt(title, artists),
+            quality: "low",
+            size: "1024x1024",
           })
         : await openai.images.generate({
-            model: process.env.OPENAI_IMAGE_MODEL || DEFAULT_IMAGE_MODEL,
+            model,
             prompt: buildPrompt(title, artists),
+            quality: "low",
+            size: "1024x1024",
           });
 
     const base64Image = result.data?.[0]?.b64_json;

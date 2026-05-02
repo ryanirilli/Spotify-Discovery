@@ -1,5 +1,12 @@
 "use client";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Box,
@@ -10,12 +17,14 @@ import {
   InputGroup,
   Icon,
   List,
+  Spinner,
   Text,
 } from "@chakra-ui/react";
 
 import { CgSearch } from "react-icons/cg";
 import { artistSearchQuery } from "@/queries/spotifyArtistSearchQuery";
 import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
@@ -38,6 +47,10 @@ interface ISpotifyAutocompleteProvider {
   children: React.ReactNode;
 }
 
+const MIN_SEARCH_LENGTH = 2;
+const SEARCH_DEBOUNCE_MS = 180;
+const EMPTY_ARTISTS: TSpotifyArtist[] = [];
+
 export function SpotifyAutocompleteProvider({
   children,
 }: ISpotifyAutocompleteProvider) {
@@ -57,10 +70,16 @@ export default function SpotifyAutocomplete() {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [artist, setArtist] = useState("");
+  const searchTerm = artist.trim();
+  const [debouncedArtist, setDebouncedArtist] = useState("");
   const [isResultsShowing, setIsResultsShowing] = useState(false);
   const { addArtists, artists, fetchRecs, isSeedLimitReached } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
+
+  const hasSearchTerm = searchTerm.length >= MIN_SEARCH_LENGTH;
+  const hasDebouncedSearchTerm =
+    debouncedArtist.length >= MIN_SEARCH_LENGTH;
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -75,48 +94,91 @@ export default function SpotifyAutocomplete() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const { data: spotifyArtists } = useQuery<TSpotifyArtist[]>({
-    queryKey: ["spotifyArtist", artist],
-    queryFn: () => {
-      if (artist.length < 2) {
-        return [];
-      }
-      return artistSearchQuery(artist);
+  useEffect(() => {
+    if (!hasSearchTerm) {
+      setDebouncedArtist("");
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setDebouncedArtist(searchTerm);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timeout);
+  }, [hasSearchTerm, searchTerm]);
+
+  const {
+    data: spotifyArtists,
+    isError,
+    isFetching,
+  } = useQuery<TSpotifyArtist[]>({
+    queryKey: ["spotifyArtist", debouncedArtist],
+    queryFn: () => artistSearchQuery(debouncedArtist),
+    enabled: hasDebouncedSearchTerm,
+    placeholderData: (previousData, previousQuery) => {
+      const previousArtist = previousQuery?.queryKey[1];
+
+      return typeof previousArtist === "string" &&
+        previousArtist.length >= MIN_SEARCH_LENGTH
+        ? previousData
+        : undefined;
     },
   });
+
+  const visibleArtists = useMemo(() => {
+    if (!hasSearchTerm || !hasDebouncedSearchTerm) {
+      return EMPTY_ARTISTS;
+    }
+
+    return spotifyArtists || EMPTY_ARTISTS;
+  }, [hasDebouncedSearchTerm, hasSearchTerm, spotifyArtists]);
+
+  const isWaitingToSearch =
+    hasSearchTerm && debouncedArtist !== searchTerm;
+  const isSearching = hasSearchTerm && (isWaitingToSearch || isFetching);
+  const hasResults = visibleArtists.length > 0;
+  const shouldShowEmptyState =
+    hasSearchTerm && !isSearching && !isError && !hasResults;
 
   const { selectedIndex } = useListSelection<TSpotifyArtist>({
-    initialItems: spotifyArtists || [],
+    initialItems: visibleArtists,
+    enabled: isResultsShowing && hasResults,
     onSelect(selected: TSpotifyArtist | null) {
-      !isSeedLimitReached && selected && onAddArtist(selected);
+      if (!isResultsShowing || isSeedLimitReached || !selected) {
+        return;
+      }
+
+      onAddArtist(selected);
     },
   });
-
-  useEffect(() => {
-    if (spotifyArtists?.length) {
-      setIsResultsShowing(true);
-    }
-  }, [spotifyArtists]);
 
   useEffect(() => {
     if (isNew) {
       inputRef.current?.focus();
+      setIsResultsShowing(true);
     }
   }, [isNew]);
 
   const onFocus = () => {
-    if (spotifyArtists?.length && !isResultsShowing) {
+    if ((hasSearchTerm || isNew) && !isResultsShowing) {
       setIsResultsShowing(true);
     }
   };
 
+  const onArtistChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextArtist = event.target.value;
+    setArtist(nextArtist);
+    setIsResultsShowing(
+      nextArtist.trim().length >= MIN_SEARCH_LENGTH || isNew
+    );
+  };
+
   const onAddArtist = (artist: TSpotifyArtist) => {
     addArtists([artist.id]);
+    setArtist("");
+    setDebouncedArtist("");
     setIsResultsShowing(false);
     setIsNew(false);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
     if (pathname === "/search") {
       setTimeout(fetchRecs, 0);
     } else {
@@ -126,92 +188,225 @@ export default function SpotifyAutocomplete() {
     }
   };
 
-  const shouldShowResults =
-    (Boolean(spotifyArtists?.length) && isResultsShowing) || isNew;
+  const isNewExperience = isNew && !hasSearchTerm;
 
-  const isNewExperience = isNew && !spotifyArtists?.length;
+  const shouldShowResults =
+    isResultsShowing && (hasSearchTerm || isNewExperience);
 
   return (
     <Box
       position="relative"
       ref={containerRef}
       maxW="md"
-      w={["auto", "md"]}
+      w={["100%", "md"]}
       flex={1}
     >
-      <InputGroup
-        startElement={<Icon as={CgSearch} color="gray.500" />}
+      <Box
+        position="relative"
+        zIndex={1001}
+        bg={shouldShowResults ? "gray.950" : "whiteAlpha.200"}
+        borderWidth="1px"
+        borderBottomWidth={shouldShowResults ? "0" : "1px"}
+        borderColor="whiteAlpha.300"
+        borderTopRadius={shouldShowResults ? "2xl" : "full"}
+        borderBottomRadius={shouldShowResults ? "0" : "full"}
+        boxShadow={shouldShowResults ? "dark-lg" : "none"}
+        transition="background 160ms ease, border-radius 160ms ease, border-color 160ms ease, box-shadow 160ms ease"
+        _focusWithin={{
+          borderColor: "whiteAlpha.400",
+          boxShadow: shouldShowResults
+            ? "0 0 0 1px var(--chakra-colors-white-alpha-400), var(--chakra-shadows-dark-lg)"
+            : "0 0 0 1px var(--chakra-colors-white-alpha-400)",
+        }}
       >
-        <Input
-          size="sm"
-          borderRadius="full"
-          borderColor="whiteAlpha.300"
-          color="white"
-          bg="whiteAlpha.200"
-          w="100%"
-          ref={inputRef}
-          onFocus={onFocus}
-          placeholder="Search for an artist"
-          onChange={(e) => setArtist(e.target.value)}
-        />
-      </InputGroup>
-      {shouldShowResults && (
-        <Box
-          boxShadow="dark-lg"
-          position={"absolute"}
-          top={"calc(100% + 8px)"}
-          left={0}
-          w={["calc(100vw - 16px)", "100%"]}
-          zIndex="dropdown"
+        <InputGroup
+          startElement={<Icon as={CgSearch} color="gray.500" />}
+          startElementProps={{ w: 10, px: 0 }}
         >
-          <List.Root
-            listStyle="none"
-            role="listbox"
-            maxH="xs"
-            overflowY={isNew ? "hidden" : "scroll"}
-            zIndex="modal"
-            bg={isNewExperience ? "transparent" : "gray.100"}
-            borderRadius="md"
-            css={scrollBarStyle}
+          <Input
+            unstyled
+            h={9}
+            ps={10}
+            pe={3}
+            fontSize="sm"
+            borderWidth="0"
+            borderRadius="full"
+            outline="0"
+            color="white"
+            bg="transparent"
+            w="100%"
+            ref={inputRef}
+            onFocus={onFocus}
+            placeholder="Search for an artist"
+            value={artist}
+            onChange={onArtistChange}
+            _focusVisible={{ boxShadow: "none", outline: "0" }}
+          />
+        </InputGroup>
+      </Box>
+      <AnimatePresence initial={false}>
+        {shouldShowResults && (
+          <motion.div
+            key="artist-autocomplete-results"
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.99 }}
+            transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              width: "100%",
+              zIndex: 1000,
+              transformOrigin: "top center",
+            }}
           >
-            {isNewExperience && (
-              <Box p={4} bg="black" color="white">
-                <Text fontSize="xl">
-                  &#x261D; Search for your favorite artist
-                </Text>
-              </Box>
-            )}
-            {spotifyArtists?.map((artist, i) => {
-              const isSelected = selectedIndex === i;
-              return (
-                <List.Item
-                  role="option"
-                  aria-setsize={spotifyArtists.length}
-                  aria-posinset={i + 1}
-                  key={artist.id}
-                  _hover={{ bg: "gray.200" }}
-                  bg={isSelected ? "gray.200" : "transparent"}
-                  py={2}
-                  onClick={() => !isSeedLimitReached && onAddArtist(artist)}
-                >
-                  <Flex alignItems="center" px={2}>
-                    <Text>{artist.name}</Text>
-                    <Spacer />
-                    {!artists.includes(artist.id) && (
-                      <Button
-                        size="xs"
-                        disabled={isSeedLimitReached ? true : false}
+            <Box w="100%">
+              <List.Root
+                listStyle="none"
+                role="listbox"
+                aria-busy={isSearching}
+                maxH="xs"
+                overflowY={isNewExperience ? "hidden" : "auto"}
+                zIndex="modal"
+                bg="gray.950"
+                color="white"
+                borderWidth="1px"
+                borderTopWidth="0"
+                borderColor="whiteAlpha.300"
+                borderTopRadius="0"
+                borderBottomRadius="2xl"
+                boxShadow="dark-lg"
+                css={scrollBarStyle}
+              >
+                <AnimatePresence initial={false}>
+                  {isNewExperience && (
+                    <motion.li
+                      key="new-artist-prompt"
+                      role="presentation"
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.14 }}
+                      style={{ listStyle: "none" }}
+                    >
+                      <Box p={4} bg="black" color="white">
+                        <Text fontSize="xl">
+                          &#x261D; Search for your favorite artist
+                        </Text>
+                      </Box>
+                    </motion.li>
+                  )}
+                  {isSearching && (
+                    <motion.li
+                      key="artist-search-loading"
+                      role="presentation"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.14 }}
+                      style={{ listStyle: "none", overflow: "hidden" }}
+                    >
+                      <Flex
+                        role="status"
+                        aria-live="polite"
+                        alignItems="center"
+                        gap={2}
+                        px={3}
+                        py={2}
+                        color="whiteAlpha.800"
+                        bg="whiteAlpha.100"
+                        borderBottomWidth={hasResults ? "1px" : "0"}
+                        borderColor="whiteAlpha.100"
                       >
-                        Add
-                      </Button>
-                    )}
-                  </Flex>
-                </List.Item>
-              );
-            })}
-          </List.Root>
-        </Box>
-      )}
+                        <Spinner size="xs" color="electricPurple.300" />
+                        <Text fontSize="sm">
+                          {hasResults ? "Updating results" : "Searching artists"}
+                        </Text>
+                      </Flex>
+                    </motion.li>
+                  )}
+                  {isError && (
+                    <motion.li
+                      key="artist-search-error"
+                      role="presentation"
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.14 }}
+                      style={{ listStyle: "none" }}
+                    >
+                      <Box px={3} py={3} color="whiteAlpha.800">
+                        <Text fontSize="sm">Could not load artist results.</Text>
+                      </Box>
+                    </motion.li>
+                  )}
+                  {shouldShowEmptyState && (
+                    <motion.li
+                      key="artist-search-empty"
+                      role="presentation"
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.14 }}
+                      style={{ listStyle: "none" }}
+                    >
+                      <Box px={3} py={3} color="whiteAlpha.800">
+                        <Text fontSize="sm">No artists found.</Text>
+                      </Box>
+                    </motion.li>
+                  )}
+                  {visibleArtists.map((artist, i) => {
+                    const isSelected = selectedIndex === i;
+                    return (
+                      <motion.li
+                        role="option"
+                        aria-selected={isSelected}
+                        aria-setsize={visibleArtists.length}
+                        aria-posinset={i + 1}
+                        key={artist.id}
+                        layout="position"
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 4 }}
+                        transition={{ duration: 0.14 }}
+                        style={{ listStyle: "none" }}
+                      >
+                        <Box
+                          bg={isSelected ? "whiteAlpha.200" : "transparent"}
+                          color="white"
+                          py={2}
+                          cursor={
+                            isSeedLimitReached ? "not-allowed" : "pointer"
+                          }
+                          _hover={{ bg: "whiteAlpha.100" }}
+                          onClick={() =>
+                            !isSeedLimitReached && onAddArtist(artist)
+                          }
+                        >
+                          <Flex alignItems="center" gap={3} px={3}>
+                            <Text>{artist.name}</Text>
+                            <Spacer />
+                            {!artists.includes(artist.id) && (
+                              <Button
+                                size="xs"
+                                borderRadius="md"
+                                disabled={isSeedLimitReached}
+                              >
+                                Add
+                              </Button>
+                            )}
+                          </Flex>
+                        </Box>
+                      </motion.li>
+                    );
+                  })}
+                </AnimatePresence>
+              </List.Root>
+            </Box>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Box>
   );
 }

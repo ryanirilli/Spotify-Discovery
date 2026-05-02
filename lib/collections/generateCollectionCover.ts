@@ -1,6 +1,6 @@
 import { put } from "@vercel/blob";
 import { eq } from "drizzle-orm";
-import OpenAI, { toFile } from "openai";
+import OpenAI from "openai";
 import { getDb } from "@/db";
 import { collections } from "@/db/schema";
 import { TSpotifyCollectionArtistSnapshot } from "@/types/SpotifyCollection";
@@ -15,31 +15,22 @@ function getOpenAIClient() {
   return new OpenAI({ apiKey });
 }
 
-async function imageUrlToFile(url: string, index: number) {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Could not fetch artist image ${index + 1}`);
-  }
-
-  const contentType = res.headers.get("content-type") || "image/jpeg";
-  const ext = contentType.includes("png") ? "png" : "jpg";
-  const buffer = Buffer.from(await res.arrayBuffer());
-
-  return toFile(buffer, `artist-${index + 1}.${ext}`, { type: contentType });
-}
-
 function buildPrompt(
   title: string,
   artists: TSpotifyCollectionArtistSnapshot[]
 ) {
-  const artistNames = artists.map((artist) => artist.name).join(", ");
+  const artistNames = artists
+    .map((artist) => artist.name)
+    .slice(0, 3)
+    .join(", ");
 
   return [
-    `Create a square cover image for a shared music discovery collection titled "${title}".`,
+    `Create a square abstract cover image for a music discovery collection titled "${title}".`,
     artistNames
-      ? `Use the supplied Spotify artist images as visual references for the mood, color, styling, and genre cues. The artist seeds are: ${artistNames}.`
+      ? `Use the genre and mood of these artists as inspiration: ${artistNames}.`
       : "Use the title as the primary mood and genre cue.",
-    "Make it polished, modern, music-forward, and suitable as a collection card thumbnail.",
+    "Style: polished, modern, music-forward, suitable as a small card thumbnail.",
+    "Do not depict any people, faces, or recognizable likenesses.",
     "Do not include text, typography, logos, UI, app branding, or recognizable copyrighted characters.",
   ].join(" ");
 }
@@ -61,28 +52,14 @@ export async function generateCollectionCover({
   artists: TSpotifyCollectionArtistSnapshot[];
 }) {
   try {
-    const imageUrls = artists
-      .map((artist) => artist.imageUrl)
-      .filter((url): url is string => Boolean(url))
-      .slice(0, 2);
-    const imageFiles = await Promise.all(imageUrls.map(imageUrlToFile));
     const openai = getOpenAIClient();
     const model = process.env.OPENAI_IMAGE_MODEL || DEFAULT_IMAGE_MODEL;
-    const result =
-      imageFiles.length > 0
-        ? await openai.images.edit({
-            model,
-            image: imageFiles,
-            prompt: buildPrompt(title, artists),
-            quality: "low",
-            size: "1024x1024",
-          })
-        : await openai.images.generate({
-            model,
-            prompt: buildPrompt(title, artists),
-            quality: "low",
-            size: "1024x1024",
-          });
+    const result = await openai.images.generate({
+      model,
+      prompt: buildPrompt(title, artists),
+      quality: "low",
+      size: "1024x1024",
+    });
 
     const base64Image = result.data?.[0]?.b64_json;
     if (!base64Image) {

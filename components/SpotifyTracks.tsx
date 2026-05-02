@@ -34,23 +34,34 @@ import { DragPreviewImage, useDrag } from "react-dnd";
 import LazyImage from "./LazyImage";
 import SpotifyLink from "./SpotifyLink";
 import SpotifyAddToPlaylistMenu from "./SpotifyAddToPlaylistMenu";
+import SpotifyTrackSkeleton from "./SpotifyTrackSkeleton";
 import useHoverPreview from "@/utils/useHoverPreview";
 
 const lottiePlayerOptions = { animationData };
 
 export default function SpotifyTracks() {
-  const { recommendations } = useContext(
+  const { recommendations, isLoadingRecs } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
+
+  const itemWidth = ["100%", null, "50%", "25%", null, "16.66%"];
+
+  if (isLoadingRecs && recommendations.length === 0) {
+    return (
+      <Wrap gap={0} px={4} pb={32}>
+        {Array.from({ length: 12 }).map((_, index) => (
+          <WrapItem w={itemWidth} key={index} position="relative">
+            <SpotifyTrackSkeleton />
+          </WrapItem>
+        ))}
+      </Wrap>
+    );
+  }
 
   return (
     <Wrap gap={0} px={4} pb={32}>
       {recommendations.map((rec) => (
-        <WrapItem
-          w={["100%", null, "50%", "25%", null, "16.66%"]}
-          key={rec.id}
-          position="relative"
-        >
+        <WrapItem w={itemWidth} key={rec.id} position="relative">
           <SpotifyTrack rec={rec} />
         </WrapItem>
       ))}

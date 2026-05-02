@@ -17,6 +17,7 @@ import {
   MdImageNotSupported,
   MdLibraryMusic,
 } from "react-icons/md";
+import CollectionCoverSwirl from "./CollectionCoverSwirl";
 import LazyImage from "./LazyImage";
 import { SpotifyRecommendationsContext } from "./SpotifyRecommendationsProvider";
 import { deleteSpotifyCollection } from "@/queries/spotifyCollections";
@@ -122,33 +123,7 @@ export function SpotifyCollectionCard({
             bg="gray.950"
           >
             {isPending ? (
-              <Box
-                position="absolute"
-                inset={0}
-                bg="gray.950"
-                overflow="hidden"
-                _before={{
-                  content: '""',
-                  position: "absolute",
-                  inset: "-35%",
-                  bg: "conic-gradient(from 90deg, black, whiteAlpha.500, blackAlpha.700, whiteAlpha.300, black)",
-                  filter: "blur(24px)",
-                  opacity: 0.55,
-                  animation: "collection-cover-swirl 3.8s linear infinite",
-                }}
-                _after={{
-                  content: '""',
-                  position: "absolute",
-                  inset: 0,
-                  bg: "linear-gradient(135deg, blackAlpha.500, transparent 45%, whiteAlpha.100)",
-                }}
-                css={{
-                  "@keyframes collection-cover-swirl": {
-                    "0%": { transform: "rotate(0deg) scale(1.1)" },
-                    "100%": { transform: "rotate(360deg) scale(1.1)" },
-                  },
-                }}
-              />
+              <CollectionCoverSwirl />
             ) : (
               <>
                 <Icon

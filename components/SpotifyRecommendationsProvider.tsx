@@ -3,7 +3,7 @@
 import { createContext, ReactNode, useEffect, useMemo, useState } from "react";
 import produce from "immer";
 import spotifyRecommendations from "@/queries/spotifyRecommendations";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TSpotifyArtist } from "@/types/SpotifyArtist";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import { TSpotifyRecommendationsOptions } from "@/types/SpotifyRecommendationsOptions";
@@ -25,7 +25,7 @@ export type TSpotifyRecommendationsContext = {
   artistsDetails: TSpotifyArtist[];
   enabledArtists: string[];
   isArtistDisabled: (id: string) => boolean;
-  addArtists: (artist: string[]) => void;
+  addArtists: (artist: string[], details?: TSpotifyArtist[]) => void;
   setArtists: (artist: string[]) => void;
   setSearchConfig: (config: TSpotifySearchConfig) => void;
   removeArtist: (artist: string) => void;
@@ -51,6 +51,7 @@ export const SpotifyRecommendationsContext = createContext<
 export default function SpotifyRecommendationsProvider({
   children,
 }: ISpotifyRecommendationsProvider) {
+  const queryClient = useQueryClient();
   const [artists, setArtists] = useState<string[]>([]);
   const [genres, setGenres] = useState<string[]>([]);
   const [filters, setFilters] = useState<TSpotifyRecommendationFilters>({});
@@ -101,7 +102,21 @@ export default function SpotifyRecommendationsProvider({
     return genres.length >= MAX_ENABLED_SEEDS;
   }, [genres]);
 
-  const addArtists = (artist: string[]) => {
+  const addArtists = (artist: string[], details?: TSpotifyArtist[]) => {
+    if (details?.length) {
+      // Prime the React Query cache so the seed pill renders immediately
+      // from the data the caller already has, rather than waiting for the
+      // /api/spotify-get-artists-detail roundtrip.
+      queryClient.setQueryData<TSpotifyArtist[]>(
+        ["spotifyArtistsDetails"],
+        (existing) => {
+          const byId = new Map<string, TSpotifyArtist>();
+          existing?.forEach((a) => byId.set(a.id, a));
+          details.forEach((a) => byId.set(a.id, a));
+          return Array.from(byId.values());
+        }
+      );
+    }
     const updatedArtists = produce(artists, (draft: string[]) => {
       draft.push(...artist);
       return draft;

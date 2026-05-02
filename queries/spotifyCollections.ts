@@ -13,6 +13,16 @@ export async function spotifyCollectionsQuery(): Promise<
   return res.json();
 }
 
+export async function spotifyCollectionByIdQuery(
+  id: string
+): Promise<TSpotifyCollection> {
+  const res = await fetch(`/api/collections/${id}`);
+  if (!res.ok) {
+    throw new Error("Could not load collection");
+  }
+  return res.json();
+}
+
 export async function createSpotifyCollection({
   title,
   config,

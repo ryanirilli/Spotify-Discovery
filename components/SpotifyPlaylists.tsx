@@ -7,10 +7,11 @@ import { TSpotifyPlaylist } from "@/types/SpotifyPlaylist";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import scrollBarStyle from "@/utils/scrollBarStyle";
 import { toaster } from "@/utils/toaster";
-import { Box, List, Skeleton, Text } from "@chakra-ui/react";
+import { Box, List, Text } from "@chakra-ui/react";
 import { useContext } from "react";
 import { useDrop } from "react-dnd";
 import { useMutation } from "@tanstack/react-query";
+import CollectionCoverSwirl from "./CollectionCoverSwirl";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
 export default function SpotifyPlaylists() {
@@ -102,8 +103,15 @@ function PlaylistItem({ playlist }: { playlist: TSpotifyPlaylist }) {
 
 function ListItemPlaceholder() {
   return (
-    <List.Item px={2} my={2} opacity={0.2}>
-      <Skeleton borderRadius="full" height="20px" />
+    <List.Item px={2} my={2}>
+      <Box
+        position="relative"
+        overflow="hidden"
+        borderRadius="full"
+        height="20px"
+      >
+        <CollectionCoverSwirl />
+      </Box>
     </List.Item>
   );
 }

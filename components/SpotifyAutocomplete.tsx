@@ -174,7 +174,7 @@ export default function SpotifyAutocomplete() {
   };
 
   const onAddArtist = (artist: TSpotifyArtist) => {
-    addArtists([artist.id]);
+    addArtists([artist.id], [artist]);
     setArtist("");
     setDebouncedArtist("");
     setIsResultsShowing(false);
@@ -204,7 +204,7 @@ export default function SpotifyAutocomplete() {
       <Box
         position="relative"
         zIndex={1001}
-        bg={shouldShowResults ? "gray.950" : "whiteAlpha.200"}
+        bg={shouldShowResults ? "gray.950" : "black"}
         borderWidth="1px"
         borderBottomWidth={shouldShowResults ? "0" : "1px"}
         borderColor="whiteAlpha.300"

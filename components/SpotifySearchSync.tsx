@@ -74,5 +74,15 @@ export default function SpotifySearchSync() {
     router.replace(qs ? `${pathname}?${qs}` : pathname);
   }, [artists, genres, filters, pathname, router, searchParams]);
 
+  // When the user clears every seed, drop them back on /home — /search has
+  // nothing meaningful to show without at least one artist or genre.
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    if (pathname !== "/search") return;
+    if (artists.length === 0 && genres.length === 0) {
+      router.replace("/home");
+    }
+  }, [artists.length, genres.length, pathname, router]);
+
   return null;
 }

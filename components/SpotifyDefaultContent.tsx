@@ -2,8 +2,9 @@
 
 import { useContext, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Box, Button, Flex, Heading, Spinner, Text, Wrap } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Text, Wrap } from "@chakra-ui/react";
 import { SpotifyCollectionCard } from "./SpotifyCollectionCard";
+import { SpotifyCollectionCardSkeleton } from "./SpotifyCollectionCardSkeleton";
 import { SpotifyAutocompleteContext } from "./SpotifyAutocomplete";
 import { spotifyCollectionsQuery } from "@/queries/spotifyCollections";
 import spotifyUserInfo from "@/queries/spotifyUserInfo";
@@ -44,21 +45,16 @@ export default function SpotifyDefaultContent() {
   return (
     <Box color="white">
       <Box p={[4, null, null, 8]}>
-        <Flex mb={4} alignItems="center" gap={3}>
-          <Heading flex={1}>Collections</Heading>
-          <Button
-            size="sm"
-            colorPalette="whiteAlpha"
-            onClick={() => setIsNew(true)}
-          >
-            Start search
-          </Button>
-        </Flex>
+        <Heading mb={4}>Community Collections</Heading>
 
         {isLoading ? (
-          <Flex py={16} justifyContent="center">
-            <Spinner size="lg" color="spotifyGreen" />
-          </Flex>
+          <Wrap gap={[8, 4]}>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Box key={index} {...itemContainerProps}>
+                <SpotifyCollectionCardSkeleton />
+              </Box>
+            ))}
+          </Wrap>
         ) : isError ? (
           <Text color="whiteAlpha.700">Collections could not be loaded.</Text>
         ) : collections.length ? (

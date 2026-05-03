@@ -55,12 +55,8 @@ export default function BottomSheet({
   const [mounted, setMounted] = useState(false);
   const scrollLock = useRef<{
     overflow: string;
-    position: string;
-    top: string;
-    width: string;
-    scrollY: number;
+    overscrollBehavior: string;
   } | null>(null);
-  const previousFocus = useRef<HTMLElement | null>(null);
   const onOpenChangeRef = useRef(onOpenChange);
   const closeFrameRef = useRef<number | null>(null);
 
@@ -83,8 +79,6 @@ export default function BottomSheet({
   useEffect(() => {
     if (!open) return;
     closeFrameRef.current = null;
-    previousFocus.current =
-      (document.activeElement as HTMLElement | null) ?? null;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeSheet();
@@ -94,15 +88,10 @@ export default function BottomSheet({
     const body = document.body;
     scrollLock.current = {
       overflow: body.style.overflow,
-      position: body.style.position,
-      top: body.style.top,
-      width: body.style.width,
-      scrollY: window.scrollY,
+      overscrollBehavior: body.style.overscrollBehavior,
     };
     body.style.overflow = "hidden";
-    body.style.position = "fixed";
-    body.style.top = `-${scrollLock.current.scrollY}px`;
-    body.style.width = "100%";
+    body.style.overscrollBehavior = "none";
 
     return () => {
       document.removeEventListener("keydown", onKey);
@@ -113,20 +102,9 @@ export default function BottomSheet({
       const lock = scrollLock.current;
       if (lock) {
         body.style.overflow = lock.overflow;
-        body.style.position = lock.position;
-        body.style.top = lock.top;
-        body.style.width = lock.width;
-        window.scrollTo(0, lock.scrollY);
+        body.style.overscrollBehavior = lock.overscrollBehavior;
       }
       scrollLock.current = null;
-      const focusTarget = previousFocus.current;
-      if (focusTarget && document.contains(focusTarget)) {
-        window.requestAnimationFrame(() => {
-          if (document.contains(focusTarget)) {
-            focusTarget.focus({ preventScroll: true });
-          }
-        });
-      }
     };
   }, [open, closeSheet]);
 

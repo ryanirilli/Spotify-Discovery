@@ -180,6 +180,7 @@ export default function BottomSheet({
                     bg="black"
                     color="white"
                     borderTopRadius="xl"
+                    h="85dvh"
                     maxH="85dvh"
                     pb="env(safe-area-inset-bottom)"
                     display="flex"

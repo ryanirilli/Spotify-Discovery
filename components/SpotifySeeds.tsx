@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext } from "react";
+import { useRouter } from "next/navigation";
 import { Avatar, Box, Icon, Tag, Flex } from "@chakra-ui/react";
 import { Button } from "@/components/ui/Button";
 import { MdClose, MdLibraryMusic } from "react-icons/md";
@@ -12,6 +13,7 @@ import SpotifyTopNavDiscoPattern from "./SpotifyTopNavDiscoPattern";
 import { topNavScrollBarStyle } from "@/utils/scrollBarStyle";
 
 export default function SpotifySeeds() {
+  const router = useRouter();
   const {
     artists,
     artistsDetails,
@@ -27,6 +29,18 @@ export default function SpotifySeeds() {
   ) as TSpotifyRecommendationsContext;
 
   const hasSeeds = artists.length > 0 || genres.length > 0;
+
+  const syncAfterSeedRemoval = (
+    nextArtists: string[],
+    nextGenres: string[]
+  ) => {
+    if (nextArtists.length || nextGenres.length) {
+      setTimeout(fetchRecs, 0);
+      return;
+    }
+
+    router.replace("/home");
+  };
 
   // Render in insertion order so disabled (oldest) chips appear first.
   const orderedArtistDetails = artists
@@ -68,8 +82,9 @@ export default function SpotifySeeds() {
               px={4}
               flexShrink={0}
               onClick={() => {
-                window.scroll(0, 0);
+                window.scrollTo({ top: 0 });
                 setSearchConfig({ artists: [], genres: [], filters });
+                router.replace("/home");
               }}
             >
               <Icon as={MdClose} boxSize={5} />
@@ -126,8 +141,11 @@ export default function SpotifySeeds() {
                         boxSize="100%"
                         css={{ "& svg": { width: "20px", height: "20px" } }}
                         onClick={() => {
+                          const nextArtists = artists.filter(
+                            (id) => id !== artist.id
+                          );
                           removeArtist(artist.id);
-                          setTimeout(fetchRecs, 0);
+                          syncAfterSeedRemoval(nextArtists, genres);
                         }}
                       />
                     </Tag.EndElement>
@@ -165,8 +183,9 @@ export default function SpotifySeeds() {
                       boxSize="100%"
                       css={{ "& svg": { width: "20px", height: "20px" } }}
                       onClick={() => {
+                        const nextGenres = genres.filter((g) => g !== genre);
                         removeGenre(genre);
-                        setTimeout(fetchRecs, 0);
+                        syncAfterSeedRemoval(artists, nextGenres);
                       }}
                     />
                   </Tag.EndElement>

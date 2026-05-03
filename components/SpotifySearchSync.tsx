@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   SpotifyRecommendationsContext,
@@ -25,14 +25,13 @@ export default function SpotifySearchSync() {
     isLoadingRecs,
   } = useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
 
-  const hydratedRef = useRef(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Hydrate from URL on first mount. If URL has no params but provider has
   // state (e.g. navigating from /home after seeding), push provider state
   // into the URL instead. Then fetch recommendations.
   useEffect(() => {
-    if (hydratedRef.current) return;
-    hydratedRef.current = true;
+    if (isHydrated) return;
 
     const params = searchParams ?? new URLSearchParams();
     const urlConfig = parseSearchConfigFromParams(params);
@@ -53,7 +52,10 @@ export default function SpotifySearchSync() {
     const hasCurrentRecs = recommendations.length > 0 || isLoadingRecs;
 
     if (hasUrlState) {
-      if (isSameConfig && hasCurrentRecs) return;
+      if (isSameConfig && hasCurrentRecs) {
+        setIsHydrated(true);
+        return;
+      }
       if (!isSameConfig) {
         setSearchConfig(urlConfig);
       }
@@ -65,11 +67,14 @@ export default function SpotifySearchSync() {
         setTimeout(fetchRecs, 0);
       }
     }
+
+    setIsHydrated(true);
   }, [
     artists,
     fetchRecs,
     filters,
     genres,
+    isHydrated,
     isLoadingRecs,
     pathname,
     recommendations.length,
@@ -81,27 +86,17 @@ export default function SpotifySearchSync() {
   // Mirror provider state back into the URL as the user adds/removes seeds
   // or changes filters. Only runs after initial hydration.
   useEffect(() => {
-    if (!hydratedRef.current) return;
+    if (!isHydrated) return;
+    if (pathname === "/search" && artists.length === 0 && genres.length === 0) {
+      router.replace("/home");
+      return;
+    }
+
     const qs = buildSearchStringFromConfig({ artists, genres, filters });
     const current = searchParams?.toString() ?? "";
     if (qs === current) return;
     router.replace(qs ? `${pathname}?${qs}` : pathname);
-  }, [artists, genres, filters, pathname, router, searchParams]);
-
-  // When the user clears every seed, drop them back on /home — /search has
-  // nothing meaningful to show without at least one artist or genre.
-  useEffect(() => {
-    if (!hydratedRef.current) return;
-    if (pathname !== "/search") return;
-    if (artists.length > 0 || genres.length > 0) return;
-    // If the URL still carries seeds the provider hasn't caught up yet
-    // (this fires on initial mount before setSearchConfig commits).
-    const urlConfig = parseSearchConfigFromParams(
-      searchParams ?? new URLSearchParams()
-    );
-    if (urlConfig.artists.length > 0 || urlConfig.genres.length > 0) return;
-    router.replace("/home");
-  }, [artists.length, genres.length, pathname, router, searchParams]);
+  }, [artists, genres, filters, isHydrated, pathname, router, searchParams]);
 
   return null;
 }

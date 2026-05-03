@@ -6,7 +6,7 @@ import SpotifyTopNavDiscoPattern from "./SpotifyTopNavDiscoPattern";
 
 export default function SpotifySeedControls() {
   return (
-    <Box position="relative" overflow="visible" w="100%">
+    <Box position="relative" overflow="visible" w="100%" zIndex="dropdown">
       <SpotifyTopNavDiscoPattern rows={4} />
       <Flex px={2} position="relative" zIndex={1}>
         <SpotifyAutocomplete />

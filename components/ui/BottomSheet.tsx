@@ -5,6 +5,7 @@ import {
   ReactNode,
   cloneElement,
   isValidElement,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -38,8 +39,8 @@ const SHEET_OUT_DURATION = 0.22;
  * Mobile-first bottom sheet. Keyboard handling is CSS-driven: the viewport
  * meta uses `interactive-widget=resizes-content`, so when the software
  * keyboard opens the layout viewport shrinks and `position: fixed; bottom: 0`
- * naturally sits above the keyboard. `max-height: 85dvh` adapts to the new
- * viewport in the same paint as the keyboard animation. No JS translate, no
+ * naturally sits above the keyboard. `height: 85dvh` locks the open sheet's
+ * top edge while still adapting to the visual viewport. No JS translate, no
  * double source of truth, no re-entering the sheet when the input focuses.
  */
 export default function BottomSheet({
@@ -60,18 +61,33 @@ export default function BottomSheet({
     scrollY: number;
   } | null>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
+  const onOpenChangeRef = useRef(onOpenChange);
+  const closeFrameRef = useRef<number | null>(null);
+
+  onOpenChangeRef.current = onOpenChange;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  const closeSheet = useCallback(() => {
+    if (closeFrameRef.current !== null) return;
+    const activeElement = document.activeElement as HTMLElement | null;
+    activeElement?.blur?.();
+    closeFrameRef.current = window.requestAnimationFrame(() => {
+      closeFrameRef.current = null;
+      onOpenChangeRef.current(false);
+    });
+  }, []);
+
   useEffect(() => {
     if (!open) return;
+    closeFrameRef.current = null;
     previousFocus.current =
       (document.activeElement as HTMLElement | null) ?? null;
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onOpenChange(false);
+      if (e.key === "Escape") closeSheet();
     };
     document.addEventListener("keydown", onKey);
 
@@ -90,6 +106,10 @@ export default function BottomSheet({
 
     return () => {
       document.removeEventListener("keydown", onKey);
+      if (closeFrameRef.current !== null) {
+        window.cancelAnimationFrame(closeFrameRef.current);
+        closeFrameRef.current = null;
+      }
       const lock = scrollLock.current;
       if (lock) {
         body.style.overflow = lock.overflow;
@@ -99,18 +119,23 @@ export default function BottomSheet({
         window.scrollTo(0, lock.scrollY);
       }
       scrollLock.current = null;
-      if (previousFocus.current && "focus" in previousFocus.current) {
-        previousFocus.current.focus({ preventScroll: true });
+      const focusTarget = previousFocus.current;
+      if (focusTarget && document.contains(focusTarget)) {
+        window.requestAnimationFrame(() => {
+          if (document.contains(focusTarget)) {
+            focusTarget.focus({ preventScroll: true });
+          }
+        });
       }
     };
-  }, [open, onOpenChange]);
+  }, [open, closeSheet]);
 
   const wrappedTrigger =
     trigger && isValidElement(trigger)
       ? cloneElement(trigger as ReactElement<TriggerProps>, {
           onClick: (e: React.MouseEvent) => {
             (trigger.props as TriggerProps | undefined)?.onClick?.(e);
-            if (!e.defaultPrevented) onOpenChange(true);
+            if (!e.defaultPrevented) onOpenChangeRef.current(true);
           },
         })
       : null;
@@ -119,9 +144,10 @@ export default function BottomSheet({
     headerEndElement ??
     (doneLabel ? (
       <Button
+        type="button"
         visual="secondary"
         size="sm"
-        onClick={() => onOpenChange(false)}
+        onClick={closeSheet}
       >
         {doneLabel}
       </Button>
@@ -146,7 +172,7 @@ export default function BottomSheet({
                     duration: SHEET_OUT_DURATION,
                     ease: SHEET_EASE,
                   }}
-                  onClick={() => onOpenChange(false)}
+                  onClick={closeSheet}
                   style={{
                     position: "fixed",
                     inset: 0,

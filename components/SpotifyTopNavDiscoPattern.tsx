@@ -33,7 +33,7 @@ export default function SpotifyTopNavDiscoPattern({
 }: ISpotifyTopNavDiscoPattern) {
   const pathname = usePathname();
 
-  if (pathname !== "/search") {
+  if (pathname !== "/search" && pathname !== "/home") {
     return null;
   }
 

@@ -39,6 +39,9 @@ const SIDEBAR_COLLAPSED_KEY = "desktopSidebarCollapsed";
 export const SIDEBAR_COLLAPSED_WIDTH_PX = 56;
 export const SIDEBAR_EXPANDED_WIDTH_PX = 240;
 
+const MAIN_CONTENT_GRAIN_BG =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='144' viewBox='0 0 144 144'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='1.35' intercept='-.26'/%3E%3CfeFuncG type='linear' slope='1.35' intercept='-.26'/%3E%3CfeFuncB type='linear' slope='1.35' intercept='-.26'/%3E%3CfeFuncA type='linear' slope='.14'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E\"), linear-gradient(rgba(0,0,0,.2), rgba(0,0,0,.2))";
+
 const DesktopAppLayout = ({
   topNav,
   leftSidebar,
@@ -144,7 +147,14 @@ const DesktopAppLayout = ({
               {leftSidebar}
             </Box>
           </Box>
-          <Box gridArea="maincontent" bg="gray.900" position="relative">
+          <Box
+            gridArea="maincontent"
+            bg="gray.900"
+            bgImage={MAIN_CONTENT_GRAIN_BG}
+            bgRepeat="repeat"
+            bgSize="auto, 144px 144px"
+            position="relative"
+          >
             {children}
           </Box>
         </Grid>

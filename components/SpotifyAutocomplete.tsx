@@ -220,7 +220,18 @@ export default function SpotifyAutocomplete() {
         }}
       >
         <InputGroup
-          startElement={<Icon as={CgSearch} color="gray.500" />}
+          startElement={
+            <Flex
+              alignItems="center"
+              justifyContent="center"
+              boxSize={6}
+              borderRadius="full"
+              bg="electricPurple.500"
+              color="white"
+            >
+              <Icon as={CgSearch} boxSize={4} />
+            </Flex>
+          }
           startElementProps={{ w: 10, px: 0 }}
         >
           <Input

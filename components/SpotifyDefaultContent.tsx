@@ -41,7 +41,9 @@ export default function SpotifyDefaultContent() {
   return (
     <Box color="white">
       <Box p={[4, null, null, 8]}>
-        <Heading textStyle="pageTitle" mb={4}>Community Collections</Heading>
+        <Heading textStyle="pageTitle" mb={[6, null, 8]}>
+          Community Collections
+        </Heading>
 
         {isLoading ? (
           <Wrap gap={[8, 4]}>

@@ -213,11 +213,10 @@ function SpotifyPlaylistListItem({
         {!mutation.isSuccess ? (
           <Button
             disabled={mutation.isPending || mutation.isSuccess}
-            loading={mutation.isPending}
             colorPalette="blackAlpha"
             size="sm"
           >
-            Add
+            {mutation.isPending ? "Adding..." : "Add"}
           </Button>
         ) : (
           <Icon mr={4} as={BsCheck2} color="green.500" />

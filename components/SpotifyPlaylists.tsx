@@ -11,7 +11,7 @@ import { Box, List, Text } from "@chakra-ui/react";
 import { useContext } from "react";
 import { useDrop } from "react-dnd";
 import { useMutation } from "@tanstack/react-query";
-import CollectionCoverSwirl from "./CollectionCoverSwirl";
+import { LoadingTextRows } from "./LoadingSkeleton";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
 export default function SpotifyPlaylists() {
@@ -27,25 +27,15 @@ export default function SpotifyPlaylists() {
         bg="blackAlpha.500"
         css={scrollBarStyle}
       >
-        <List.Root listStyle="none">
-          {isLoading ? (
-            <>
-              <ListItemPlaceholder />
-              <ListItemPlaceholder />
-              <ListItemPlaceholder />
-              <ListItemPlaceholder />
-              <ListItemPlaceholder />
-              <ListItemPlaceholder />
-              <ListItemPlaceholder />
-              <ListItemPlaceholder />
-              <ListItemPlaceholder />
-            </>
-          ) : (
-            playlists?.map((playlist) => (
+        {isLoading ? (
+          <LoadingTextRows count={9} />
+        ) : (
+          <List.Root listStyle="none">
+            {playlists?.map((playlist) => (
               <PlaylistItem key={playlist.id} playlist={playlist} />
-            ))
-          )}
-        </List.Root>
+            ))}
+          </List.Root>
+        )}
       </Box>
     </>
   );
@@ -97,21 +87,6 @@ function PlaylistItem({ playlist }: { playlist: TSpotifyPlaylist }) {
       >
         {playlist.name}
       </Text>
-    </List.Item>
-  );
-}
-
-function ListItemPlaceholder() {
-  return (
-    <List.Item px={2} my={2}>
-      <Box
-        position="relative"
-        overflow="hidden"
-        borderRadius="full"
-        height="20px"
-      >
-        <CollectionCoverSwirl />
-      </Box>
     </List.Item>
   );
 }

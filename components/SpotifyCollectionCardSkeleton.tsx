@@ -1,5 +1,5 @@
-import { AspectRatio, Box, Skeleton } from "@chakra-ui/react";
-import CollectionCoverSwirl from "./CollectionCoverSwirl";
+import { AspectRatio, Box } from "@chakra-ui/react";
+import { LoadingBox } from "./LoadingSkeleton";
 
 export function SpotifyCollectionCardSkeleton() {
   return (
@@ -11,21 +11,19 @@ export function SpotifyCollectionCardSkeleton() {
       position="relative"
     >
       <AspectRatio ratio={1} overflow="hidden" bg="blackAlpha.600" position="relative">
-        <CollectionCoverSwirl />
+        <LoadingBox w="100%" h="100%" borderRadius="0" />
       </AspectRatio>
       <Box p={3} minH="84px">
-        <Skeleton
+        <LoadingBox
           h="20px"
           w="70%"
           mb={3}
-          bg="whiteAlpha.200"
-          css={{ "--start-color": "rgba(255,255,255,0.08)", "--end-color": "rgba(255,255,255,0.18)" }}
+          borderRadius="sm"
         />
-        <Skeleton
+        <LoadingBox
           h="14px"
           w="45%"
-          bg="whiteAlpha.200"
-          css={{ "--start-color": "rgba(255,255,255,0.08)", "--end-color": "rgba(255,255,255,0.18)" }}
+          borderRadius="sm"
         />
       </Box>
     </Box>

@@ -72,7 +72,7 @@ export default function Home() {
           </Text>
           <Button
             mt={[6, 8]}
-            loading={isLoggingIn}
+            disabled={isLoggingIn}
             onClick={() => setIsLoggingIn(true)}
             borderRadius="full"
             bg="electricPurple.500"
@@ -85,7 +85,7 @@ export default function Home() {
           >
             <a href="/api/spotify-login">
               <Icon as={BsSpotify} fontSize="md" color="white" />
-              Login with Spotify
+              {isLoggingIn ? "Connecting..." : "Login with Spotify"}
             </a>
           </Button>
         </Box>

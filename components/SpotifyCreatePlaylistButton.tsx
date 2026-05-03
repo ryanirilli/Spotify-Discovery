@@ -22,7 +22,6 @@ import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
 export default function SpotifyCreatePlaylistButton() {
   const dialog = useDisclosure();
-  const [isSaving, setIsSaving] = useState(false);
   const initialRef = useRef<HTMLInputElement>(null);
   const [playlistName, setPlaylistName] = useState("");
   const { refetchPlaylists } = useContext(SpotifyPlaylistsContext) || {};
@@ -32,7 +31,6 @@ export default function SpotifyCreatePlaylistButton() {
       spotifyCreatePlaylist({ name }),
     onSuccess: async () => {
       await refetchPlaylists?.();
-      setIsSaving(false);
       dialog.onClose();
       setPlaylistName("");
     },
@@ -40,8 +38,8 @@ export default function SpotifyCreatePlaylistButton() {
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (mutation.isPending) return;
     mutation.mutate({ name: playlistName });
-    setIsSaving(true);
   };
 
   return (
@@ -91,8 +89,8 @@ export default function SpotifyCreatePlaylistButton() {
                   </Box>
                 </Dialog.Body>
                 <Dialog.Footer>
-                  <Button loading={isSaving} type="submit">
-                    Create
+                  <Button disabled={mutation.isPending} type="submit">
+                    {mutation.isPending ? "Creating..." : "Create"}
                   </Button>
                 </Dialog.Footer>
               </form>

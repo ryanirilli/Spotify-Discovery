@@ -16,7 +16,6 @@ import {
   InputGroup,
   Popover,
   Portal,
-  Spinner,
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
@@ -34,6 +33,7 @@ import spotifyCreatePlaylist, {
 import { toaster } from "@/utils/toaster";
 import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import scrollBarStyle from "@/utils/scrollBarStyle";
+import { LoadingBox, LoadingTextRows } from "./LoadingSkeleton";
 
 interface ISpotifyAddToPlaylistMenu {
   track: TSpotifyTrack;
@@ -295,7 +295,7 @@ function MenuBody({
           <PopoverRow
             onClick={onCreate}
             disabled={busy}
-            loading={createMutation.isPending}
+            pending={createMutation.isPending}
           >
             <Icon as={SiApplemusic} color="color-palette.400" />
             <Text lineClamp={1}>
@@ -308,9 +308,9 @@ function MenuBody({
         )}
 
         {isLoading ? (
-          <Flex justify="center" py={4}>
-            <Spinner size="sm" />
-          </Flex>
+          <Box px={1}>
+            <LoadingTextRows count={6} />
+          </Box>
         ) : filtered.length === 0 ? (
           <Text px={3} py={3} color="gray.400" fontSize="sm">
             {filter.trim()
@@ -323,7 +323,7 @@ function MenuBody({
               key={pl.id}
               onClick={() => onSelect(pl.id)}
               disabled={busy}
-              loading={
+              pending={
                 addMutation.isPending &&
                 addMutation.variables?.playlistId === pl.id
               }
@@ -341,10 +341,10 @@ interface IPopoverRow {
   children: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
-  loading?: boolean;
+  pending?: boolean;
 }
 
-function PopoverRow({ children, onClick, disabled, loading }: IPopoverRow) {
+function PopoverRow({ children, onClick, disabled, pending }: IPopoverRow) {
   return (
     <Button
       w="100%"
@@ -366,7 +366,15 @@ function PopoverRow({ children, onClick, disabled, loading }: IPopoverRow) {
     >
       <Flex gap={2} alignItems="center" minW={0} w="100%">
         {children}
-        {loading && <Spinner size="xs" ml="auto" />}
+        {pending && (
+          <LoadingBox
+            h="8px"
+            w="44px"
+            ml="auto"
+            borderRadius="full"
+            flexShrink={0}
+          />
+        )}
       </Flex>
     </Button>
   );

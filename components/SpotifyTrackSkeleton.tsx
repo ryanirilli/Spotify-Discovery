@@ -1,5 +1,5 @@
 import { AspectRatio, Box, Card, Flex } from "@chakra-ui/react";
-import CollectionCoverSwirl from "./CollectionCoverSwirl";
+import { LoadingBox } from "./LoadingSkeleton";
 
 export default function SpotifyTrackSkeleton() {
   return (
@@ -13,7 +13,7 @@ export default function SpotifyTrackSkeleton() {
     >
       <Box position="relative" overflow="hidden">
         <AspectRatio ratio={1} overflow="hidden" position="relative">
-          <CollectionCoverSwirl />
+          <LoadingBox w="100%" h="100%" borderRadius="0" />
         </AspectRatio>
         <Flex
           bg="gray.950"
@@ -33,8 +33,8 @@ export default function SpotifyTrackSkeleton() {
         opacity={0.75}
       >
         <Box p={2}>
-          <Box h="16px" mb={1} bg="whiteAlpha.300" borderRadius="sm" w="70%" />
-          <Box h="14px" bg="whiteAlpha.200" borderRadius="sm" w="45%" />
+          <LoadingBox h="16px" mb={1} borderRadius="sm" w="70%" />
+          <LoadingBox h="14px" borderRadius="sm" w="45%" />
         </Box>
         <Flex h="32px" />
       </Box>

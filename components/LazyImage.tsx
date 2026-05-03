@@ -1,6 +1,7 @@
 import useIntersectionObserver from "@/utils/useIntersectionObserver";
-import { Image, ImageProps } from "@chakra-ui/react";
+import { Box, Image, ImageProps } from "@chakra-ui/react";
 import { useState, useRef, useEffect } from "react";
+import CollectionCoverSwirl from "./CollectionCoverSwirl";
 
 interface ILazyImage extends ImageProps {
   src: string;
@@ -38,13 +39,18 @@ const LazyImage = ({ src, alt, ...rest }: ILazyImage) => {
   };
 
   return (
-    <Image
-      ref={imgRef}
-      alt={alt}
-      opacity={isLoaded ? 1 : 0}
-      transition="opacity 0.3s ease"
-      {...rest}
-    />
+    <Box position="relative" overflow="hidden" w="100%" h="100%">
+      {!isLoaded && <CollectionCoverSwirl />}
+      <Image
+        ref={imgRef}
+        alt={alt}
+        opacity={isLoaded ? 1 : 0}
+        transition="opacity 0.3s ease"
+        w="100%"
+        h="100%"
+        {...rest}
+      />
+    </Box>
   );
 };
 

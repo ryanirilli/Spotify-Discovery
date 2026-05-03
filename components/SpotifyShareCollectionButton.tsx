@@ -126,7 +126,11 @@ export default function SpotifyShareCollectionButton() {
 
   const inputValue = isCreated ? collection.title : title;
   const submitDisabled = !isCreated && (!title.trim() || !canShare);
-  const submitLabel = isCreated ? "Done" : "Generate cover image";
+  const submitLabel = mutation.isPending
+    ? "Generating cover image..."
+    : isCreated
+    ? "Done"
+    : "Generate cover image";
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => handleOpenChange(e.open)}>
@@ -227,8 +231,7 @@ export default function SpotifyShareCollectionButton() {
                 <Button
                   w="100%"
                   type="submit"
-                  loading={mutation.isPending}
-                  disabled={submitDisabled}
+                  disabled={submitDisabled || mutation.isPending}
                 >
                   {submitLabel}
                 </Button>

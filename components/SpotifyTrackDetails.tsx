@@ -1,9 +1,10 @@
 "use client";
 
 import spotifyTrackDetailsQuery from "@/queries/spotifyTrackDetailsQuery";
-import { List, Skeleton, Slider, Table } from "@chakra-ui/react";
+import { Slider, Table } from "@chakra-ui/react";
 import { ReactNode, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { LoadingTextRows } from "./LoadingSkeleton";
 
 const attributes = new Set(["duration_ms", "tempo"]);
 
@@ -92,17 +93,7 @@ export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
   }, [data]);
 
   return isLoading ? (
-    <List.Root listStyle="none">
-      <ListItemPlaceholder />
-      <ListItemPlaceholder />
-      <ListItemPlaceholder />
-      <ListItemPlaceholder />
-      <ListItemPlaceholder />
-      <ListItemPlaceholder />
-      <ListItemPlaceholder />
-      <ListItemPlaceholder />
-      <ListItemPlaceholder />
-    </List.Root>
+    <LoadingTextRows count={9} my={4} opacity={0.5} />
   ) : (
     <Table.ScrollArea bg="transparent">
       <Table.Root
@@ -124,13 +115,5 @@ export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
         </Table.Body>
       </Table.Root>
     </Table.ScrollArea>
-  );
-}
-
-function ListItemPlaceholder() {
-  return (
-    <List.Item px={2} my={4} opacity={0.5}>
-      <Skeleton borderRadius="full" height="20px" />
-    </List.Item>
   );
 }

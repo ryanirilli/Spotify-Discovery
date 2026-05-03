@@ -20,8 +20,6 @@ import {
   Icon,
   Image,
   Progress,
-  Skeleton,
-  Spinner,
   Stack,
   Text,
   VisuallyHidden,
@@ -40,6 +38,7 @@ import { TSpotifyAlbum } from "@/types/SpotifyAlbum";
 import { TSpotifyAlbumTrack } from "@/types/SpotifyAlbumTrack";
 import animationData from "@/public/sound-bars.json";
 import Lottie from "./Lottie";
+import { LoadingBox, LoadingTextRows } from "./LoadingSkeleton";
 import SpotifyTrackDetails from "./SpotifyTrackDetails";
 import SpotifyLink from "./SpotifyLink";
 import SpotifyAddToPlaylistMenu from "./SpotifyAddToPlaylistMenu";
@@ -380,13 +379,13 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                   bg="blackAlpha.300"
                 >
                   <AspectRatio ratio={1}>
-                    <Skeleton w="100%" h="100%" />
+                    <LoadingBox w="100%" h="100%" borderRadius="0" />
                   </AspectRatio>
                   <Stack gap={4} p={4}>
-                    <Skeleton height="20px" w="80%" />
-                    <Skeleton height="16px" w="60%" />
-                    <Skeleton height="32px" borderRadius="full" />
-                    <Skeleton height="32px" borderRadius="full" />
+                    <LoadingBox h="20px" w="80%" borderRadius="full" />
+                    <LoadingBox h="16px" w="60%" borderRadius="full" />
+                    <LoadingBox h="32px" borderRadius="full" />
+                    <LoadingBox h="32px" borderRadius="full" />
                   </Stack>
                 </Box>
               </Stack>
@@ -418,7 +417,7 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                     objectFit="cover"
                   />
                 ) : (
-                  <Skeleton w="100%" h="100%" />
+                  <LoadingBox w="100%" h="100%" borderRadius="full" />
                 )}
               </Box>
               <Box minW={0}>
@@ -439,9 +438,7 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
             </Heading>
             <Box>
               {albumsQuery.isLoading ? (
-                <Flex justify="center" py={8}>
-                  <Spinner />
-                </Flex>
+                <DiscographySkeleton />
               ) : albums.length === 0 ? (
                 <Text color="gray.400" py={4}>
                   No albums found.
@@ -472,6 +469,31 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
         </VisuallyHidden>
       </Box>
     </Box>
+  );
+}
+
+function DiscographySkeleton() {
+  return (
+    <Stack gap={0}>
+      {Array.from({ length: 6 }).map((_, index) => (
+        <Flex key={index} alignItems="center" gap={3} py={2} opacity={0.75}>
+          <LoadingBox boxSize="48px" flexShrink={0} borderRadius="sm" />
+          <Box flex={1} minW={0}>
+            <LoadingBox
+              h="18px"
+              w={index % 2 === 0 ? "78%" : "64%"}
+              mb={2}
+              borderRadius="full"
+            />
+            <LoadingBox
+              h="12px"
+              w={index % 3 === 0 ? "42%" : "54%"}
+              borderRadius="full"
+            />
+          </Box>
+        </Flex>
+      ))}
+    </Stack>
   );
 }
 
@@ -550,9 +572,13 @@ function AlbumAccordionItem({
       <Accordion.ItemContent>
         <Accordion.ItemBody pt={0} pb={2}>
           {tracksQuery.isLoading ? (
-            <Flex justify="center" py={4}>
-              <Spinner size="sm" />
-            </Flex>
+            <LoadingTextRows
+              count={album.total_tracks}
+              px={3}
+              my={2}
+              height="18px"
+              widths={["94%", "78%", "88%", "64%"]}
+            />
           ) : (
             <Box>
               {tracks.map((track) => {

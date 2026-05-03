@@ -193,6 +193,35 @@ export default function SpotifyAutocomplete() {
   const shouldShowResults =
     isResultsShowing && (hasSearchTerm || isNewExperience);
 
+  const autocompleteSurface = shouldShowResults
+    ? "var(--chakra-colors-gray-950)"
+    : "var(--chakra-colors-black)";
+  const autocompleteBorderLayers = [
+    "radial-gradient(ellipse 72px 42px at left bottom, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0.26) 32%, transparent 68%) border-box",
+    "radial-gradient(ellipse 72px 42px at right top, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0.26) 32%, transparent 68%) border-box",
+    "linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08)) border-box",
+  ].join(", ");
+  const autocompleteFocusBorderLayers = [
+    "radial-gradient(ellipse 78px 46px at left bottom, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.34) 32%, transparent 68%) border-box",
+    "radial-gradient(ellipse 78px 46px at right top, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.34) 32%, transparent 68%) border-box",
+    "linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.1)) border-box",
+  ].join(", ");
+  const autocompleteShadow = [
+    shouldShowResults ? "var(--chakra-shadows-dark-lg)" : undefined,
+    "inset 0 -1px 0 rgba(0, 0, 0, 0.45)",
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const autocompleteFocusShadow = [
+    "0 0 0 1px rgba(255, 255, 255, 0.14)",
+    shouldShowResults ? "var(--chakra-shadows-dark-lg)" : undefined,
+    "inset 0 -1px 0 rgba(0, 0, 0, 0.48)",
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const autocompleteBackground = `linear-gradient(${autocompleteSurface}, ${autocompleteSurface}) padding-box, ${autocompleteBorderLayers}`;
+  const autocompleteFocusBackground = `linear-gradient(${autocompleteSurface}, ${autocompleteSurface}) padding-box, ${autocompleteFocusBorderLayers}`;
+
   return (
     <Box
       position="relative"
@@ -204,19 +233,17 @@ export default function SpotifyAutocomplete() {
       <Box
         position="relative"
         zIndex={1001}
-        bg={shouldShowResults ? "gray.950" : "black"}
+        background={autocompleteBackground}
         borderWidth="1px"
         borderBottomWidth={shouldShowResults ? "0" : "1px"}
-        borderColor="whiteAlpha.300"
+        borderColor="transparent"
         borderTopRadius={shouldShowResults ? "2xl" : "full"}
         borderBottomRadius={shouldShowResults ? "0" : "full"}
-        boxShadow={shouldShowResults ? "dark-lg" : "none"}
-        transition="background 160ms ease, border-radius 160ms ease, border-color 160ms ease, box-shadow 160ms ease"
+        boxShadow={autocompleteShadow}
+        transition="background 160ms ease, border-radius 160ms ease, box-shadow 160ms ease"
         _focusWithin={{
-          borderColor: "whiteAlpha.400",
-          boxShadow: shouldShowResults
-            ? "0 0 0 1px var(--chakra-colors-white-alpha-400), var(--chakra-shadows-dark-lg)"
-            : "0 0 0 1px var(--chakra-colors-white-alpha-400)",
+          background: autocompleteFocusBackground,
+          boxShadow: autocompleteFocusShadow,
         }}
       >
         <InputGroup
@@ -229,7 +256,11 @@ export default function SpotifyAutocomplete() {
               bg="electricPurple.500"
               color="white"
             >
-              <Icon as={CgSearch} boxSize={4} />
+              <Icon
+                as={CgSearch}
+                boxSize={4}
+                transform="translate(-1px, 1px)"
+              />
             </Flex>
           }
           startElementProps={{ w: 10, px: 0 }}
@@ -251,6 +282,7 @@ export default function SpotifyAutocomplete() {
             placeholder="Search for an artist"
             value={artist}
             onChange={onArtistChange}
+            _placeholder={{ color: "white" }}
             _focusVisible={{ boxShadow: "none", outline: "0" }}
           />
         </InputGroup>

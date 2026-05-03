@@ -5,12 +5,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AspectRatio,
   Box,
-  Button,
   Clipboard,
   Dialog,
   Flex,
   Icon,
-  IconButton,
   Image,
   Input,
   Portal,
@@ -25,6 +23,8 @@ import {
   MdIosShare,
 } from "react-icons/md";
 import CollectionCoverSwirl from "./CollectionCoverSwirl";
+import DialogCloseButton from "./DialogCloseButton";
+import { Button, IconButton } from "@/components/ui/Button";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
@@ -45,7 +45,7 @@ type Step = "name" | "created";
 export default function SpotifyShareCollectionButton() {
   const queryClient = useQueryClient();
   const { artists, genres, filters } = useContext(
-    SpotifyRecommendationsContext
+    SpotifyRecommendationsContext,
   ) as TSpotifyRecommendationsContext;
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>("name");
@@ -129,16 +129,15 @@ export default function SpotifyShareCollectionButton() {
   const submitLabel = mutation.isPending
     ? "Generating cover image..."
     : isCreated
-    ? "Done"
-    : "Generate cover image";
+      ? "Done"
+      : "Generate cover image";
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => handleOpenChange(e.open)}>
       <Dialog.Trigger asChild>
         <Button
+          visual="secondary"
           size={["sm", "md"]}
-          colorPalette="blackAlpha"
-          borderRadius="full"
           disabled={!canShare}
         >
           <Icon as={MdIosShare} />
@@ -157,17 +156,7 @@ export default function SpotifyShareCollectionButton() {
             maxW="md"
           >
             <Dialog.CloseTrigger asChild>
-              <Button
-                size="sm"
-                variant="solid"
-                borderRadius="full"
-                position="absolute"
-                top={3}
-                right={3}
-                zIndex={1}
-              >
-                Done
-              </Button>
+              <DialogCloseButton>Done</DialogCloseButton>
             </Dialog.CloseTrigger>
             <form onSubmit={onSubmit}>
               <Dialog.Header
@@ -180,7 +169,7 @@ export default function SpotifyShareCollectionButton() {
               >
                 <Dialog.Title>Share with the community</Dialog.Title>
                 <Text color="whiteAlpha.700" fontSize="sm">
-                  This will publish your session on the homepage
+                  Publish your search on the homepage
                 </Text>
               </Dialog.Header>
               <Dialog.Body px={[6, 5]} py={4}>
@@ -209,13 +198,10 @@ export default function SpotifyShareCollectionButton() {
                       </Clipboard.Input>
                       <Clipboard.Trigger asChild>
                         <IconButton
+                          visual="secondary"
                           aria-label="Copy share link"
-                          variant="solid"
-                          colorPalette="blackAlpha"
                         >
-                          <Clipboard.Indicator
-                            copied={<Icon as={MdCheck} />}
-                          >
+                          <Clipboard.Indicator copied={<Icon as={MdCheck} />}>
                             <Icon as={MdContentCopy} />
                           </Clipboard.Indicator>
                         </IconButton>
@@ -229,6 +215,7 @@ export default function SpotifyShareCollectionButton() {
               </Dialog.Body>
               <Dialog.Footer px={[6, 5]} pb={[6, 5]}>
                 <Button
+                  visual="primary"
                   w="100%"
                   type="submit"
                   disabled={submitDisabled || mutation.isPending}
@@ -244,7 +231,11 @@ export default function SpotifyShareCollectionButton() {
   );
 }
 
-function CoverPreview({ collection }: { collection: TSpotifyCollection | null }) {
+function CoverPreview({
+  collection,
+}: {
+  collection: TSpotifyCollection | null;
+}) {
   const isReady =
     collection?.cover_status === "ready" && !!collection.cover_image_url;
   const isPending = collection?.cover_status === "pending";

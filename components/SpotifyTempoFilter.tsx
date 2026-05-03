@@ -3,15 +3,14 @@ import {
   Box,
   Flex,
   NumberInput,
-  Button,
   Icon,
   Text,
-  IconButton,
   Portal,
   Tooltip,
 } from "@chakra-ui/react";
 import { TbActivity } from "react-icons/tb";
 import { IoCloseOutline } from "react-icons/io5";
+import { Button, IconButton } from "@/components/ui/Button";
 
 interface ISpotifyTempoFilter {
   onChange: (range: [number, number] | null) => void;
@@ -43,9 +42,9 @@ export default function SpotifyTempoFilter({
           <Tooltip.Root openDelay={500}>
             <Tooltip.Trigger asChild>
               <IconButton
-                variant={"ghost"}
-                aria-label="remove tempo filter"
+                visual="ghost"
                 size="xs"
+                aria-label="remove tempo filter"
                 onClick={onRemoveTempoRange}
               >
                 <Icon as={IoCloseOutline} boxSize="6" />
@@ -103,8 +102,8 @@ export default function SpotifyTempoFilter({
     </Box>
   ) : (
     <Button
+      visual="ghost"
       size="sm"
-      variant="ghost"
       onClick={() => setHasAddedTempoRange(true)}
     >
       <Icon as={TbActivity} />

@@ -10,7 +10,6 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import {
   Box,
-  Button,
   Flex,
   Spacer,
   Input,
@@ -20,6 +19,7 @@ import {
   Spinner,
   Text,
 } from "@chakra-ui/react";
+import { Button } from "@/components/ui/Button";
 
 import { CgSearch } from "react-icons/cg";
 import { artistSearchQuery } from "@/queries/spotifyArtistSearchQuery";
@@ -389,8 +389,8 @@ export default function SpotifyAutocomplete() {
                             <Spacer />
                             {!artists.includes(artist.id) && (
                               <Button
+                                visual="primary"
                                 size="xs"
-                                borderRadius="md"
                                 disabled={isSeedLimitReached}
                               >
                                 Add

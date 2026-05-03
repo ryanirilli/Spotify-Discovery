@@ -7,7 +7,6 @@ import { TbListDetails, TbMusicPlus, TbPlaylist } from "react-icons/tb";
 import {
   AspectRatio,
   Box,
-  Button,
   Card,
   Flex,
   Icon,
@@ -18,6 +17,7 @@ import {
   Wrap,
   WrapItem,
 } from "@chakra-ui/react";
+import { Button } from "@/components/ui/Button";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
@@ -330,19 +330,16 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
           </Flex>
           <Flex>
             <Button
-              aria-label="Add artist to search"
-              variant="ghost"
+              visual="ghost"
               size="sm"
+              aria-label="Add artist to search"
               borderRadius={0}
-              color="whiteAlpha.900"
               flex={1}
               minW={0}
               h="64px"
               px={1}
               gap={1}
               flexDirection="column"
-              _hover={{ bg: "whiteAlpha.100", color: "white" }}
-              _active={{ bg: "whiteAlpha.200" }}
               disabled={!artistId || isSeedLimitReached}
               onClick={onAddArtistToSeed}
             >
@@ -361,19 +358,16 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
               track={rec}
               trigger={
                 <Button
-                  aria-label="Add to playlist"
-                  variant="ghost"
+                  visual="ghost"
                   size="sm"
+                  aria-label="Add to playlist"
                   borderRadius={0}
-                  color="whiteAlpha.900"
                   flex={1}
                   minW={0}
                   h="64px"
                   px={1}
                   gap={1}
                   flexDirection="column"
-                  _hover={{ bg: "whiteAlpha.100", color: "white" }}
-                  _active={{ bg: "whiteAlpha.200" }}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Icon boxSize={5} as={TbPlaylist} />
@@ -390,19 +384,16 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
               }
             />
             <Button
-              aria-label="Explore artist"
-              variant="ghost"
+              visual="ghost"
               size="sm"
+              aria-label="Explore artist"
               borderRadius={0}
-              color="whiteAlpha.900"
               flex={1}
               minW={0}
               h="64px"
               px={1}
               gap={1}
               flexDirection="column"
-              _hover={{ bg: "whiteAlpha.100", color: "white" }}
-              _active={{ bg: "whiteAlpha.200" }}
               asChild
             >
               <NextLink

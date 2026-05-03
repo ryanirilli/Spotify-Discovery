@@ -1,7 +1,6 @@
 "use client";
 import {
   Box,
-  Button,
   Grid,
   GridItem,
   Heading,
@@ -12,6 +11,7 @@ import {
 import { Monoton } from "next/font/google";
 import { useState } from "react";
 import { BsSpotify } from "react-icons/bs";
+import { Button } from "@/components/ui/Button";
 
 const monoton = Monoton({
   subsets: ["latin"],
@@ -71,16 +71,12 @@ export default function Home() {
             algorithm&apos;s greatest hits.
           </Text>
           <Button
+            visual="primary"
+            size="lg"
             mt={[6, 8]}
             disabled={isLoggingIn}
             onClick={() => setIsLoggingIn(true)}
-            borderRadius="full"
-            bg="electricPurple.500"
-            color="white"
-            _hover={{ bg: "electricPurple.400" }}
-            _active={{ bg: "electricPurple.600" }}
             minW="200px"
-            size="lg"
             asChild
           >
             <a href="/api/spotify-login">

@@ -10,16 +10,63 @@ import { Box, Flex, Icon, List, Text } from "@chakra-ui/react";
 import { useContext } from "react";
 import { useDrop } from "react-dnd";
 import { useMutation } from "@tanstack/react-query";
-import { TbPlaylist } from "react-icons/tb";
+import { TbLayoutSidebarLeftCollapse, TbPlaylist } from "react-icons/tb";
+import { SidebarCollapseContext } from "./DesktopAppLayout";
 import { LoadingTextRows } from "./LoadingSkeleton";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
+const ICON_SIZE_PX = 18;
+const ICON_SLIDE_TRANSITION = "transform 220ms ease";
+
 export default function SpotifyPlaylists() {
   const { playlists, isLoading } = useContext(SpotifyPlaylistsContext) || {};
+  const { toggleSidebar } = useContext(SidebarCollapseContext);
   return (
     <>
-      <Flex pl={4} mt={4} mb={2} alignItems="center" gap={2}>
-        <Icon as={TbPlaylist} />
+      <Flex
+        as="button"
+        onClick={toggleSidebar}
+        aria-label="Collapse sidebar"
+        pl={4}
+        pr={2}
+        mt={4}
+        mb={2}
+        alignItems="center"
+        gap={2}
+        cursor="pointer"
+        color="whiteAlpha.900"
+        textAlign="left"
+        css={{
+          [`&:hover .sidebar-toggle-icons`]: {
+            transform: `translateY(-${ICON_SIZE_PX}px)`,
+          },
+        }}
+      >
+        <Box
+          position="relative"
+          overflow="hidden"
+          w={`${ICON_SIZE_PX}px`}
+          h={`${ICON_SIZE_PX}px`}
+          flexShrink={0}
+        >
+          <Box
+            className="sidebar-toggle-icons"
+            transition={ICON_SLIDE_TRANSITION}
+          >
+            <Icon
+              as={TbPlaylist}
+              display="block"
+              w={`${ICON_SIZE_PX}px`}
+              h={`${ICON_SIZE_PX}px`}
+            />
+            <Icon
+              as={TbLayoutSidebarLeftCollapse}
+              display="block"
+              w={`${ICON_SIZE_PX}px`}
+              h={`${ICON_SIZE_PX}px`}
+            />
+          </Box>
+        </Box>
         <Text fontWeight="bold">Playlists</Text>
       </Flex>
       <Box bg="blackAlpha.500">

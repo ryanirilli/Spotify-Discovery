@@ -2,7 +2,8 @@
 
 import { useContext, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Box, Button, Flex, Heading, Text, Wrap } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text, Wrap } from "@chakra-ui/react";
+import { Button } from "@/components/ui/Button";
 import { SpotifyCollectionCard } from "./SpotifyCollectionCard";
 import { SpotifyCollectionCardSkeleton } from "./SpotifyCollectionCardSkeleton";
 import { SpotifyAutocompleteContext } from "./SpotifyAutocomplete";
@@ -70,7 +71,7 @@ export default function SpotifyDefaultContent() {
             color="whiteAlpha.700"
           >
             <Text>No collections have been shared yet.</Text>
-            <Button colorPalette="whiteAlpha" onClick={() => setIsNew(true)}>
+            <Button visual="secondary" onClick={() => setIsNew(true)}>
               Search for an artist
             </Button>
           </Flex>

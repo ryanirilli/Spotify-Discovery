@@ -16,11 +16,11 @@ import {
   Icon,
   Input,
   List,
-  Button,
   Text,
   Spacer,
 } from "@chakra-ui/react";
 import DialogCloseButton from "./DialogCloseButton";
+import { Button } from "@/components/ui/Button";
 import { useCallback, useMemo, useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
 import { CgSearch } from "react-icons/cg";
@@ -153,7 +153,7 @@ export default function SpotifyAddTrackToPlaylistModal({
               </List.Root>
             </Dialog.Body>
             <Dialog.Footer>
-              <Button w="100%" onClick={onClosePlaylistModal}>
+              <Button visual="primary" w="100%" onClick={onClosePlaylistModal}>
                 Done
               </Button>
             </Dialog.Footer>
@@ -212,9 +212,9 @@ function SpotifyPlaylistListItem({
         <Spacer />
         {!mutation.isSuccess ? (
           <Button
-            disabled={mutation.isPending || mutation.isSuccess}
-            colorPalette="blackAlpha"
+            visual="secondary"
             size="sm"
+            disabled={mutation.isPending || mutation.isSuccess}
           >
             {mutation.isPending ? "Adding..." : "Add"}
           </Button>

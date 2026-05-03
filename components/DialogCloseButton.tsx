@@ -1,21 +1,23 @@
-import { CloseButton, type CloseButtonProps } from "@chakra-ui/react";
+import { Icon } from "@chakra-ui/react";
+import { MdClose } from "react-icons/md";
+import { Button, type ButtonProps } from "./ui/Button";
 
-export default function DialogCloseButton(props: CloseButtonProps) {
+export default function DialogCloseButton({
+  children,
+  ...props
+}: ButtonProps) {
   return (
-    <CloseButton
-      variant="solid"
-      colorPalette="whiteAlpha"
-      bg="whiteAlpha.300"
-      color="white"
-      borderRadius="full"
+    <Button
+      visual="secondary"
       size="sm"
+      aria-label="Close"
       position="absolute"
       top={3}
       right={3}
       zIndex={1}
-      _hover={{ bg: "whiteAlpha.400" }}
-      _active={{ bg: "whiteAlpha.500" }}
       {...props}
-    />
+    >
+      {children ?? <Icon as={MdClose} />}
+    </Button>
   );
 }

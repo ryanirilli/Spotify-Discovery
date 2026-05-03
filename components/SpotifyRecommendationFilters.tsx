@@ -2,7 +2,6 @@
 
 import {
   Box,
-  Button,
   Flex,
   HStack,
   Icon,
@@ -12,6 +11,7 @@ import {
   Tag,
   useDisclosure,
 } from "@chakra-ui/react";
+import { Button } from "@/components/ui/Button";
 import { produce } from "immer";
 import { useContext, useReducer } from "react";
 import { IoFilter } from "react-icons/io5";
@@ -89,11 +89,7 @@ export default function SpotifyRecommendationFilters() {
           onOpenChange={(e) => popover.setOpen(e.open)}
         >
           <Popover.Trigger asChild>
-            <Button
-              size={["sm", "md"]}
-              colorPalette="blackAlpha"
-              borderRadius="full"
-            >
+            <Button visual="secondary" size={["sm", "md"]}>
               <Icon as={IoFilter} />
               Filters
             </Button>
@@ -112,6 +108,7 @@ export default function SpotifyRecommendationFilters() {
                   />
                   <Box p={2}>
                     <Button
+                      visual="primary"
                       disabled={!draftFilters.isDirty}
                       w="100%"
                       onClick={() => {
@@ -169,12 +166,7 @@ export default function SpotifyRecommendationFilters() {
           display={["none", "flex"]}
         >
           <Switch.HiddenInput />
-          <Switch.Control
-            _checked={{
-              bg: "electricPurple.500",
-              borderColor: "electricPurple.500",
-            }}
-          >
+          <Switch.Control>
             <Switch.Thumb />
           </Switch.Control>
           <Switch.Label color="white" fontSize={["xs", "sm"]}>

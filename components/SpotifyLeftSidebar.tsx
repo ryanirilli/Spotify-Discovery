@@ -1,12 +1,9 @@
 "use client";
 
-import { Box, Button, Flex, Icon, IconButton, Tooltip } from "@chakra-ui/react";
+import { Box, Flex, Tooltip } from "@chakra-ui/react";
 import { useContext } from "react";
-import {
-  TbLayoutSidebarLeftCollapse,
-  TbLayoutSidebarLeftExpand,
-  TbPlaylist,
-} from "react-icons/tb";
+import { TbPlaylist } from "react-icons/tb";
+import { IconButton } from "@/components/ui/Button";
 import scrollBarStyle from "@/utils/scrollBarStyle";
 import {
   SidebarCollapseContext,
@@ -37,20 +34,6 @@ export default function SpotifyLeftSidebar() {
         transition={FADE_TRANSITION}
         pointerEvents={isSidebarCollapsed ? "none" : "auto"}
       >
-        <Flex flexShrink={0} px={2} pt={2}>
-          <Button
-            aria-label="Collapse sidebar"
-            variant="ghost"
-            size="sm"
-            color="whiteAlpha.700"
-            justifyContent="flex-start"
-            onClick={toggleSidebar}
-            _hover={{ bg: "whiteAlpha.200", color: "white" }}
-          >
-            <Icon as={TbLayoutSidebarLeftCollapse} />
-            Collapse
-          </Button>
-        </Flex>
         <Box flex={1} minH={0} overflowY="auto" css={scrollBarStyle}>
           <SpotifyPlaylists />
           <SpotifyCreatePlaylistButton />
@@ -79,26 +62,10 @@ export default function SpotifyLeftSidebar() {
         <Tooltip.Root openDelay={300} positioning={{ placement: "right" }}>
           <Tooltip.Trigger asChild>
             <IconButton
+              visual="ghost"
+              size="sm"
               aria-label="Expand sidebar"
-              variant="ghost"
-              size="sm"
-              color="whiteAlpha.700"
               onClick={toggleSidebar}
-              _hover={{ bg: "whiteAlpha.200", color: "white" }}
-            >
-              <TbLayoutSidebarLeftExpand />
-            </IconButton>
-          </Tooltip.Trigger>
-        </Tooltip.Root>
-        <Tooltip.Root openDelay={300} positioning={{ placement: "right" }}>
-          <Tooltip.Trigger asChild>
-            <IconButton
-              aria-label="Playlists"
-              variant="ghost"
-              size="sm"
-              color="whiteAlpha.700"
-              onClick={toggleSidebar}
-              _hover={{ bg: "whiteAlpha.200", color: "white" }}
             >
               <TbPlaylist />
             </IconButton>

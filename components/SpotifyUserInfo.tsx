@@ -7,14 +7,13 @@ import {
   Text,
   Icon,
   Box,
-  IconButton,
   Menu,
   Flex,
-  Button,
   Dialog,
   Portal,
   useDisclosure,
 } from "@chakra-ui/react";
+import { Button } from "@/components/ui/Button";
 import { useQuery } from "@tanstack/react-query";
 import { VscDebugDisconnect } from "react-icons/vsc";
 import { FiChevronUp } from "react-icons/fi";
@@ -110,7 +109,7 @@ export default function SpotifyUserInfo() {
                 </Text>
               </Dialog.Body>
               <Dialog.Footer>
-                <Button onClick={onContinue} w="100%" colorPalette="whiteAlpha">
+                <Button visual="secondary" onClick={onContinue} w="100%">
                   Continue
                 </Button>
               </Dialog.Footer>

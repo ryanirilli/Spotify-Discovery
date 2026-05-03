@@ -25,6 +25,45 @@ const config = defineConfig({
   },
   theme: {
     recipes: {
+      // Three-variant button system: primary (electric purple CTA),
+      // secondary (whiteAlpha pill), ghost (transparent w/ hover).
+      // Selected via the custom `visual` prop, e.g. <Button visual="primary" />.
+      // Sizes (xs/sm/md/lg) come from Chakra defaults and are not redeclared.
+      // Same recipe applies to <IconButton />.
+      button: {
+        className: "chakra-button",
+        base: {
+          borderRadius: "full",
+          fontWeight: "semibold",
+          borderWidth: "0",
+          _icon: { flexShrink: 0 },
+        },
+        variants: {
+          visual: {
+            primary: {
+              bg: "electricPurple.500",
+              color: "white",
+              _hover: { bg: "electricPurple.400" },
+              _active: { bg: "electricPurple.600" },
+              _disabled: { opacity: 0.4, cursor: "not-allowed" },
+            },
+            secondary: {
+              bg: "whiteAlpha.200",
+              color: "white",
+              _hover: { bg: "whiteAlpha.300" },
+              _active: { bg: "whiteAlpha.400" },
+              _disabled: { opacity: 0.4, cursor: "not-allowed" },
+            },
+            ghost: {
+              bg: "transparent",
+              color: "whiteAlpha.900",
+              _hover: { bg: "whiteAlpha.200", color: "white" },
+              _active: { bg: "whiteAlpha.300" },
+              _disabled: { opacity: 0.4, cursor: "not-allowed" },
+            },
+          },
+        },
+      },
       // Normalize all <Input /> instances across the app. Components that
       // need a bespoke look (e.g. the artist autocomplete) opt out via the
       // `unstyled` prop, which bypasses this recipe entirely.
@@ -67,6 +106,31 @@ const config = defineConfig({
           backdrop: {
             bg: "blackAlpha.800",
             backdropFilter: "blur(8px)",
+          },
+        },
+      },
+      // Dark-theme switch: muted whiteAlpha track when off, electric
+      // purple when on. Thumb scaled so its visible padding matches on
+      // both sides.
+      switch: {
+        slots: ["root", "label", "indicator", "control", "thumb"],
+        variants: {
+          variant: {
+            solid: {
+              control: {
+                bg: "whiteAlpha.200",
+                _checked: {
+                  bg: "electricPurple.500",
+                },
+              },
+              thumb: {
+                bg: "white",
+                scale: "0.85",
+                _checked: {
+                  bg: "white",
+                },
+              },
+            },
           },
         },
       },

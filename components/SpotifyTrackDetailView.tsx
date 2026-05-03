@@ -14,7 +14,6 @@ import {
   Accordion,
   AspectRatio,
   Box,
-  Button,
   Flex,
   Heading,
   Icon,
@@ -24,6 +23,7 @@ import {
   Text,
   VisuallyHidden,
 } from "@chakra-ui/react";
+import { Button } from "@/components/ui/Button";
 import { useQuery } from "@tanstack/react-query";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { MdAdd, MdArrowBack, MdPlaylistAdd } from "react-icons/md";
@@ -247,12 +247,8 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
       >
         <Flex alignItems="center" ml={[1, 0]}>
           <Button
+            visual="ghost"
             size={["sm", "md"]}
-            variant="ghost"
-            color="white"
-            borderRadius="full"
-            _hover={{ bg: "whiteAlpha.200" }}
-            _active={{ bg: "whiteAlpha.300" }}
             onClick={onBack}
           >
             <Icon as={MdArrowBack} boxSize={5} />
@@ -336,10 +332,8 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                         track={track}
                         trigger={
                           <Button
+                            visual="primary"
                             size="sm"
-                            variant="solid"
-                            borderRadius="full"
-                            border="none"
                             w="100%"
                           >
                             <Icon as={MdPlaylistAdd} boxSize={5} />
@@ -348,12 +342,9 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                         }
                       />
                       <Button
+                        visual="primary"
                         size="sm"
-                        variant="solid"
-                        borderRadius="full"
-                        border="none"
                         w="100%"
-                        _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
                         disabled={isSeedLimitReached}
                         onClick={onAddArtistToSeed}
                       >
@@ -686,14 +677,9 @@ function AlbumAccordionItem({
                           }
                           trigger={
                             <Button
-                              aria-label="Add to playlist"
+                              visual="primary"
                               size="xs"
-                              borderRadius="full"
-                              bg="electricPurple.500"
-                              color="white"
-                              fontWeight="semibold"
-                              _hover={{ bg: "electricPurple.400" }}
-                              _active={{ bg: "electricPurple.600" }}
+                              aria-label="Add to playlist"
                               tabIndex={showActions ? 0 : -1}
                               onClick={(e) => e.stopPropagation()}
                             >

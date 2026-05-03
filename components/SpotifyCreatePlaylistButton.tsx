@@ -5,7 +5,6 @@ import spotifyCreatePlaylist, {
 } from "@/mutations/spotifyCreatePlaylistMutation";
 import scrollBarStyle from "@/utils/scrollBarStyle";
 import {
-  Button,
   Box,
   Dialog,
   Portal,
@@ -18,6 +17,7 @@ import { FormEvent, useContext, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { SiApplemusic } from "react-icons/si";
 import DialogCloseButton from "./DialogCloseButton";
+import { Button } from "@/components/ui/Button";
 import { SpotifyPlaylistsContext } from "./SpotifyPlaylistsProvider";
 
 export default function SpotifyCreatePlaylistButton() {
@@ -46,13 +46,8 @@ export default function SpotifyCreatePlaylistButton() {
     <>
       <Box p={2}>
         <Button
-          borderRadius="full"
+          visual="ghost"
           size="sm"
-          variant="ghost"
-          _hover={{
-            bg: "whiteAlpha.300",
-            color: "white",
-          }}
           onClick={dialog.onOpen}
         >
           <Icon as={SiApplemusic} />
@@ -89,7 +84,11 @@ export default function SpotifyCreatePlaylistButton() {
                   </Box>
                 </Dialog.Body>
                 <Dialog.Footer>
-                  <Button disabled={mutation.isPending} type="submit">
+                  <Button
+                    visual="primary"
+                    disabled={mutation.isPending}
+                    type="submit"
+                  >
                     {mutation.isPending ? "Creating..." : "Create"}
                   </Button>
                 </Dialog.Footer>

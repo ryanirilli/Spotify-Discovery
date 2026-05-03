@@ -9,7 +9,6 @@ import {
 } from "react";
 import {
   Box,
-  Button,
   Flex,
   Icon,
   Input,
@@ -19,6 +18,7 @@ import {
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
+import { Button } from "@/components/ui/Button";
 import { useMutation } from "@tanstack/react-query";
 import { CgSearch } from "react-icons/cg";
 import { SiApplemusic } from "react-icons/si";
@@ -347,17 +347,13 @@ interface IPopoverRow {
 function PopoverRow({ children, onClick, disabled, pending }: IPopoverRow) {
   return (
     <Button
+      visual="ghost"
+      size="sm"
       w="100%"
       justifyContent="flex-start"
-      variant="ghost"
-      size="sm"
-      bg="transparent"
-      color="white"
       borderRadius={0}
       fontWeight="normal"
       px={3}
-      _hover={{ bg: "whiteAlpha.200" }}
-      _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
       disabled={disabled}
       onClick={(e) => {
         e.stopPropagation();

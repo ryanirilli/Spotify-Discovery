@@ -11,7 +11,8 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Box, Button } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
+import { Button } from "./Button";
 
 interface IBottomSheet {
   open: boolean;
@@ -118,9 +119,8 @@ export default function BottomSheet({
     headerEndElement ??
     (doneLabel ? (
       <Button
+        visual="secondary"
         size="sm"
-        variant="solid"
-        borderRadius="full"
         onClick={() => onOpenChange(false)}
       >
         {doneLabel}

@@ -1,12 +1,14 @@
 "use client";
 
 import { useContext } from "react";
-import { Avatar, Box, Button, Icon, Tag, Flex } from "@chakra-ui/react";
+import { Avatar, Box, Icon, Tag, Flex } from "@chakra-ui/react";
+import { Button } from "@/components/ui/Button";
 import { MdClose, MdLibraryMusic } from "react-icons/md";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
 } from "./SpotifyRecommendationsProvider";
+import SpotifyTopNavDiscoPattern from "./SpotifyTopNavDiscoPattern";
 import { topNavScrollBarStyle } from "@/utils/scrollBarStyle";
 
 export default function SpotifySeeds() {
@@ -34,136 +36,143 @@ export default function SpotifySeeds() {
   return (
     <>
       {hasSeeds && (
-        <Flex
+        <Box
           mt={[1, 2]}
-          px={[2, 2]}
-          py={[1.5, 2]}
           bg="blackAlpha.500"
-          alignItems="center"
-          gap={2}
-          overflowX="auto"
+          position="relative"
           w="100%"
-          css={{
-            ...topNavScrollBarStyle,
-            WebkitOverflowScrolling: "touch",
-            overflowScrolling: "touch",
-          }}
+          overflow="hidden"
         >
-          <Button
-            h={["44px", "40px"]}
-            minW="max-content"
-            px={4}
-            borderRadius="full"
-            color="white"
-            bg="whiteAlpha.200"
-            flexShrink={0}
-            _hover={{ bg: "whiteAlpha.300" }}
-            _active={{ bg: "whiteAlpha.400" }}
-            onClick={() => {
-              window.scroll(0, 0);
-              setSearchConfig({ artists: [], genres: [], filters });
+          <SpotifyTopNavDiscoPattern rows={5} />
+          <Flex
+            px={[2, 2]}
+            py={[1.5, 2]}
+            position="relative"
+            zIndex={1}
+            alignItems="center"
+            gap={2}
+            overflowX="auto"
+            overflowY="hidden"
+            w="100%"
+            css={{
+              ...topNavScrollBarStyle,
+              WebkitOverflowScrolling: "touch",
+              overflowScrolling: "touch",
             }}
           >
-            <Icon as={MdClose} boxSize={5} />
-            Clear all
-          </Button>
-          {orderedArtistDetails.map((artist) => {
-            const artistImg = artist.images[artist.images.length - 1]?.url;
-            const disabled = isArtistDisabled(artist.id);
-            return (
-              <Box
-                key={artist.id}
-                flexShrink={0}
-                opacity={disabled ? 0.4 : 1}
-                transition="opacity 0.15s ease"
-                title={
-                  disabled
-                    ? "Disabled — remove a newer artist to re-enable"
-                    : undefined
-                }
-              >
+            <Button
+              visual="secondary"
+              size="sm"
+              h={["44px", "40px"]}
+              minW="max-content"
+              px={4}
+              flexShrink={0}
+              onClick={() => {
+                window.scroll(0, 0);
+                setSearchConfig({ artists: [], genres: [], filters });
+              }}
+            >
+              <Icon as={MdClose} boxSize={5} />
+              Clear all
+            </Button>
+            {orderedArtistDetails.map((artist) => {
+              const artistImg = artist.images[artist.images.length - 1]?.url;
+              const disabled = isArtistDisabled(artist.id);
+              return (
+                <Box
+                  key={artist.id}
+                  flexShrink={0}
+                  opacity={disabled ? 0.4 : 1}
+                  transition="opacity 0.15s ease"
+                  title={
+                    disabled
+                      ? "Disabled — remove a newer artist to re-enable"
+                      : undefined
+                  }
+                >
+                  <Tag.Root
+                    size="lg"
+                    borderRadius="full"
+                    variant="solid"
+                    pl={0}
+                    minH={["44px", "40px"]}
+                    maxW="none"
+                    flexShrink={0}
+                    whiteSpace="nowrap"
+                  >
+                    <Tag.StartElement
+                      boxSize={["32px", "28px"]}
+                      overflow="hidden"
+                      borderRadius="full"
+                      mr={2}
+                    >
+                      <Avatar.Root boxSize="100%">
+                        <Avatar.Image src={artistImg} />
+                        <Avatar.Fallback name={artist.name} />
+                      </Avatar.Root>
+                    </Tag.StartElement>
+                    <Tag.Label
+                      maxW="none"
+                      overflow="visible"
+                      whiteSpace="nowrap"
+                      lineClamp="none"
+                    >
+                      {artist.name}
+                    </Tag.Label>
+                    <Tag.EndElement boxSize={["32px", "28px"]} ml={1} mr={-1}>
+                      <Tag.CloseTrigger
+                        aria-label={`Remove ${artist.name}`}
+                        boxSize="100%"
+                        css={{ "& svg": { width: "20px", height: "20px" } }}
+                        onClick={() => {
+                          removeArtist(artist.id);
+                          setTimeout(fetchRecs, 0);
+                        }}
+                      />
+                    </Tag.EndElement>
+                  </Tag.Root>
+                </Box>
+              );
+            })}
+            {genres.map((genre) => (
+              <Box key={genre} flexShrink={0}>
                 <Tag.Root
                   size="lg"
                   borderRadius="full"
                   variant="solid"
-                  pl={0}
                   minH={["44px", "40px"]}
                   maxW="none"
                   flexShrink={0}
                   whiteSpace="nowrap"
                 >
-                  <Tag.StartElement
-                    boxSize={["32px", "28px"]}
-                    overflow="hidden"
-                    borderRadius="full"
-                    mr={2}
-                  >
-                    <Avatar.Root boxSize="100%">
-                      <Avatar.Image src={artistImg} />
-                      <Avatar.Fallback name={artist.name} />
-                    </Avatar.Root>
+                  <Tag.StartElement>
+                    <Icon ml={-1} mr={2} as={MdLibraryMusic} color="white" />
                   </Tag.StartElement>
                   <Tag.Label
+                    textTransform="capitalize"
                     maxW="none"
                     overflow="visible"
                     whiteSpace="nowrap"
                     lineClamp="none"
                   >
-                    {artist.name}
+                    {genre}
                   </Tag.Label>
                   <Tag.EndElement boxSize={["32px", "28px"]} ml={1} mr={-1}>
                     <Tag.CloseTrigger
-                      aria-label={`Remove ${artist.name}`}
+                      aria-label={`Remove ${genre}`}
                       boxSize="100%"
                       css={{ "& svg": { width: "20px", height: "20px" } }}
                       onClick={() => {
-                        removeArtist(artist.id);
+                        removeGenre(genre);
                         setTimeout(fetchRecs, 0);
                       }}
                     />
                   </Tag.EndElement>
                 </Tag.Root>
               </Box>
-            );
-          })}
-          {genres.map((genre) => (
-            <Box key={genre} flexShrink={0}>
-              <Tag.Root
-                size="lg"
-                borderRadius="full"
-                variant="solid"
-                minH={["44px", "40px"]}
-                maxW="none"
-                flexShrink={0}
-                whiteSpace="nowrap"
-              >
-                <Tag.StartElement>
-                  <Icon ml={-1} mr={2} as={MdLibraryMusic} color="white" />
-                </Tag.StartElement>
-                <Tag.Label
-                  textTransform="capitalize"
-                  maxW="none"
-                  overflow="visible"
-                  whiteSpace="nowrap"
-                  lineClamp="none"
-                >
-                  {genre}
-                </Tag.Label>
-                <Tag.EndElement boxSize={["32px", "28px"]} ml={1} mr={-1}>
-                  <Tag.CloseTrigger
-                    aria-label={`Remove ${genre}`}
-                    boxSize="100%"
-                    css={{ "& svg": { width: "20px", height: "20px" } }}
-                    onClick={() => {
-                      removeGenre(genre);
-                      setTimeout(fetchRecs, 0);
-                    }}
-                  />
-                </Tag.EndElement>
-              </Tag.Root>
-            </Box>
-          ))}
-        </Flex>
+            ))}
+          </Flex>
+        </Box>
       )}
     </>
   );

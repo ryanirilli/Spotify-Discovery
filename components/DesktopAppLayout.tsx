@@ -25,6 +25,20 @@ export const TopNavHeightContext = createContext<ITopNavHeightContext>({
   },
 });
 
+interface ISidebarCollapseContext {
+  isSidebarCollapsed: boolean;
+  toggleSidebar: () => void;
+}
+
+export const SidebarCollapseContext = createContext<ISidebarCollapseContext>({
+  isSidebarCollapsed: false,
+  toggleSidebar() {},
+});
+
+const SIDEBAR_COLLAPSED_KEY = "desktopSidebarCollapsed";
+export const SIDEBAR_COLLAPSED_WIDTH_PX = 56;
+export const SIDEBAR_EXPANDED_WIDTH_PX = 240;
+
 const DesktopAppLayout = ({
   topNav,
   leftSidebar,
@@ -35,13 +49,34 @@ const DesktopAppLayout = ({
   const measuredTopNavHeight = useElementHeight(topNavRef);
   const isWebkitFillAvailable = useWebkitFillAvailableSupported();
   const { isNew, setIsNew } = useContext(SpotifyAutocompleteContext);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     setTopNavHeight(measuredTopNavHeight);
   }, [measuredTopNavHeight]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true") {
+      setIsSidebarCollapsed(true);
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+      }
+      return next;
+    });
+  };
+
   return (
     <DndProvider backend={HTML5Backend}>
+      <SidebarCollapseContext.Provider
+        value={{ isSidebarCollapsed, toggleSidebar }}
+      >
       <TopNavHeightContext.Provider value={{ topNavHeight, setTopNavHeight }}>
         {isNew && (
           <Box
@@ -58,7 +93,13 @@ const DesktopAppLayout = ({
           />
         )}
         <Grid
-          templateColumns={["1fr", "minmax(200px, 15%) 1fr"]}
+          templateColumns={[
+            "1fr",
+            isSidebarCollapsed
+              ? `${SIDEBAR_COLLAPSED_WIDTH_PX}px 1fr`
+              : `${SIDEBAR_EXPANDED_WIDTH_PX}px 1fr`,
+          ]}
+          transition="grid-template-columns 450ms cubic-bezier(0.87, 0, 0.13, 1)"
           templateRows="auto 1fr"
           templateAreas={[
             `
@@ -98,6 +139,7 @@ const DesktopAppLayout = ({
               top={`${topNavHeight}px`}
               zIndex="docked"
               height={`calc(100vh - ${topNavHeight}px)`}
+              overflow="hidden"
             >
               {leftSidebar}
             </Box>
@@ -107,6 +149,7 @@ const DesktopAppLayout = ({
           </Box>
         </Grid>
       </TopNavHeightContext.Provider>
+      </SidebarCollapseContext.Provider>
     </DndProvider>
   );
 };

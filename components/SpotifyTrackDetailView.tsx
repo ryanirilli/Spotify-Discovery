@@ -437,7 +437,7 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
               Discography
             </Heading>
             <Box>
-              {albumsQuery.isLoading ? (
+              {!artistId || albumsQuery.isLoading ? (
                 <DiscographySkeleton />
               ) : albums.length === 0 ? (
                 <Text color="gray.400" py={4}>

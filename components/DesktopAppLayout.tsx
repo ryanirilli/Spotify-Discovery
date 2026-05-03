@@ -1,9 +1,10 @@
 "use client";
 
 import { Box, Grid } from "@chakra-ui/react";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import useElementHeight from "@/utils/useElementHeight";
 import useWebkitFillAvailableSupported from "@/utils/useWebkitFillAvailableSupported";
 import { SpotifyAutocompleteContext } from "./SpotifyAutocomplete";
 interface IDesktopAppLayout {
@@ -30,8 +31,14 @@ const DesktopAppLayout = ({
   children,
 }: IDesktopAppLayout) => {
   const [topNavHeight, setTopNavHeight] = useState(0);
+  const topNavRef = useRef<HTMLDivElement>(null);
+  const measuredTopNavHeight = useElementHeight(topNavRef);
   const isWebkitFillAvailable = useWebkitFillAvailableSupported();
   const { isNew, setIsNew } = useContext(SpotifyAutocompleteContext);
+
+  useEffect(() => {
+    setTopNavHeight(measuredTopNavHeight);
+  }, [measuredTopNavHeight]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -66,6 +73,7 @@ const DesktopAppLayout = ({
           minH={isWebkitFillAvailable ? "-webkit-fill-available" : "100vh"}
         >
           <Box
+            ref={topNavRef}
             gridArea="topnav"
             bg="black"
             width="100%"

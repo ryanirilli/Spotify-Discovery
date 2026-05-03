@@ -3,15 +3,14 @@
 import { useContext, useEffect, useRef, useState, ViewTransition } from "react";
 import NextLink from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
-import { AiOutlineUserAdd } from "react-icons/ai";
-import { MdMoreHoriz, MdPlaylistAdd } from "react-icons/md";
+import { TbListDetails, TbMusicPlus, TbPlaylist } from "react-icons/tb";
 import {
   AspectRatio,
   Box,
+  Button,
   Card,
   Flex,
   Icon,
-  IconButton,
   Image,
   Progress,
   Text,
@@ -44,7 +43,7 @@ export default function SpotifyTracks() {
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
-  const itemWidth = ["100%", null, "50%", "25%", null, "16.66%"];
+  const itemWidth = ["100%", null, "50%", null, "33.333%", "25%"];
 
   if (isLoadingRecs && recommendations.length === 0) {
     return (
@@ -236,7 +235,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
 
           <Flex
             pointerEvents="none"
-            bg="gray.200"
+            bg="gray.950"
             borderTopRadius="md"
             mt={2}
             justifyContent="space-between"
@@ -256,7 +255,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
             <Image
               height="100%"
               alt="spotify logo"
-              src="Spotify_Logo_RGB_Black.png"
+              src="Spotify_Logo_RGB_White.png"
               maxW="64px"
               mr={2}
             />
@@ -271,8 +270,8 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
             playsInline
           />
         </VisuallyHidden>
-        <Progress.Root h={2} value={trackProgress}>
-          <Progress.Track>
+        <Progress.Root value={trackProgress}>
+          <Progress.Track h="2px" bg="whiteAlpha.200">
             <Progress.Range
               bg="electricPurple.500"
               borderRightRadius="full"
@@ -280,10 +279,18 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
             />
           </Progress.Track>
         </Progress.Root>
-        <Box bg="white" alignItems="center" borderBottomRadius="md">
+        <Box
+          bg="gray.950"
+          color="white"
+          alignItems="center"
+          borderBottomRadius="md"
+          borderWidth="1px"
+          borderTopWidth="0"
+          borderColor="whiteAlpha.200"
+        >
           <Flex p={2}>
             <Box flex={1} minW={0}>
-              <Text fontWeight="bold" fontSize="small">
+              <Text fontWeight="bold" fontSize="small" color="white">
                 {isLoadingRecs ? (
                   "..."
                 ) : (
@@ -294,12 +301,14 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
                     whiteSpace="nowrap"
                     overflow="hidden"
                     textOverflow="ellipsis"
+                    color="white"
+                    _hover={{ color: "whiteAlpha.800" }}
                   >
                     {rec.name}
                   </SpotifyLink>
                 )}
               </Text>
-              <Text fontSize="small" color="gray.500">
+              <Text fontSize="small" color="whiteAlpha.700">
                 {isLoadingRecs ? (
                   "..."
                 ) : (
@@ -310,6 +319,8 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
                     whiteSpace="nowrap"
                     overflow="hidden"
                     textOverflow="ellipsis"
+                    color="whiteAlpha.700"
+                    _hover={{ color: "whiteAlpha.900" }}
                   >
                     {rec.artists.map((a) => a.name).join(", ")}
                   </SpotifyLink>
@@ -318,38 +329,80 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
             </Box>
           </Flex>
           <Flex>
+            <Button
+              aria-label="Add artist to search"
+              variant="ghost"
+              size="sm"
+              borderRadius={0}
+              color="whiteAlpha.900"
+              flex={1}
+              minW={0}
+              h="64px"
+              px={1}
+              gap={1}
+              flexDirection="column"
+              _hover={{ bg: "whiteAlpha.100", color: "white" }}
+              _active={{ bg: "whiteAlpha.200" }}
+              disabled={!artistId || isSeedLimitReached}
+              onClick={onAddArtistToSeed}
+            >
+              <Icon boxSize={5} as={TbMusicPlus} />
+              <Text
+                as="span"
+                fontSize="xs"
+                lineHeight="1.1"
+                maxW="100%"
+                textAlign="center"
+              >
+                Add to search
+              </Text>
+            </Button>
             <SpotifyAddToPlaylistMenu
               track={rec}
               trigger={
-                <IconButton
+                <Button
                   aria-label="Add to playlist"
                   variant="ghost"
                   size="sm"
                   borderRadius={0}
+                  color="whiteAlpha.900"
                   flex={1}
+                  minW={0}
+                  h="64px"
+                  px={1}
+                  gap={1}
+                  flexDirection="column"
+                  _hover={{ bg: "whiteAlpha.100", color: "white" }}
+                  _active={{ bg: "whiteAlpha.200" }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Icon boxSize={6} as={MdPlaylistAdd} />
-                </IconButton>
+                  <Icon boxSize={5} as={TbPlaylist} />
+                  <Text
+                    as="span"
+                    fontSize="xs"
+                    lineHeight="1.1"
+                    maxW="100%"
+                    textAlign="center"
+                  >
+                    Add to playlist
+                  </Text>
+                </Button>
               }
             />
-            <IconButton
-              aria-label="Add artist as seed"
+            <Button
+              aria-label="Explore artist"
               variant="ghost"
               size="sm"
               borderRadius={0}
+              color="whiteAlpha.900"
               flex={1}
-              disabled={!artistId || isSeedLimitReached}
-              onClick={onAddArtistToSeed}
-            >
-              <Icon boxSize={5} as={AiOutlineUserAdd} />
-            </IconButton>
-            <IconButton
-              aria-label="Open track details"
-              variant="ghost"
-              size="sm"
-              borderRadius={0}
-              flex={1}
+              minW={0}
+              h="64px"
+              px={1}
+              gap={1}
+              flexDirection="column"
+              _hover={{ bg: "whiteAlpha.100", color: "white" }}
+              _active={{ bg: "whiteAlpha.200" }}
               asChild
             >
               <NextLink
@@ -359,9 +412,18 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
                   queryClient.setQueryData(["spotifyTrack", rec.id], rec);
                 }}
               >
-                <Icon boxSize={6} as={MdMoreHoriz} />
+                <Icon boxSize={5} as={TbListDetails} />
+                <Text
+                  as="span"
+                  fontSize="xs"
+                  lineHeight="1.1"
+                  maxW="100%"
+                  textAlign="center"
+                >
+                  Explore artist
+                </Text>
               </NextLink>
-            </IconButton>
+            </Button>
           </Flex>
         </Box>
       </Card.Root>

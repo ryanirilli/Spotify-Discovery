@@ -4,32 +4,43 @@ function useElementHeight(elementRef: React.RefObject<HTMLElement | null>) {
   const [height, setHeight] = useState<number>(0);
 
   useLayoutEffect(() => {
-    let currentHeight: number;
     const element = elementRef.current;
 
     if (!element) {
       return;
     }
 
-    setHeight(element.offsetHeight);
+    let frameId: number | null = null;
+    let currentHeight = 0;
+
+    const measure = () => {
+      const newHeight = Math.ceil(element.getBoundingClientRect().height);
+      if (currentHeight !== newHeight) {
+        currentHeight = newHeight;
+        setHeight(newHeight);
+      }
+    };
+
+    measure();
+    frameId = window.requestAnimationFrame(measure);
+
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.target === element) {
-          const newHeight = element.offsetHeight;
-          if (currentHeight && currentHeight !== newHeight) {
-            setHeight(newHeight);
-            currentHeight = newHeight;
-          } else {
-            currentHeight = newHeight;
-          }
+          measure();
         }
       }
     });
 
     resizeObserver.observe(element);
+    window.addEventListener("resize", measure);
 
     return () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
       resizeObserver.disconnect();
+      window.removeEventListener("resize", measure);
     };
   }, [elementRef]);
 

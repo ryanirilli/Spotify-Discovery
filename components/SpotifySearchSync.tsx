@@ -21,6 +21,8 @@ export default function SpotifySearchSync() {
     filters,
     setSearchConfig,
     fetchRecs,
+    recommendations,
+    isLoadingRecs,
   } = useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
 
   const hydratedRef = useRef(false);
@@ -44,21 +46,33 @@ export default function SpotifySearchSync() {
       m !== null;
     const hasProviderState =
       artists.length > 0 || genres.length > 0 || Object.keys(filters).length > 0;
+    const providerConfig = { artists, genres, filters };
+    const providerConfigKey = buildSearchStringFromConfig(providerConfig);
+    const urlConfigKey = buildSearchStringFromConfig(urlConfig);
+    const isSameConfig = providerConfigKey === urlConfigKey;
+    const hasCurrentRecs = recommendations.length > 0 || isLoadingRecs;
 
     if (hasUrlState) {
-      setSearchConfig(urlConfig);
+      if (isSameConfig && hasCurrentRecs) return;
+      if (!isSameConfig) {
+        setSearchConfig(urlConfig);
+      }
       setTimeout(fetchRecs, 0);
     } else if (hasProviderState) {
-      const qs = buildSearchStringFromConfig({ artists, genres, filters });
+      const qs = providerConfigKey;
       router.replace(qs ? `${pathname}?${qs}` : pathname);
-      setTimeout(fetchRecs, 0);
+      if (!hasCurrentRecs) {
+        setTimeout(fetchRecs, 0);
+      }
     }
   }, [
     artists,
     fetchRecs,
     filters,
     genres,
+    isLoadingRecs,
     pathname,
+    recommendations.length,
     router,
     searchParams,
     setSearchConfig,

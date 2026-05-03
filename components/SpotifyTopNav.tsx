@@ -1,28 +1,23 @@
 "use client";
 
-import useElementHeight from "@/utils/useElementHeight";
 import { Box } from "@chakra-ui/react";
-import { useContext, useEffect, useRef } from "react";
-import { TopNavHeightContext } from "./DesktopAppLayout";
+import { usePathname } from "next/navigation";
 
 interface ISpotifyTopNav {
   children: React.ReactNode;
 }
 
 export default function SpotifyTopNav({ children }: ISpotifyTopNav) {
-  const topNavRef = useRef<HTMLDivElement>(null);
-  const height = useElementHeight(topNavRef);
-  const { setTopNavHeight } = useContext(TopNavHeightContext);
-  useEffect(() => {
-    setTopNavHeight(height);
-  }, [height, setTopNavHeight]);
+  const pathname = usePathname();
+  const isHidden = pathname?.startsWith("/track/");
+
   return (
     <Box
       pt={2}
       pb={2}
-      ref={topNavRef}
       borderBottom={["none", "1px"]}
       borderColor="whiteAlpha.300"
+      display={isHidden ? "none" : "block"}
     >
       {children}
     </Box>

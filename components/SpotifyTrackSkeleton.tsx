@@ -16,18 +16,25 @@ export default function SpotifyTrackSkeleton() {
           <CollectionCoverSwirl />
         </AspectRatio>
         <Flex
-          bg="gray.200"
+          bg="gray.950"
           borderTopRadius="md"
           mt={2}
           h="20px"
-          opacity={0.15}
+          opacity={0.75}
         />
       </Box>
       <Box h={2} />
-      <Box bg="white" borderBottomRadius="md" opacity={0.15}>
+      <Box
+        bg="gray.950"
+        borderBottomRadius="md"
+        borderWidth="1px"
+        borderTopWidth="0"
+        borderColor="whiteAlpha.200"
+        opacity={0.75}
+      >
         <Box p={2}>
-          <Box h="16px" mb={1} bg="blackAlpha.300" borderRadius="sm" w="70%" />
-          <Box h="14px" bg="blackAlpha.200" borderRadius="sm" w="45%" />
+          <Box h="16px" mb={1} bg="whiteAlpha.300" borderRadius="sm" w="70%" />
+          <Box h="14px" bg="whiteAlpha.200" borderRadius="sm" w="45%" />
         </Box>
         <Flex h="32px" />
       </Box>

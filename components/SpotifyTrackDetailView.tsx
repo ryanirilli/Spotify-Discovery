@@ -1,6 +1,14 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useRef, useState, ViewTransition } from "react";
+import {
+  startTransition,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  ViewTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   Accordion,
@@ -11,6 +19,7 @@ import {
   Heading,
   Icon,
   Image,
+  Progress,
   Skeleton,
   Spinner,
   Stack,
@@ -26,6 +35,7 @@ import spotifyArtistDetailsQuery from "@/queries/spotifyArtistDetailsQuery";
 import spotifyGetArtistAlbumsQuery from "@/queries/spotifyGetArtistAlbumsQuery";
 import spotifyGetAlbumTracksQuery from "@/queries/spotifyGetAlbumTracksQuery";
 import scrollBarStyle from "@/utils/scrollBarStyle";
+import useHoverPreview from "@/utils/useHoverPreview";
 import { TSpotifyAlbum } from "@/types/SpotifyAlbum";
 import { TSpotifyAlbumTrack } from "@/types/SpotifyAlbumTrack";
 import animationData from "@/public/sound-bars.json";
@@ -43,6 +53,11 @@ import {
 } from "./SpotifyRecommendationsProvider";
 
 const lottiePlayerOptions = { animationData };
+
+type TPreviewTrack = {
+  id: string;
+  preview_url: string | null;
+};
 
 export default function SpotifyTrackDetailView({ id }: { id: string }) {
   const router = useRouter();
@@ -69,6 +84,9 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
+  const [lastPreviewTrackId, setLastPreviewTrackId] = useState<string | null>(
+    null
+  );
   const [trackProgress, setTrackProgress] = useState(0);
   const [menuOpenTrackId, setMenuOpenTrackId] = useState<string | null>(null);
 
@@ -80,6 +98,7 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
   const { addArtists, fetchRecs, isSeedLimitReached } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
+  const [hoverPreviewEnabled] = useHoverPreview();
 
   useEffect(() => {
     if (playingTrackId && curTrack !== playingTrackId) {
@@ -97,7 +116,6 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
 
   useEffect(() => {
     if (!playingTrackId) {
-      setTrackProgress(0);
       return;
     }
     const el = audioRef.current;
@@ -124,11 +142,17 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
     };
   }, [playingTrackId]);
 
-  const playPreview = (previewTrack: TSpotifyAlbumTrack) => {
+  const playPreview = (previewTrack: TPreviewTrack) => {
     const el = audioRef.current;
     if (!el || !previewTrack.preview_url) return;
-    el.src = previewTrack.preview_url;
+    if (lastPreviewTrackId !== previewTrack.id) {
+      setTrackProgress(0);
+      el.src = previewTrack.preview_url;
+    } else if (!el.src) {
+      el.src = previewTrack.preview_url;
+    }
     const playPromise = el.play();
+    setLastPreviewTrackId(previewTrack.id);
     setPlayingTrackId(previewTrack.id);
     setCurTrack?.(previewTrack.id);
     playPromise?.catch(() => setPlayingTrackId(null));
@@ -143,12 +167,19 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
     setPlayingTrackId(null);
   };
 
-  const onTrackMouseEnter = (previewTrack: TSpotifyAlbumTrack) => {
+  const onTrackMouseEnter = (previewTrack: TPreviewTrack) => {
     const isTouch =
       typeof window !== "undefined" && window.ontouchstart !== undefined;
-    if (isTouch || menuOpenTrackId) return;
+    if (isTouch || !hoverPreviewEnabled || menuOpenTrackId) return;
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => playPreview(previewTrack), 300);
+  };
+
+  const onTrackMouseLeave = () => {
+    const isTouch =
+      typeof window !== "undefined" && window.ontouchstart !== undefined;
+    if (isTouch || !hoverPreviewEnabled) return;
+    stopPreview();
   };
 
   const onMenuOpenChange = (trackId: string, open: boolean) => {
@@ -165,7 +196,7 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
     }
   };
 
-  const onTrackClick = (previewTrack: TSpotifyAlbumTrack) => {
+  const onTrackClick = (previewTrack: TPreviewTrack) => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
       hoverTimeoutRef.current = null;
@@ -185,11 +216,13 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
   };
 
   const onBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/search");
-    }
+    startTransition(() => {
+      if (window.history.length > 1) {
+        router.back();
+      } else {
+        router.push("/search");
+      }
+    });
   };
 
   const artist = artistQuery.data;
@@ -198,174 +231,246 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
     () => track?.album?.images?.[0]?.url,
     [track]
   );
+  const isTrackPreviewPlayable = Boolean(track?.preview_url);
+  const shouldShowMainTrackProgress = Boolean(
+    track && lastPreviewTrackId === track.id
+  );
 
   return (
-    <Box color="white" p={[4, 6, 8]}>
-      <Flex mb={[4, 6]} alignItems="center" gap={4} flexWrap="wrap">
-        <Button
-          size="sm"
-          variant="ghost"
-          color="white"
-          borderRadius="full"
-          _hover={{ bg: "whiteAlpha.200" }}
-          _active={{ bg: "whiteAlpha.300" }}
-          onClick={onBack}
-        >
-          <Icon as={MdArrowBack} boxSize={5} />
-          Back
-        </Button>
-
-        <Flex alignItems="center" gap={3} minW={0}>
-          <Box
-            boxSize="48px"
-            flexShrink={0}
-            borderRadius="full"
-            overflow="hidden"
-            bg="whiteAlpha.100"
-          >
-            {artist?.images?.[0]?.url ? (
-              <Image
-                alt={artist?.name || "artist"}
-                src={artist.images[0].url}
-                w="100%"
-                h="100%"
-                objectFit="cover"
-              />
-            ) : (
-              <Skeleton w="100%" h="100%" />
-            )}
-          </Box>
-          <Box minW={0}>
-            <Heading as="h1" size="md" lineClamp={1}>
-              {artist?.name ||
-                track?.artists?.[0]?.name ||
-                (artistQuery.isLoading ? "…" : "Artist")}
-            </Heading>
-            {artist?.followers?.total !== undefined && (
-              <Text fontSize="sm" color="gray.400">
-                {artist.followers.total.toLocaleString()} followers
-              </Text>
-            )}
-          </Box>
-        </Flex>
-      </Flex>
-
-      <Flex
-        direction={{ base: "column", md: "row" }}
-        gap={6}
-        alignItems="flex-start"
+    <Box color="white">
+      <Box
+        bg="gray.900/70"
+        backdropFilter="blur(12px) saturate(140%)"
+        p={[1, 2]}
+        position="sticky"
+        top={0}
+        zIndex="banner"
       >
-        <Box
-          w={{ base: "100%", md: "320px" }}
-          flexShrink={0}
-          position={{ base: "static", md: "sticky" }}
-          top={4}
+        <Flex alignItems="center" ml={[1, 0]}>
+          <Button
+            size={["sm", "md"]}
+            variant="ghost"
+            color="white"
+            borderRadius="full"
+            _hover={{ bg: "whiteAlpha.200" }}
+            _active={{ bg: "whiteAlpha.300" }}
+            onClick={onBack}
+          >
+            <Icon as={MdArrowBack} boxSize={5} />
+            Back
+          </Button>
+        </Flex>
+      </Box>
+
+      <Box p={[4, 6, 8]}>
+        <Flex
+          direction={{ base: "column", md: "row" }}
+          gap={6}
+          alignItems="flex-start"
         >
-          {track && (
-            <Stack gap={4}>
-              <Box borderRadius="md" overflow="hidden" bg="whiteAlpha.100">
-                <AspectRatio ratio={1}>
-                  {albumImageUrl ? (
-                    <ViewTransition name={`album-art-${track.id}`} share="morph">
-                      <Image
-                        alt={`${track.album.name} cover art`}
-                        src={albumImageUrl}
-                        w="100%"
-                        h="100%"
-                        objectFit="cover"
-                      />
-                    </ViewTransition>
-                  ) : (
-                    <Box />
-                  )}
-                </AspectRatio>
-              </Box>
-              <Box>
-                <SpotifyLink isExternal rec={track}>
-                  <Text fontWeight="bold" color="white" lineClamp={1}>
-                    {track.name}
-                  </Text>
-                </SpotifyLink>
-                <Text fontSize="xs" color="gray.400" lineClamp={1}>
-                  {track.album.name}
-                </Text>
-              </Box>
-              <Stack gap={2}>
-                <SpotifyAddToPlaylistMenu
-                  track={track}
-                  trigger={
-                    <Button
-                      size="sm"
-                      variant="solid"
-                      borderRadius="full"
-                      border="none"
-                    >
-                      <Icon as={MdPlaylistAdd} boxSize={5} />
-                      Add to playlist
-                    </Button>
-                  }
-                />
-                <Button
-                  size="sm"
-                  variant="solid"
-                  borderRadius="full"
-                  border="none"
-                  _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
-                  disabled={isSeedLimitReached}
-                  onClick={onAddArtistToSeed}
+          <Box
+            w={{ base: "100%", md: "320px" }}
+            flexShrink={0}
+          >
+            {track && (
+              <Stack gap={4}>
+                <Heading as="h2" size="md">
+                  Track Details
+                </Heading>
+                <Box
+                  borderWidth="1px"
+                  borderColor="whiteAlpha.300"
+                  borderRadius="md"
+                  overflow="hidden"
+                  bg="blackAlpha.300"
                 >
-                  <Icon as={AiOutlineUserAdd} boxSize={4} />
-                  Add artist as seed
-                </Button>
+                  <Box bg="whiteAlpha.100">
+                    <AspectRatio
+                      ratio={1}
+                      cursor={isTrackPreviewPlayable ? "pointer" : "default"}
+                      onMouseEnter={() => onTrackMouseEnter(track)}
+                      onMouseLeave={onTrackMouseLeave}
+                      onClick={() => onTrackClick(track)}
+                    >
+                      {albumImageUrl ? (
+                        <ViewTransition
+                          name={`album-art-${track.id}`}
+                          share="morph"
+                        >
+                          <Image
+                            alt={`${track.album.name} cover art`}
+                            src={albumImageUrl}
+                            w="100%"
+                            h="100%"
+                            objectFit="cover"
+                          />
+                        </ViewTransition>
+                      ) : (
+                        <Box />
+                      )}
+                    </AspectRatio>
+                    <Progress.Root
+                      value={shouldShowMainTrackProgress ? trackProgress : 0}
+                    >
+                      <Progress.Track h="2px" bg="whiteAlpha.200">
+                        <Progress.Range
+                          bg="electricPurple.500"
+                          borderRightRadius="full"
+                          transition="none"
+                        />
+                      </Progress.Track>
+                    </Progress.Root>
+                  </Box>
+                  <Stack gap={4} p={4}>
+                    <Box>
+                      <SpotifyLink isExternal rec={track}>
+                        <Text fontWeight="bold" color="white" lineClamp={1}>
+                          {track.name}
+                        </Text>
+                      </SpotifyLink>
+                      <Text fontSize="xs" color="gray.400" lineClamp={1}>
+                        {track.album.name}
+                      </Text>
+                    </Box>
+                    <Stack gap={2}>
+                      <SpotifyAddToPlaylistMenu
+                        track={track}
+                        trigger={
+                          <Button
+                            size="sm"
+                            variant="solid"
+                            borderRadius="full"
+                            border="none"
+                            w="100%"
+                          >
+                            <Icon as={MdPlaylistAdd} boxSize={5} />
+                            Add to playlist
+                          </Button>
+                        }
+                      />
+                      <Button
+                        size="sm"
+                        variant="solid"
+                        borderRadius="full"
+                        border="none"
+                        w="100%"
+                        _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+                        disabled={isSeedLimitReached}
+                        onClick={onAddArtistToSeed}
+                      >
+                        <Icon as={AiOutlineUserAdd} boxSize={4} />
+                        Add artist as seed
+                      </Button>
+                    </Stack>
+                    <SpotifyTrackDetails id={track.id} />
+                  </Stack>
+                </Box>
               </Stack>
-              <Box>
-                <SpotifyTrackDetails id={track.id} />
+            )}
+            {!track && trackQuery.isLoading && (
+              <Stack gap={4}>
+                <Heading as="h2" size="md">
+                  Track Details
+                </Heading>
+                <Box
+                  borderWidth="1px"
+                  borderColor="whiteAlpha.300"
+                  borderRadius="md"
+                  overflow="hidden"
+                  bg="blackAlpha.300"
+                >
+                  <AspectRatio ratio={1}>
+                    <Skeleton w="100%" h="100%" />
+                  </AspectRatio>
+                  <Stack gap={4} p={4}>
+                    <Skeleton height="20px" w="80%" />
+                    <Skeleton height="16px" w="60%" />
+                    <Skeleton height="32px" borderRadius="full" />
+                    <Skeleton height="32px" borderRadius="full" />
+                  </Stack>
+                </Box>
+              </Stack>
+            )}
+          </Box>
+
+          <Stack
+            flex={1}
+            minW={0}
+            w="100%"
+            gap={4}
+            pt={{ base: 0, md: 10 }}
+            css={scrollBarStyle}
+          >
+            <Flex alignItems="center" gap={3} minW={0}>
+              <Box
+                boxSize="48px"
+                flexShrink={0}
+                borderRadius="full"
+                overflow="hidden"
+                bg="whiteAlpha.100"
+              >
+                {artist?.images?.[0]?.url ? (
+                  <Image
+                    alt={artist?.name || "artist"}
+                    src={artist.images[0].url}
+                    w="100%"
+                    h="100%"
+                    objectFit="cover"
+                  />
+                ) : (
+                  <Skeleton w="100%" h="100%" />
+                )}
               </Box>
-            </Stack>
-          )}
-          {!track && trackQuery.isLoading && (
-            <Stack gap={4}>
-              <AspectRatio ratio={1}>
-                <Skeleton w="100%" h="100%" />
-              </AspectRatio>
-              <Skeleton height="20px" w="80%" />
-              <Skeleton height="16px" w="60%" />
-            </Stack>
-          )}
-        </Box>
-
-        <Box flex={1} minW={0} w="100%" css={scrollBarStyle}>
-          {albumsQuery.isLoading ? (
-            <Flex justify="center" py={8}>
-              <Spinner />
+              <Box minW={0}>
+                <Heading as="h1" size="md" lineClamp={1}>
+                  {artist?.name ||
+                    track?.artists?.[0]?.name ||
+                    (artistQuery.isLoading ? "…" : "Artist")}
+                </Heading>
+                {artist?.followers?.total !== undefined && (
+                  <Text fontSize="sm" color="gray.400">
+                    {artist.followers.total.toLocaleString()} followers
+                  </Text>
+                )}
+              </Box>
             </Flex>
-          ) : albums.length === 0 ? (
-            <Text color="gray.400" py={4}>
-              No albums found.
-            </Text>
-          ) : (
-            <Accordion.Root multiple>
-              {albums.map((album) => (
-                <AlbumAccordionItem
-                  key={album.id}
-                  album={album}
-                  playingTrackId={playingTrackId}
-                  menuOpenTrackId={menuOpenTrackId}
-                  trackProgress={trackProgress}
-                  onTrackMouseEnter={onTrackMouseEnter}
-                  onTrackMouseLeave={stopPreview}
-                  onTrackClick={onTrackClick}
-                  onMenuOpenChange={onMenuOpenChange}
-                />
-              ))}
-            </Accordion.Root>
-          )}
-        </Box>
-      </Flex>
+            <Heading as="h2" size="md">
+              Discography
+            </Heading>
+            <Box>
+              {albumsQuery.isLoading ? (
+                <Flex justify="center" py={8}>
+                  <Spinner />
+                </Flex>
+              ) : albums.length === 0 ? (
+                <Text color="gray.400" py={4}>
+                  No albums found.
+                </Text>
+              ) : (
+                <Accordion.Root multiple>
+                  {albums.map((album) => (
+                    <AlbumAccordionItem
+                      key={album.id}
+                      album={album}
+                      playingTrackId={playingTrackId}
+                      menuOpenTrackId={menuOpenTrackId}
+                      trackProgress={trackProgress}
+                      onTrackMouseEnter={onTrackMouseEnter}
+                      onTrackMouseLeave={onTrackMouseLeave}
+                      onTrackClick={onTrackClick}
+                      onMenuOpenChange={onMenuOpenChange}
+                    />
+                  ))}
+                </Accordion.Root>
+              )}
+            </Box>
+          </Stack>
+        </Flex>
 
-      <VisuallyHidden>
-        <audio ref={audioRef} preload="auto" playsInline loop />
-      </VisuallyHidden>
+        <VisuallyHidden>
+          <audio ref={audioRef} preload="auto" playsInline loop />
+        </VisuallyHidden>
+      </Box>
     </Box>
   );
 }

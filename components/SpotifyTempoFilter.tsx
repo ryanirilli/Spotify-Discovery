@@ -38,7 +38,7 @@ export default function SpotifyTempoFilter({
     >
       <Box px={2}>
         <Flex justifyContent="space-between" mb={2}>
-          <Text mb={2}>Tempo Range (BPM)</Text>
+          <Text textStyle="sectionTitle" mb={2}>Tempo Range (BPM)</Text>
           <Tooltip.Root openDelay={500}>
             <Tooltip.Trigger asChild>
               <IconButton
@@ -52,7 +52,7 @@ export default function SpotifyTempoFilter({
             </Tooltip.Trigger>
             <Portal>
               <Tooltip.Positioner>
-                <Tooltip.Content fontSize="xs">
+                <Tooltip.Content textStyle="microLabel">
                   <Tooltip.Arrow />
                   Remove filter
                 </Tooltip.Content>
@@ -62,7 +62,7 @@ export default function SpotifyTempoFilter({
         </Flex>
         <Flex mb={2}>
           <Box mr={2}>
-            <Text fontSize="xs">Target</Text>
+            <Text textStyle="microLabel">Target</Text>
             <NumberInput.Root
               maxW={20}
               value={String(value?.[0] ?? 0)}
@@ -80,7 +80,7 @@ export default function SpotifyTempoFilter({
             </NumberInput.Root>
           </Box>
           <Box>
-            <Text fontSize="xs">Max</Text>
+            <Text textStyle="microLabel">Max</Text>
             <NumberInput.Root
               maxW="80px"
               value={String(value?.[1] ?? 0)}

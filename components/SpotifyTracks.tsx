@@ -290,7 +290,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
         >
           <Flex p={2}>
             <Box flex={1} minW={0}>
-              <Text fontWeight="bold" fontSize="small" color="white">
+              <Text textStyle="itemTitle" color="white">
                 {isLoadingRecs ? (
                   "..."
                 ) : (
@@ -308,7 +308,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
                   </SpotifyLink>
                 )}
               </Text>
-              <Text fontSize="small" color="whiteAlpha.700">
+              <Text textStyle="itemMeta" color="whiteAlpha.700">
                 {isLoadingRecs ? (
                   "..."
                 ) : (
@@ -346,8 +346,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
               <Icon boxSize={5} as={TbMusicPlus} />
               <Text
                 as="span"
-                fontSize="xs"
-                lineHeight="1.1"
+                textStyle="microLabel"
                 maxW="100%"
                 textAlign="center"
               >
@@ -373,8 +372,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
                   <Icon boxSize={5} as={TbPlaylist} />
                   <Text
                     as="span"
-                    fontSize="xs"
-                    lineHeight="1.1"
+                    textStyle="microLabel"
                     maxW="100%"
                     textAlign="center"
                   >
@@ -406,8 +404,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
                 <Icon boxSize={5} as={TbListDetails} />
                 <Text
                   as="span"
-                  fontSize="xs"
-                  lineHeight="1.1"
+                  textStyle="microLabel"
                   maxW="100%"
                   textAlign="center"
                 >

@@ -228,7 +228,7 @@ export default function SpotifyAutocomplete() {
             h={9}
             ps={10}
             pe={3}
-            fontSize="sm"
+            textStyle="body"
             borderWidth="0"
             borderRadius="full"
             outline="0"
@@ -291,7 +291,7 @@ export default function SpotifyAutocomplete() {
                       style={{ listStyle: "none" }}
                     >
                       <Box p={4} bg="black" color="white">
-                        <Text fontSize="xl">
+                        <Text textStyle="sectionTitle">
                           &#x261D; Search for your favorite artist
                         </Text>
                       </Box>
@@ -320,7 +320,7 @@ export default function SpotifyAutocomplete() {
                         borderColor="whiteAlpha.100"
                       >
                         <Spinner size="xs" color="electricPurple.300" />
-                        <Text fontSize="sm">
+                        <Text textStyle="statusText">
                           {hasResults ? "Updating results" : "Searching artists"}
                         </Text>
                       </Flex>
@@ -337,7 +337,7 @@ export default function SpotifyAutocomplete() {
                       style={{ listStyle: "none" }}
                     >
                       <Box px={3} py={3} color="whiteAlpha.800">
-                        <Text fontSize="sm">Could not load artist results.</Text>
+                        <Text textStyle="statusText">Could not load artist results.</Text>
                       </Box>
                     </motion.li>
                   )}
@@ -352,7 +352,7 @@ export default function SpotifyAutocomplete() {
                       style={{ listStyle: "none" }}
                     >
                       <Box px={3} py={3} color="whiteAlpha.800">
-                        <Text fontSize="sm">No artists found.</Text>
+                        <Text textStyle="statusText">No artists found.</Text>
                       </Box>
                     </motion.li>
                   )}
@@ -385,7 +385,7 @@ export default function SpotifyAutocomplete() {
                           }
                         >
                           <Flex alignItems="center" gap={3} px={3}>
-                            <Text>{artist.name}</Text>
+                            <Text textStyle="itemTitle">{artist.name}</Text>
                             <Spacer />
                             {!artists.includes(artist.id) && (
                               <Button

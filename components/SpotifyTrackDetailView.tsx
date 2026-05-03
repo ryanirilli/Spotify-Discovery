@@ -269,7 +269,7 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
           >
             {track && (
               <Stack gap={4}>
-                <Heading as="h2" size="md">
+                <Heading as="h2" textStyle="sectionTitle">
                   Track Details
                 </Heading>
                 <Box
@@ -319,11 +319,11 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                   <Stack gap={4} p={4}>
                     <Box>
                       <SpotifyLink isExternal rec={track}>
-                        <Text fontWeight="bold" color="white" lineClamp={1}>
+                        <Text textStyle="itemTitle" color="white" lineClamp={1}>
                           {track.name}
                         </Text>
                       </SpotifyLink>
-                      <Text fontSize="xs" color="gray.400" lineClamp={1}>
+                      <Text textStyle="itemMeta" color="gray.400" lineClamp={1}>
                         {track.album.name}
                       </Text>
                     </Box>
@@ -359,7 +359,7 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
             )}
             {!track && trackQuery.isLoading && (
               <Stack gap={4}>
-                <Heading as="h2" size="md">
+                <Heading as="h2" textStyle="sectionTitle">
                   Track Details
                 </Heading>
                 <Box
@@ -412,26 +412,26 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                 )}
               </Box>
               <Box minW={0}>
-                <Heading as="h1" size="md" lineClamp={1}>
+                <Heading as="h1" textStyle="pageTitle" lineClamp={1}>
                   {artist?.name ||
                     track?.artists?.[0]?.name ||
                     (artistQuery.isLoading ? "…" : "Artist")}
                 </Heading>
                 {artist?.followers?.total !== undefined && (
-                  <Text fontSize="sm" color="gray.400">
+                  <Text textStyle="itemMeta" color="gray.400">
                     {artist.followers.total.toLocaleString()} followers
                   </Text>
                 )}
               </Box>
             </Flex>
-            <Heading as="h2" size="md">
+            <Heading as="h2" textStyle="sectionTitle">
               Discography
             </Heading>
             <Box>
               {!artistId || albumsQuery.isLoading ? (
                 <DiscographySkeleton />
               ) : albums.length === 0 ? (
-                <Text color="gray.400" py={4}>
+                <Text textStyle="statusText" color="gray.400" py={4}>
                   No albums found.
                 </Text>
               ) : (
@@ -550,8 +550,8 @@ function AlbumAccordionItem({
             </AspectRatio>
           </Box>
           <Box flex={1} minW={0}>
-            <Text lineClamp={1}>{album.name}</Text>
-            <Text fontSize="xs" color="gray.400" textTransform="capitalize">
+            <Text textStyle="itemTitle" lineClamp={1}>{album.name}</Text>
+            <Text textStyle="itemMeta" color="gray.400" textTransform="capitalize">
               {[year, album.album_type, `${album.total_tracks} tracks`]
                 .filter(Boolean)
                 .join(" · ")}
@@ -623,7 +623,7 @@ function AlbumAccordionItem({
                           transition="transform 0.25s ease-in-out"
                           transform={`translateY(${isActive ? "-100%" : "0%"})`}
                         >
-                          <Text fontSize="sm" color="gray.400">
+                          <Text textStyle="itemMeta" color="gray.400">
                             {track.track_number}
                           </Text>
                         </Flex>
@@ -643,7 +643,7 @@ function AlbumAccordionItem({
                           />
                         </Flex>
                       </Box>
-                      <Text fontSize="sm" lineClamp={1}>
+                      <Text textStyle="itemTitle" lineClamp={1}>
                         {track.name}
                       </Text>
                     </Flex>
@@ -698,7 +698,7 @@ function AlbumAccordionItem({
                         transition="transform 0.25s ease-in-out"
                         transform={`translateY(${showActions ? "-100%" : "0%"})`}
                       >
-                        <Text fontSize="xs" color="gray.400">
+                        <Text textStyle="itemMeta" color="gray.400">
                           {msToMinSec(track.duration_ms)}
                         </Text>
                       </Flex>

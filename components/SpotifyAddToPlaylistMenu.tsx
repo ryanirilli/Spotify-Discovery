@@ -268,6 +268,7 @@ function MenuBody({
             ref={inputRef}
             autoFocus={autoFocusInput}
             value={filter}
+            textStyle="body"
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Find or create a playlist"
             onKeyDown={(e) => {
@@ -298,9 +299,9 @@ function MenuBody({
             pending={createMutation.isPending}
           >
             <Icon as={SiApplemusic} color="color-palette.400" />
-            <Text lineClamp={1}>
+            <Text textStyle="body" lineClamp={1}>
               Create{" "}
-              <Text as="span" fontWeight="bold">
+              <Text as="span" textStyle="itemTitle">
                 &ldquo;{filter.trim()}&rdquo;
               </Text>
             </Text>
@@ -312,7 +313,7 @@ function MenuBody({
             <LoadingTextRows count={6} />
           </Box>
         ) : filtered.length === 0 ? (
-          <Text px={3} py={3} color="gray.400" fontSize="sm">
+          <Text px={3} py={3} color="gray.400" textStyle="statusText">
             {filter.trim()
               ? "No matching playlists"
               : "No playlists yet"}
@@ -328,7 +329,7 @@ function MenuBody({
                 addMutation.variables?.playlistId === pl.id
               }
             >
-              <Text lineClamp={1}>{pl.name}</Text>
+              <Text textStyle="itemTitle" lineClamp={1}>{pl.name}</Text>
             </PopoverRow>
           ))
         )}
@@ -352,7 +353,7 @@ function PopoverRow({ children, onClick, disabled, pending }: IPopoverRow) {
       w="100%"
       justifyContent="flex-start"
       borderRadius={0}
-      fontWeight="normal"
+      textStyle="body"
       px={3}
       disabled={disabled}
       onClick={(e) => {

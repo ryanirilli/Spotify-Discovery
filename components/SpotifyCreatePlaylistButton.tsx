@@ -65,7 +65,7 @@ export default function SpotifyCreatePlaylistButton() {
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header>
-                <Dialog.Title>Create Playlist</Dialog.Title>
+                <Dialog.Title textStyle="dialogTitle">Create Playlist</Dialog.Title>
               </Dialog.Header>
               <Dialog.CloseTrigger asChild>
                 <DialogCloseButton />
@@ -76,6 +76,7 @@ export default function SpotifyCreatePlaylistButton() {
                     <InputGroup>
                       <Input
                         value={playlistName}
+                        textStyle="body"
                         onChange={(e) => setPlaylistName(e.target.value)}
                         ref={initialRef}
                         placeholder="Playlist Name"

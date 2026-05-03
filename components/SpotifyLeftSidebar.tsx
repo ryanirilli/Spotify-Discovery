@@ -71,7 +71,7 @@ export default function SpotifyLeftSidebar() {
             </IconButton>
           </Tooltip.Trigger>
           <Tooltip.Positioner>
-            <Tooltip.Content>Playlists</Tooltip.Content>
+            <Tooltip.Content textStyle="microLabel">Playlists</Tooltip.Content>
           </Tooltip.Positioner>
         </Tooltip.Root>
       </Flex>

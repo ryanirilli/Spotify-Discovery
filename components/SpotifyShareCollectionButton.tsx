@@ -167,8 +167,10 @@ export default function SpotifyShareCollectionButton() {
                 alignItems="flex-start"
                 gap={1}
               >
-                <Dialog.Title>Share with the community</Dialog.Title>
-                <Text color="whiteAlpha.700" fontSize="sm">
+                <Dialog.Title textStyle="dialogTitle">
+                  Share with the community
+                </Dialog.Title>
+                <Text color="whiteAlpha.700" textStyle="body">
                   Publish your search on the homepage
                 </Text>
               </Dialog.Header>
@@ -177,6 +179,7 @@ export default function SpotifyShareCollectionButton() {
                   <Input
                     autoFocus={!isCreated}
                     value={inputValue}
+                    textStyle="body"
                     onChange={(event) => setTitle(event.target.value)}
                     placeholder="Collection title"
                     maxLength={80}
@@ -185,7 +188,7 @@ export default function SpotifyShareCollectionButton() {
                   />
                   <Clipboard.Root value={shareUrl}>
                     <Clipboard.Label
-                      fontSize="xs"
+                      textStyle="microLabel"
                       color="whiteAlpha.700"
                       mb={1}
                       display="block"
@@ -194,7 +197,7 @@ export default function SpotifyShareCollectionButton() {
                     </Clipboard.Label>
                     <Flex gap={2}>
                       <Clipboard.Input asChild>
-                        <Input disabled fontSize="sm" flex={1} />
+                        <Input disabled textStyle="body" flex={1} />
                       </Clipboard.Input>
                       <Clipboard.Trigger asChild>
                         <IconButton
@@ -273,9 +276,9 @@ function CoverPreview({
           color="whiteAlpha.400"
         >
           <Icon as={isFailed ? MdImageNotSupported : MdImage} boxSize={10} />
-          <Flex align="center" gap={1} fontSize="xs">
+          <Flex align="center" gap={1} textStyle="microLabel">
             <Icon as={MdAutoAwesome} boxSize={3.5} />
-            <Text as="span">Cover</Text>
+            <Text as="span" textStyle="microLabel">Cover</Text>
           </Flex>
         </Flex>
       )}

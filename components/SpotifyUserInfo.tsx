@@ -50,10 +50,10 @@ export default function SpotifyUserInfo() {
             <Flex flex={1} alignItems="center" minW={0}>
               <Avatar.Root bg="spotifyGreen" ml={-4} size="sm">
                 <Avatar.Fallback>
-                  <Icon as={FaUser} fontSize="md" color="black" />
+                  <Icon as={FaUser} boxSize={4} color="black" />
                 </Avatar.Fallback>
               </Avatar.Root>
-              <Text ml={2} color="white" lineClamp={1}>
+              <Text ml={2} color="white" textStyle="itemTitle" lineClamp={1}>
                 {data?.display_name}
               </Text>
             </Flex>
@@ -75,6 +75,7 @@ export default function SpotifyUserInfo() {
                 value="disconnect"
                 bg="transparent"
                 color="white"
+                textStyle="body"
                 _hover={{ bg: "whiteAlpha.200" }}
                 onClick={onOpen}
               >
@@ -91,17 +92,19 @@ export default function SpotifyUserInfo() {
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header>
-                <Dialog.Title>Disconnect from Spotify</Dialog.Title>
+                <Dialog.Title textStyle="dialogTitle">
+                  Disconnect from Spotify
+                </Dialog.Title>
               </Dialog.Header>
               <Dialog.CloseTrigger asChild>
                 <DialogCloseButton />
               </Dialog.CloseTrigger>
               <Dialog.Body p={4}>
-                <Text mb={2}>
+                <Text textStyle="body" mb={2}>
                   Sorry to see you go! In order to disconnect Disco Stu from
                   your Spotify account you need to remove access from this app.
                 </Text>
-                <Text>
+                <Text textStyle="body">
                   By clicking continue you will end your session with Disco Stu
                   and be redirected to Spotify&apos;s &quot;Manage Apps&quot;
                   page. There you can locate the app titled &quot;Disco

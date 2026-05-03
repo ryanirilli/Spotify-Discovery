@@ -112,6 +112,7 @@ export default function SpotifySeeds() {
                       </Avatar.Root>
                     </Tag.StartElement>
                     <Tag.Label
+                      textStyle="controlLabel"
                       maxW="none"
                       overflow="visible"
                       whiteSpace="nowrap"
@@ -149,6 +150,7 @@ export default function SpotifySeeds() {
                     <Icon ml={-1} mr={2} as={MdLibraryMusic} color="white" />
                   </Tag.StartElement>
                   <Tag.Label
+                    textStyle="controlLabel"
                     textTransform="capitalize"
                     maxW="none"
                     overflow="visible"

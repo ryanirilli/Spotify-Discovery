@@ -128,7 +128,9 @@ export default function SpotifyRecommendationFilters() {
           <HStack>
             {filters?.target_tempo ? (
               <Tag.Root size={["sm", "md"]} borderRadius="full">
-                <Tag.Label>Target BPM {filters.target_tempo}</Tag.Label>
+                <Tag.Label textStyle="controlLabel">
+                  Target BPM {filters.target_tempo}
+                </Tag.Label>
                 <Tag.EndElement>
                   <Tag.CloseTrigger
                     onClick={() => {
@@ -142,7 +144,9 @@ export default function SpotifyRecommendationFilters() {
             ) : null}
             {filters?.max_tempo ? (
               <Tag.Root size={["sm", "md"]} borderRadius="full">
-                <Tag.Label>Max BPM {filters.max_tempo}</Tag.Label>
+                <Tag.Label textStyle="controlLabel">
+                  Max BPM {filters.max_tempo}
+                </Tag.Label>
                 <Tag.EndElement>
                   <Tag.CloseTrigger
                     onClick={() => {
@@ -169,7 +173,7 @@ export default function SpotifyRecommendationFilters() {
           <Switch.Control>
             <Switch.Thumb />
           </Switch.Control>
-          <Switch.Label color="white" fontSize={["xs", "sm"]}>
+          <Switch.Label color="white" textStyle="controlLabel">
             Hover to preview
           </Switch.Label>
         </Switch.Root>

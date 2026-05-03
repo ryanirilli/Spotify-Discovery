@@ -76,7 +76,7 @@ export function SpotifyCollectionCard({
                   as={isFailed ? MdImageNotSupported : MdLibraryMusic}
                   boxSize={10}
                 />
-                <Text fontSize="sm">
+                <Text textStyle="statusText">
                   {isFailed ? "Cover unavailable" : "Collection"}
                 </Text>
               </>
@@ -88,13 +88,13 @@ export function SpotifyCollectionCard({
         <Heading
           as="h4"
           color="whiteAlpha.900"
-          size="md"
+          textStyle="itemTitle"
           lineClamp={1}
           title={collection.title}
         >
           {collection.title}
         </Heading>
-        <Text mt={1} color="whiteAlpha.600" fontSize="sm" lineClamp={1}>
+        <Text mt={1} color="whiteAlpha.600" textStyle="itemMeta" lineClamp={1}>
           {collection.owner_display_name
             ? `Shared by ${collection.owner_display_name}`
             : "Shared collection"}

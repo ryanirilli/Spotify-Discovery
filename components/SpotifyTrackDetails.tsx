@@ -43,14 +43,14 @@ export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
     attributes.forEach((key) =>
       nodes.push(
         <Table.Row key={key}>
-          <Table.Cell>
+          <Table.Cell textStyle="itemMeta">
             {key.toLowerCase() === "duration_ms"
               ? "duration"
               : key.toLowerCase() === "tempo"
               ? "bpm"
               : key}
           </Table.Cell>
-          <Table.Cell textAlign="right">
+          <Table.Cell textStyle="itemMeta" textAlign="right">
             {key.toLowerCase() === "duration_ms"
               ? msToMinAndSec(data[key])
               : key.toLowerCase() === "tempo"
@@ -71,8 +71,10 @@ export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
     sliderAttributes.forEach((key) => {
       nodes.push(
         <Table.Row key={key}>
-          <Table.Cell>{key === "valence" ? "positive vibe" : key}</Table.Cell>
-          <Table.Cell textAlign="right">
+          <Table.Cell textStyle="itemMeta">
+            {key === "valence" ? "positive vibe" : key}
+          </Table.Cell>
+          <Table.Cell textStyle="itemMeta" textAlign="right">
             <Slider.Root
               aria-label={[`${key} slider`]}
               defaultValue={[data[key] * 100]}

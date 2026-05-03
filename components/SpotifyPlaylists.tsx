@@ -67,7 +67,7 @@ export default function SpotifyPlaylists() {
             />
           </Box>
         </Box>
-        <Text fontWeight="bold">Playlists</Text>
+        <Text textStyle="sectionTitle">Playlists</Text>
       </Flex>
       <Box bg="blackAlpha.500">
         {isLoading ? (
@@ -123,7 +123,7 @@ function PlaylistItem({ playlist }: { playlist: TSpotifyPlaylist }) {
       }}
     >
       <Text
-        fontSize="small"
+        textStyle="itemMeta"
         lineClamp={1}
         color="whiteAlpha.500"
         className="spotify-playlist-list-item"

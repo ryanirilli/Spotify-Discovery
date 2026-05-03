@@ -24,6 +24,93 @@ const config = defineConfig({
     },
   },
   theme: {
+    textStyles: {
+      brandDisplay: {
+        value: {
+          fontSize: ["4xl", "5xl", "6xl", "7xl"],
+          lineHeight: "1",
+          fontWeight: "normal",
+        },
+      },
+      displayTitle: {
+        value: {
+          fontSize: ["4xl", "5xl", "6xl", "7xl"],
+          lineHeight: "1.05",
+          letterSpacing: "-0.02em",
+          fontWeight: "bold",
+        },
+      },
+      displayBody: {
+        value: {
+          fontSize: ["md", "lg", "xl"],
+          lineHeight: "1.5",
+          fontWeight: "normal",
+        },
+      },
+      pageTitle: {
+        value: {
+          fontSize: "2xl",
+          lineHeight: "1.2",
+          fontWeight: "semibold",
+        },
+      },
+      sectionTitle: {
+        value: {
+          fontSize: "md",
+          lineHeight: "1.25",
+          fontWeight: "semibold",
+        },
+      },
+      itemTitle: {
+        value: {
+          fontSize: "sm",
+          lineHeight: "1.3",
+          fontWeight: "semibold",
+        },
+      },
+      itemMeta: {
+        value: {
+          fontSize: "xs",
+          lineHeight: "1.35",
+          fontWeight: "normal",
+        },
+      },
+      body: {
+        value: {
+          fontSize: "sm",
+          lineHeight: "1.5",
+          fontWeight: "normal",
+        },
+      },
+      controlLabel: {
+        value: {
+          fontSize: "sm",
+          lineHeight: "1.25",
+          fontWeight: "semibold",
+        },
+      },
+      microLabel: {
+        value: {
+          fontSize: "xs",
+          lineHeight: "1.15",
+          fontWeight: "medium",
+        },
+      },
+      dialogTitle: {
+        value: {
+          fontSize: "md",
+          lineHeight: "1.25",
+          fontWeight: "semibold",
+        },
+      },
+      statusText: {
+        value: {
+          fontSize: "sm",
+          lineHeight: "1.4",
+          fontWeight: "normal",
+        },
+      },
+    },
     recipes: {
       // Three-variant button system: primary (electric purple CTA),
       // secondary (whiteAlpha pill), ghost (transparent w/ hover).

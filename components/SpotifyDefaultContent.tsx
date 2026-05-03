@@ -41,7 +41,7 @@ export default function SpotifyDefaultContent() {
   return (
     <Box color="white">
       <Box p={[4, null, null, 8]}>
-        <Heading mb={4}>Community Collections</Heading>
+        <Heading textStyle="pageTitle" mb={4}>Community Collections</Heading>
 
         {isLoading ? (
           <Wrap gap={[8, 4]}>
@@ -52,7 +52,9 @@ export default function SpotifyDefaultContent() {
             ))}
           </Wrap>
         ) : isError ? (
-          <Text color="whiteAlpha.700">Collections could not be loaded.</Text>
+          <Text textStyle="statusText" color="whiteAlpha.700">
+            Collections could not be loaded.
+          </Text>
         ) : collections.length ? (
           <Wrap gap={[8, 4]}>
             {collections.map((collection) => (
@@ -70,7 +72,7 @@ export default function SpotifyDefaultContent() {
             gap={3}
             color="whiteAlpha.700"
           >
-            <Text>No collections have been shared yet.</Text>
+            <Text textStyle="statusText">No collections have been shared yet.</Text>
             <Button visual="secondary" onClick={() => setIsNew(true)}>
               Search for an artist
             </Button>

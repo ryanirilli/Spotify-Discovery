@@ -203,11 +203,7 @@ export default function BottomSheet({
                         px={4}
                       >
                         {title && (
-                          <Box
-                            flex={1}
-                            fontSize="md"
-                            fontWeight="semibold"
-                          >
+                          <Box flex={1} textStyle="dialogTitle">
                             {title}
                           </Box>
                         )}

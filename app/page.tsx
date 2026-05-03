@@ -46,26 +46,20 @@ export default function Home() {
           <Text
             className={`${monoton.className} disco-stu-title`}
             mb={[4, 5, 6]}
-            fontSize={["4xl", "5xl", "6xl", "7xl"]}
-            lineHeight="1"
+            textStyle="brandDisplay"
           >
             Disco Stu
           </Text>
           <Heading
             as="h1"
-            fontSize={["4xl", "5xl", "6xl", "7xl"]}
-            lineHeight="1.05"
-            letterSpacing="-0.02em"
-            fontWeight="bold"
+            textStyle="displayTitle"
           >
             Crate digging for the streaming age.
           </Heading>
           <Text
             mt={[4, 6]}
-            fontSize={["md", "lg", "xl"]}
-            fontWeight="light"
+            textStyle="displayBody"
             color="whiteAlpha.800"
-            lineHeight="1.5"
           >
             Built for curators, tastemakers, and DJs tired of hearing the
             algorithm&apos;s greatest hits.
@@ -80,7 +74,7 @@ export default function Home() {
             asChild
           >
             <a href="/api/spotify-login">
-              <Icon as={BsSpotify} fontSize="md" color="white" />
+              <Icon as={BsSpotify} boxSize={4} color="white" />
               {isLoggingIn ? "Connecting..." : "Login with Spotify"}
             </a>
           </Button>

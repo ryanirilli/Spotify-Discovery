@@ -70,7 +70,7 @@ export default function SpotifyAddTrackToPlaylistModal({
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.Header>
-              <Dialog.Title>Add To Playlist</Dialog.Title>
+              <Dialog.Title textStyle="dialogTitle">Add To Playlist</Dialog.Title>
               <Flex
                 color="white"
                 bg="black"
@@ -96,14 +96,13 @@ export default function SpotifyAddTrackToPlaylistModal({
                   {selectedTrack && (
                     <>
                       <SpotifyLink isExternal rec={selectedTrack}>
-                        <Text fontWeight="bold" fontSize="small" lineClamp={1}>
+                        <Text textStyle="itemTitle" lineClamp={1}>
                           {selectedTrack?.name}
                         </Text>
                       </SpotifyLink>
                       <SpotifyLink isExternal rec={selectedTrack}>
                         <Text
-                          fontWeight="normal"
-                          fontSize="small"
+                          textStyle="itemMeta"
                           lineClamp={1}
                           transform="translateY(-3px)"
                         >
@@ -130,6 +129,7 @@ export default function SpotifyAddTrackToPlaylistModal({
               >
                 <Input
                   placeholder="Find a playlist"
+                  textStyle="body"
                   value={playlistFilter}
                   onChange={(e) => setPlaylistFilter(e.target.value)}
                 />
@@ -206,7 +206,11 @@ function SpotifyPlaylistListItem({
       }}
     >
       <Flex alignItems="center">
-        <Text opacity={mutation.isSuccess ? 0.4 : 1} textTransform="capitalize">
+        <Text
+          textStyle="itemTitle"
+          opacity={mutation.isSuccess ? 0.4 : 1}
+          textTransform="capitalize"
+        >
           {playlist.name}
         </Text>
         <Spacer />

@@ -11,6 +11,7 @@ import { artistsQuery } from "@/queries/spotifyArtitstsQuery";
 import {
   getEnabledArtistsForConfig,
   MAX_ENABLED_SEEDS,
+  sanitizeRecommendationFilters,
 } from "@/utils/spotifySearchConfig";
 import {
   TSpotifyRecommendationFilters,
@@ -87,7 +88,7 @@ export default function SpotifyRecommendationsProvider({
       const settings: TSpotifyRecommendationsOptions = {
         artists: enabledArtists,
         genres,
-        ...filters,
+        ...sanitizeRecommendationFilters(filters),
       };
 
       return spotifyRecommendations(settings);

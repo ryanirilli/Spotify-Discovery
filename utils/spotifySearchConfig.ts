@@ -5,6 +5,18 @@ import {
 
 export const MAX_ENABLED_SEEDS = 5;
 
+const FILTER_PARAM_RANGES = {
+  min_tempo: { min: 1, max: Number.POSITIVE_INFINITY },
+  max_tempo: { min: 1, max: Number.POSITIVE_INFINITY },
+} satisfies Record<keyof TSpotifyRecommendationFilters, {
+  min: number;
+  max: number;
+}>;
+
+const FILTER_PARAM_KEYS = Object.keys(
+  FILTER_PARAM_RANGES
+) as (keyof TSpotifyRecommendationFilters)[];
+
 function parseCsv(value: string | null) {
   if (!value) return [];
   return value
@@ -18,33 +30,50 @@ function toStringArray(value: unknown) {
   return value.filter((item): item is string => typeof item === "string");
 }
 
-function toPositiveNumber(value: unknown) {
+function toNumberInRange(value: unknown, min: number, max: number) {
+  if (value === null || value === undefined || value === "") {
+    return undefined;
+  }
   const num = Number(value);
-  return Number.isFinite(num) && num > 0 ? num : undefined;
+  return Number.isFinite(num) && num >= min && num <= max ? num : undefined;
+}
+
+export function sanitizeRecommendationFilters(
+  filters: TSpotifyRecommendationFilters
+) {
+  const next: TSpotifyRecommendationFilters = {};
+
+  FILTER_PARAM_KEYS.forEach((key) => {
+    const range = FILTER_PARAM_RANGES[key];
+    const value = toNumberInRange(filters[key], range.min, range.max);
+    if (value !== undefined) next[key] = value;
+  });
+
+  return next;
 }
 
 export function buildSearchStringFromConfig(config: TSpotifySearchConfig) {
   const params = new URLSearchParams();
+  const filters = sanitizeRecommendationFilters(config.filters);
   if (config.artists.length) params.set("artists", config.artists.join(","));
   if (config.genres.length) params.set("genres", config.genres.join(","));
-  if (config.filters.target_tempo) {
-    params.set("target_tempo", String(config.filters.target_tempo));
-  }
-  if (config.filters.max_tempo) {
-    params.set("max_tempo", String(config.filters.max_tempo));
-  }
+  FILTER_PARAM_KEYS.forEach((key) => {
+    const value = filters[key];
+    if (value !== undefined) params.set(key, String(value));
+  });
   return params.toString();
 }
 
 export function parseSearchConfigFromParams(
   params: Pick<URLSearchParams, "get">
 ): TSpotifySearchConfig {
-  const targetTempo = toPositiveNumber(params.get("target_tempo"));
-  const maxTempo = toPositiveNumber(params.get("max_tempo"));
   const filters: TSpotifyRecommendationFilters = {};
 
-  if (targetTempo) filters.target_tempo = targetTempo;
-  if (maxTempo) filters.max_tempo = maxTempo;
+  FILTER_PARAM_KEYS.forEach((key) => {
+    const range = FILTER_PARAM_RANGES[key];
+    const value = toNumberInRange(params.get(key), range.min, range.max);
+    if (value !== undefined) filters[key] = value;
+  });
 
   return {
     artists: parseCsv(params.get("artists")),
@@ -60,12 +89,13 @@ export function normalizeSearchConfig(value: unknown): TSpotifySearchConfig {
     genres?: unknown;
     filters?: Record<string, unknown>;
   };
-  const targetTempo = toPositiveNumber(raw.filters?.target_tempo);
-  const maxTempo = toPositiveNumber(raw.filters?.max_tempo);
   const filters: TSpotifyRecommendationFilters = {};
 
-  if (targetTempo) filters.target_tempo = targetTempo;
-  if (maxTempo) filters.max_tempo = maxTempo;
+  FILTER_PARAM_KEYS.forEach((key) => {
+    const range = FILTER_PARAM_RANGES[key];
+    const value = toNumberInRange(raw.filters?.[key], range.min, range.max);
+    if (value !== undefined) filters[key] = value;
+  });
 
   return {
     artists: toStringArray(raw.artists),

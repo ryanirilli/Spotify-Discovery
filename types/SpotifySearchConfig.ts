@@ -1,5 +1,5 @@
 export type TSpotifyRecommendationFilters = {
-  target_tempo?: number;
+  min_tempo?: number;
   max_tempo?: number;
 };
 

@@ -222,7 +222,8 @@ URL the search page uses.
 
 The core read endpoint is
 [pages/api/spotify-get-recommendations.ts](pages/api/spotify-get-recommendations.ts).
-It takes `?artists=...&genres=...&max_tempo&target_tempo` and forwards to
+It takes `?artists=...&genres=...` plus tempo and vibe filter params, then
+forwards to
 `spotifyApi.getRecommendations({ limit: 100, ... })`, then **filters out
 any track without a `preview_url`** so the autoplay-on-hover UX always
 works.

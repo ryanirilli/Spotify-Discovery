@@ -35,14 +35,11 @@ export default function SpotifySearchSync() {
 
     const params = searchParams ?? new URLSearchParams();
     const urlConfig = parseSearchConfigFromParams(params);
-    const t = params.get("target_tempo");
-    const m = params.get("max_tempo");
 
     const hasUrlState =
       urlConfig.artists.length > 0 ||
       urlConfig.genres.length > 0 ||
-      t !== null ||
-      m !== null;
+      Object.keys(urlConfig.filters).length > 0;
     const hasProviderState =
       artists.length > 0 || genres.length > 0 || Object.keys(filters).length > 0;
     const providerConfig = { artists, genres, filters };

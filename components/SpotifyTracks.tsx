@@ -39,7 +39,7 @@ import useHoverPreview from "@/utils/useHoverPreview";
 const lottiePlayerOptions = { animationData };
 
 export default function SpotifyTracks() {
-  const { recommendations, isLoadingRecs } = useContext(
+  const { recommendations, isLoadingRecs, artists, genres } = useContext(
     SpotifyRecommendationsContext
   ) as TSpotifyRecommendationsContext;
 
@@ -54,6 +54,26 @@ export default function SpotifyTracks() {
           </WrapItem>
         ))}
       </Wrap>
+    );
+  }
+
+  if (
+    !isLoadingRecs &&
+    recommendations.length === 0 &&
+    (artists.length > 0 || genres.length > 0)
+  ) {
+    return (
+      <Flex
+        minH="240px"
+        alignItems="center"
+        justifyContent="center"
+        px={4}
+        color="whiteAlpha.700"
+      >
+        <Text textStyle="statusText">
+          No recommendations found. Try adjusting the tempo.
+        </Text>
+      </Flex>
     );
   }
 

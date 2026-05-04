@@ -8,6 +8,7 @@ export default function DialogCloseButton({
 }: ButtonProps) {
   return (
     <Button
+      type="button"
       visual="secondary"
       size="sm"
       aria-label="Close"

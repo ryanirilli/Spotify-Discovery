@@ -72,6 +72,15 @@ export default function SpotifySeeds() {
               ...topNavScrollBarStyle,
               WebkitOverflowScrolling: "touch",
               overflowScrolling: "touch",
+              "@media (max-width: 47.9975rem)": {
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+                "&::-webkit-scrollbar": {
+                  display: "none",
+                  width: 0,
+                  height: 0,
+                },
+              },
             }}
           >
             <Button
@@ -193,6 +202,18 @@ export default function SpotifySeeds() {
               </Box>
             ))}
           </Flex>
+          <Box
+            aria-hidden="true"
+            display={["block", "none"]}
+            position="absolute"
+            top={0}
+            right={0}
+            bottom={0}
+            w="44px"
+            zIndex={2}
+            pointerEvents="none"
+            background="linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.72))"
+          />
         </Box>
       )}
     </>

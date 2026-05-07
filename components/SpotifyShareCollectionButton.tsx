@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useContext, useEffect, useState } from "react";
+import { FormEvent, MouseEvent, useContext, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AspectRatio,
@@ -104,8 +104,21 @@ export default function SpotifyShareCollectionButton() {
     }
   };
 
-  const onSubmit = (event: FormEvent) => {
+  const closeDialog = (event?: MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    handleOpenChange(false);
+  };
+
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const submitter = (event.nativeEvent as SubmitEvent).submitter;
+    if (
+      submitter instanceof HTMLElement &&
+      submitter.dataset.shareSubmit !== "true"
+    ) {
+      return;
+    }
     if (isCreated) {
       handleOpenChange(false);
       return;
@@ -136,6 +149,7 @@ export default function SpotifyShareCollectionButton() {
     <Dialog.Root open={open} onOpenChange={(e) => handleOpenChange(e.open)}>
       <Dialog.Trigger asChild>
         <Button
+          type="button"
           visual="secondary"
           size={["sm", "md"]}
           disabled={!canShare}
@@ -155,10 +169,8 @@ export default function SpotifyShareCollectionButton() {
             w="100%"
             maxW="md"
           >
-            <Dialog.CloseTrigger asChild>
-              <DialogCloseButton>Done</DialogCloseButton>
-            </Dialog.CloseTrigger>
-            <form onSubmit={onSubmit}>
+            <DialogCloseButton onClick={closeDialog}>Done</DialogCloseButton>
+            <form onSubmit={onSubmit} noValidate>
               <Dialog.Header
                 pt={[6, 5]}
                 px={[6, 5]}
@@ -221,6 +233,7 @@ export default function SpotifyShareCollectionButton() {
                   visual="primary"
                   w="100%"
                   type="submit"
+                  data-share-submit="true"
                   disabled={submitDisabled || mutation.isPending}
                 >
                   {submitLabel}

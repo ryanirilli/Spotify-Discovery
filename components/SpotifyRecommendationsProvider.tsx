@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import produce from "immer";
 import spotifyRecommendations from "@/queries/spotifyRecommendations";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,6 +16,7 @@ import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import { TSpotifyRecommendationsOptions } from "@/types/SpotifyRecommendationsOptions";
 import { artistsQuery } from "@/queries/spotifyArtitstsQuery";
 import {
+  buildSearchStringFromConfig,
   getEnabledArtistsForConfig,
   MAX_ENABLED_SEEDS,
   sanitizeRecommendationFilters,
@@ -33,7 +41,7 @@ export type TSpotifyRecommendationsContext = {
   addGenre: (genre: string) => void;
   removeGenre: (genre: string) => void;
   genres: string[];
-  fetchRecs: () => void;
+  fetchRecs: (config?: TSpotifySearchConfig) => Promise<TSpotifyTrack[]>;
   recommendations: TSpotifyTrack[];
   isSeedLimitReached: boolean;
   filters: TSpotifyRecommendationFilters;
@@ -49,6 +57,27 @@ export const SpotifyRecommendationsContext = createContext<
   TSpotifyRecommendationsContext | undefined
 >(undefined);
 
+const getRecommendationsQueryKey = (config: TSpotifySearchConfig) =>
+  ["spotifyRecommendations", buildSearchStringFromConfig(config)] as const;
+
+async function fetchRecommendationsForConfig(config: TSpotifySearchConfig) {
+  const enabledArtists = getEnabledArtistsForConfig(config);
+
+  if (!enabledArtists.length && !config.genres.length) {
+    return [];
+  }
+
+  document.body.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  const settings: TSpotifyRecommendationsOptions = {
+    artists: enabledArtists,
+    genres: config.genres,
+    ...sanitizeRecommendationFilters(config.filters),
+  };
+
+  return spotifyRecommendations(settings);
+}
+
 export default function SpotifyRecommendationsProvider({
   children,
 }: ISpotifyRecommendationsProvider) {
@@ -56,6 +85,14 @@ export default function SpotifyRecommendationsProvider({
   const [artists, setArtists] = useState<string[]>([]);
   const [genres, setGenres] = useState<string[]>([]);
   const [filters, setFilters] = useState<TSpotifyRecommendationFilters>({});
+  const searchConfig = useMemo<TSpotifySearchConfig>(
+    () => ({ artists, genres, filters }),
+    [artists, genres, filters]
+  );
+  const recommendationsQueryKey = useMemo(
+    () => getRecommendationsQueryKey(searchConfig),
+    [searchConfig]
+  );
 
   // Only the most recently added artists (within the remaining seed budget
   // after genres) are sent to the recommendations API. Older artists remain
@@ -72,30 +109,25 @@ export default function SpotifyRecommendationsProvider({
     return idx !== -1 && idx < disabledCount;
   };
 
-  const {
-    data: recommendations,
-    refetch: fetchRecs,
-    isFetching: isLoadingRecs,
-  } = useQuery<TSpotifyTrack[]>({
-    queryKey: ["spotifyRecommendations"],
-    queryFn: () => {
-      if (!enabledArtists.length && !genres.length) {
-        return Promise.resolve([]);
-      }
-
-      document.body.scrollIntoView({ behavior: "smooth", block: "start" });
-
-      const settings: TSpotifyRecommendationsOptions = {
-        artists: enabledArtists,
-        genres,
-        ...sanitizeRecommendationFilters(filters),
-      };
-
-      return spotifyRecommendations(settings);
-    },
+  const { data: recommendations, isFetching: isLoadingRecs } = useQuery<
+    TSpotifyTrack[]
+  >({
+    queryKey: recommendationsQueryKey,
+    queryFn: () => fetchRecommendationsForConfig(searchConfig),
     enabled: false,
     staleTime: 0,
   });
+
+  const fetchRecs = useCallback(
+    (config: TSpotifySearchConfig = searchConfig) => {
+      return queryClient.fetchQuery({
+        queryKey: getRecommendationsQueryKey(config),
+        queryFn: () => fetchRecommendationsForConfig(config),
+        staleTime: 0,
+      });
+    },
+    [queryClient, searchConfig]
+  );
 
   // Artists can now always be added (older ones are auto-disabled), so the
   // seed limit only applies to genres.
@@ -118,11 +150,12 @@ export default function SpotifyRecommendationsProvider({
         }
       );
     }
-    const updatedArtists = produce(artists, (draft: string[]) => {
-      draft.push(...artist);
-      return draft;
-    });
-    setArtists(updatedArtists);
+    setArtists((currentArtists) =>
+      produce(currentArtists, (draft: string[]) => {
+        draft.push(...artist);
+        return draft;
+      })
+    );
   };
 
   const setSearchConfig = (config: TSpotifySearchConfig) => {
@@ -132,30 +165,33 @@ export default function SpotifyRecommendationsProvider({
   };
 
   const removeArtist = (artist: string) => {
-    const updatedArtists = produce(artists, (draft: string[]) => {
-      const index = draft.findIndex((a) => a === artist);
-      if (index > -1) {
-        draft.splice(index, 1);
-      }
-    });
-    setArtists(updatedArtists);
+    setArtists((currentArtists) =>
+      produce(currentArtists, (draft: string[]) => {
+        const index = draft.findIndex((a) => a === artist);
+        if (index > -1) {
+          draft.splice(index, 1);
+        }
+      })
+    );
   };
 
   const addGenre = (genre: string) => {
-    const updatedGenres = produce(genres, (draft: string[]) => {
-      draft.push(genre);
-    });
-    setGenres(updatedGenres);
+    setGenres((currentGenres) =>
+      produce(currentGenres, (draft: string[]) => {
+        draft.push(genre);
+      })
+    );
   };
 
   const removeGenre = (genre: string) => {
-    const updatedGenres = produce(genres, (draft: string[]) => {
-      const index = draft.findIndex((g) => g === genre);
-      if (index > -1) {
-        draft.splice(index, 1);
-      }
-    });
-    setGenres(updatedGenres);
+    setGenres((currentGenres) =>
+      produce(currentGenres, (draft: string[]) => {
+        const index = draft.findIndex((g) => g === genre);
+        if (index > -1) {
+          draft.splice(index, 1);
+        }
+      })
+    );
   };
 
   const { data: artistsDetailsData, refetch: fetchArtistsDetails } = useQuery<

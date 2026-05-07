@@ -89,16 +89,28 @@ export default function SpotifyTracks() {
 }
 
 function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
-  const { isLoadingRecs, addArtists, fetchRecs, isSeedLimitReached } =
-    useContext(
-      SpotifyRecommendationsContext
-    ) as TSpotifyRecommendationsContext;
+  const {
+    isLoadingRecs,
+    addArtists,
+    fetchRecs,
+    isSeedLimitReached,
+    artists,
+    genres,
+    filters,
+  } = useContext(
+    SpotifyRecommendationsContext
+  ) as TSpotifyRecommendationsContext;
   const artistId = rec.artists?.[0]?.id;
   const onAddArtistToSeed = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!artistId || isSeedLimitReached) return;
+    const nextConfig = {
+      artists: [...artists, artistId],
+      genres,
+      filters,
+    };
     addArtists([artistId]);
-    setTimeout(() => fetchRecs(), 0);
+    void fetchRecs(nextConfig);
   };
   const [_, dragRef, dragPreviewRef] = useDrag(() => ({
     type: "SpotifyTrack",

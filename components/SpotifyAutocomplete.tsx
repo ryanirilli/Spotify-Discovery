@@ -73,9 +73,8 @@ export default function SpotifyAutocomplete() {
   const searchTerm = artist.trim();
   const [debouncedArtist, setDebouncedArtist] = useState("");
   const [isResultsShowing, setIsResultsShowing] = useState(false);
-  const { addArtists, artists, fetchRecs, isSeedLimitReached } = useContext(
-    SpotifyRecommendationsContext
-  ) as TSpotifyRecommendationsContext;
+  const { addArtists, artists, genres, filters, fetchRecs, isSeedLimitReached } =
+    useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
 
   const hasSearchTerm = searchTerm.length >= MIN_SEARCH_LENGTH;
   const hasDebouncedSearchTerm =
@@ -174,13 +173,19 @@ export default function SpotifyAutocomplete() {
   };
 
   const onAddArtist = (artist: TSpotifyArtist) => {
+    const nextConfig = {
+      artists: [...artists, artist.id],
+      genres,
+      filters,
+    };
+
     addArtists([artist.id], [artist]);
     setArtist("");
     setDebouncedArtist("");
     setIsResultsShowing(false);
     setIsNew(false);
     if (pathname === "/search") {
-      setTimeout(fetchRecs, 0);
+      void fetchRecs(nextConfig);
     } else {
       // On /home or /track/[id], jump to /search — SpotifySearchSync will
       // mirror the current provider state into the URL and fetch.
@@ -193,34 +198,14 @@ export default function SpotifyAutocomplete() {
   const shouldShowResults =
     isResultsShowing && (hasSearchTerm || isNewExperience);
 
-  const autocompleteSurface = shouldShowResults
-    ? "var(--chakra-colors-gray-950)"
-    : "var(--chakra-colors-black)";
-  const autocompleteBorderLayers = [
-    "radial-gradient(ellipse 72px 42px at left bottom, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0.26) 32%, transparent 68%) border-box",
-    "radial-gradient(ellipse 72px 42px at right top, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0.26) 32%, transparent 68%) border-box",
-    "linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08)) border-box",
-  ].join(", ");
-  const autocompleteFocusBorderLayers = [
-    "radial-gradient(ellipse 78px 46px at left bottom, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.34) 32%, transparent 68%) border-box",
-    "radial-gradient(ellipse 78px 46px at right top, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.34) 32%, transparent 68%) border-box",
-    "linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.1)) border-box",
-  ].join(", ");
-  const autocompleteShadow = [
-    shouldShowResults ? "var(--chakra-shadows-dark-lg)" : undefined,
-    "inset 0 -1px 0 rgba(0, 0, 0, 0.45)",
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const autocompleteBg = shouldShowResults ? "gray.950" : "black";
+  const autocompleteShadow = shouldShowResults ? "dark-lg" : "none";
   const autocompleteFocusShadow = [
     "0 0 0 1px rgba(255, 255, 255, 0.14)",
     shouldShowResults ? "var(--chakra-shadows-dark-lg)" : undefined,
-    "inset 0 -1px 0 rgba(0, 0, 0, 0.48)",
   ]
     .filter(Boolean)
     .join(", ");
-  const autocompleteBackground = `linear-gradient(${autocompleteSurface}, ${autocompleteSurface}) padding-box, ${autocompleteBorderLayers}`;
-  const autocompleteFocusBackground = `linear-gradient(${autocompleteSurface}, ${autocompleteSurface}) padding-box, ${autocompleteFocusBorderLayers}`;
 
   return (
     <Box
@@ -233,16 +218,16 @@ export default function SpotifyAutocomplete() {
       <Box
         position="relative"
         zIndex={1001}
-        background={autocompleteBackground}
+        bg={autocompleteBg}
         borderWidth="1px"
         borderBottomWidth={shouldShowResults ? "0" : "1px"}
-        borderColor="transparent"
+        borderColor="whiteAlpha.300"
         borderTopRadius={shouldShowResults ? "2xl" : "full"}
         borderBottomRadius={shouldShowResults ? "0" : "full"}
         boxShadow={autocompleteShadow}
-        transition="background 160ms ease, border-radius 160ms ease, box-shadow 160ms ease"
+        transition="background-color 160ms ease, border-color 160ms ease, border-radius 160ms ease, box-shadow 160ms ease"
         _focusWithin={{
-          background: autocompleteFocusBackground,
+          borderColor: "whiteAlpha.500",
           boxShadow: autocompleteFocusShadow,
         }}
       >

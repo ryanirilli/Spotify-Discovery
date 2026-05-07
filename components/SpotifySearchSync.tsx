@@ -56,12 +56,12 @@ export default function SpotifySearchSync() {
       if (!isSameConfig) {
         setSearchConfig(urlConfig);
       }
-      setTimeout(fetchRecs, 0);
+      void fetchRecs(urlConfig);
     } else if (hasProviderState) {
       const qs = providerConfigKey;
       router.replace(qs ? `${pathname}?${qs}` : pathname);
       if (!hasCurrentRecs) {
-        setTimeout(fetchRecs, 0);
+        void fetchRecs(providerConfig);
       }
     }
 

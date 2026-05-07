@@ -85,6 +85,16 @@ export default function SpotifyPlaylists() {
 }
 
 function PlaylistItem({ playlist }: { playlist: TSpotifyPlaylist }) {
+  const showDropHint = () => {
+    toaster.create({
+      id: "playlist-drop-hint",
+      title: "Drag and drop tracks to add to this playlist",
+      type: "info",
+      duration: 3500,
+      meta: { icon: "playlist" },
+    });
+  };
+
   const mutation = useMutation({
     mutationFn: ({ playlistId, tracks }: TSpotifyAddToPlaylistArgs) =>
       spotifyAddTracksToPlaylist({ playlistId, tracks }),
@@ -120,6 +130,15 @@ function PlaylistItem({ playlist }: { playlist: TSpotifyPlaylist }) {
         "&:hover .spotify-playlist-list-item": {
           color: "whiteAlpha.900",
         },
+      }}
+      cursor="pointer"
+      role="button"
+      tabIndex={0}
+      onClick={showDropHint}
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        showDropHint();
       }}
     >
       <Text

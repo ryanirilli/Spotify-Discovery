@@ -35,7 +35,7 @@ export default function SpotifySeeds() {
     nextGenres: string[]
   ) => {
     if (nextArtists.length || nextGenres.length) {
-      setTimeout(fetchRecs, 0);
+      void fetchRecs({ artists: nextArtists, genres: nextGenres, filters });
       return;
     }
 

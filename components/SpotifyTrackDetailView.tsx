@@ -94,9 +94,8 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
       SpotifyCurrentTrackContext
     ) || {};
 
-  const { addArtists, fetchRecs, isSeedLimitReached } = useContext(
-    SpotifyRecommendationsContext
-  ) as TSpotifyRecommendationsContext;
+  const { addArtists, fetchRecs, isSeedLimitReached, artists, genres, filters } =
+    useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
   const [hoverPreviewEnabled] = useHoverPreview();
 
   useEffect(() => {
@@ -210,8 +209,13 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
 
   const onAddArtistToSeed = () => {
     if (!artistId) return;
+    const nextConfig = {
+      artists: [...artists, artistId],
+      genres,
+      filters,
+    };
     addArtists([artistId]);
-    setTimeout(() => fetchRecs(), 0);
+    void fetchRecs(nextConfig);
   };
 
   const onBack = () => {

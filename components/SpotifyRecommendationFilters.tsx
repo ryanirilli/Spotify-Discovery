@@ -35,7 +35,11 @@ export default function SpotifyRecommendationFilters() {
 
   const onCommitFilter = (next: TSpotifyRecommendationFilters) => {
     setFilters?.(next);
-    setTimeout(() => fetchRecs?.(), 0);
+    void fetchRecs?.({
+      artists: artists || [],
+      genres: genres || [],
+      filters: next,
+    });
   };
 
   const onAppliedFilter = () => {

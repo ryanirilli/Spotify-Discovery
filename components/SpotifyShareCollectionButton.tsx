@@ -26,6 +26,7 @@ import {
 import CollectionCoverSwirl from "./CollectionCoverSwirl";
 import DialogCloseButton from "./DialogCloseButton";
 import { Button, IconButton } from "@/components/ui/Button";
+import BottomSheet from "@/components/ui/BottomSheet";
 import {
   SpotifyRecommendationsContext,
   TSpotifyRecommendationsContext,
@@ -54,8 +55,11 @@ export default function SpotifyShareCollectionButton() {
   const [collection, setCollection] = useState<TSpotifyCollection | null>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
-  const shouldAutoFocusTitle =
-    useBreakpointValue({ base: false, md: true }, { ssr: false }) ?? false;
+  const isMobile = useBreakpointValue(
+    { base: true, md: false },
+    { ssr: false }
+  );
+  const shouldAutoFocusTitle = isMobile === false;
   const config = { artists, genres, filters };
   const canShare = hasRecommendationSeeds(config);
   const isCreated = step === "created" && !!collection;
@@ -152,17 +156,90 @@ export default function SpotifyShareCollectionButton() {
     : isCreated
       ? "Done"
       : "Generate cover image";
-  const submitButton = (
+  const handleClose = () => handleOpenChange(false);
+  const shareTrigger = (
+    <Button
+      type="button"
+      visual="secondary"
+      size={["sm", "md"]}
+      disabled={!canShare}
+    >
+      <Icon as={MdIosShare} />
+      Share
+    </Button>
+  );
+  const getSubmitButton = (onDone?: () => void) => (
     <Button
       visual="primary"
       w="100%"
       type={isCreated ? "button" : "submit"}
       data-share-submit={isCreated ? undefined : "true"}
       disabled={submitDisabled || mutation.isPending}
+      onClick={isCreated ? onDone : undefined}
     >
       {submitLabel}
     </Button>
   );
+  const formControls = (
+    <Flex direction="column" gap={4}>
+      <Input
+        ref={titleInputRef}
+        value={inputValue}
+        textStyle="body"
+        onChange={(event) => setTitle(event.target.value)}
+        placeholder="Collection title"
+        maxLength={80}
+        disabled={isCreated}
+        required
+      />
+      <Clipboard.Root value={shareUrl}>
+        <Clipboard.Label
+          textStyle="microLabel"
+          color="whiteAlpha.700"
+          mb={1}
+          display="block"
+        >
+          Share link
+        </Clipboard.Label>
+        <Flex gap={2}>
+          <Clipboard.Input asChild>
+            <Input disabled textStyle="body" flex={1} />
+          </Clipboard.Input>
+          <Clipboard.Trigger asChild>
+            <IconButton visual="secondary" aria-label="Copy share link">
+              <Clipboard.Indicator copied={<Icon as={MdCheck} />}>
+                <Icon as={MdContentCopy} />
+              </Clipboard.Indicator>
+            </IconButton>
+          </Clipboard.Trigger>
+        </Flex>
+      </Clipboard.Root>
+      <Box mx="auto" w={["55%", "50%"]} maxW="200px">
+        <CoverPreview collection={collection} />
+      </Box>
+    </Flex>
+  );
+
+  if (isMobile !== false) {
+    return (
+      <BottomSheet
+        open={open}
+        onOpenChange={handleOpenChange}
+        trigger={shareTrigger}
+        title="Share with the community"
+      >
+        <form onSubmit={onSubmit} noValidate>
+          <Text color="whiteAlpha.700" textStyle="body" mb={4}>
+            Publish your search on the homepage
+          </Text>
+          {formControls}
+          <Box mt={4} pt={3} pb={1} position="sticky" bottom="-12px" bg="black">
+            {getSubmitButton(handleClose)}
+          </Box>
+        </form>
+      </BottomSheet>
+    );
+  }
 
   return (
     <Dialog.Root
@@ -173,15 +250,7 @@ export default function SpotifyShareCollectionButton() {
       }
     >
       <Dialog.Trigger asChild>
-        <Button
-          type="button"
-          visual="secondary"
-          size={["sm", "md"]}
-          disabled={!canShare}
-        >
-          <Icon as={MdIosShare} />
-          Share
-        </Button>
+        {shareTrigger}
       </Dialog.Trigger>
       <Portal>
         <Dialog.Backdrop />
@@ -214,54 +283,15 @@ export default function SpotifyShareCollectionButton() {
                 </Text>
               </Dialog.Header>
               <Dialog.Body px={[6, 5]} py={4}>
-                <Flex direction="column" gap={4}>
-                  <Input
-                    ref={titleInputRef}
-                    value={inputValue}
-                    textStyle="body"
-                    onChange={(event) => setTitle(event.target.value)}
-                    placeholder="Collection title"
-                    maxLength={80}
-                    disabled={isCreated}
-                    required
-                  />
-                  <Clipboard.Root value={shareUrl}>
-                    <Clipboard.Label
-                      textStyle="microLabel"
-                      color="whiteAlpha.700"
-                      mb={1}
-                      display="block"
-                    >
-                      Share link
-                    </Clipboard.Label>
-                    <Flex gap={2}>
-                      <Clipboard.Input asChild>
-                        <Input disabled textStyle="body" flex={1} />
-                      </Clipboard.Input>
-                      <Clipboard.Trigger asChild>
-                        <IconButton
-                          visual="secondary"
-                          aria-label="Copy share link"
-                        >
-                          <Clipboard.Indicator copied={<Icon as={MdCheck} />}>
-                            <Icon as={MdContentCopy} />
-                          </Clipboard.Indicator>
-                        </IconButton>
-                      </Clipboard.Trigger>
-                    </Flex>
-                  </Clipboard.Root>
-                  <Box mx="auto" w={["55%", "50%"]} maxW="200px">
-                    <CoverPreview collection={collection} />
-                  </Box>
-                </Flex>
+                {formControls}
               </Dialog.Body>
               <Dialog.Footer px={[6, 5]} pb={[6, 5]}>
                 {isCreated ? (
                   <Dialog.CloseTrigger asChild>
-                    {submitButton}
+                    {getSubmitButton()}
                   </Dialog.CloseTrigger>
                 ) : (
-                  submitButton
+                  getSubmitButton()
                 )}
               </Dialog.Footer>
             </form>

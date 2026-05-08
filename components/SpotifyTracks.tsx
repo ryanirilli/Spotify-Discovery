@@ -359,15 +359,15 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
               </Text>
             </Box>
           </Flex>
-          <Flex>
+          <Flex p={1} gap={1}>
             <Button
               visual="ghost"
               size="sm"
               aria-label="Add artist to search"
-              borderRadius={0}
+              borderRadius="sm"
               flex={1}
               minW={0}
-              h="64px"
+              h="56px"
               px={1}
               gap={1}
               flexDirection="column"
@@ -391,10 +391,10 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
                   visual="ghost"
                   size="sm"
                   aria-label="Add to playlist"
-                  borderRadius={0}
+                  borderRadius="sm"
                   flex={1}
                   minW={0}
-                  h="64px"
+                  h="56px"
                   px={1}
                   gap={1}
                   flexDirection="column"
@@ -416,10 +416,10 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
               visual="ghost"
               size="sm"
               aria-label="Explore artist"
-              borderRadius={0}
+              borderRadius="sm"
               flex={1}
               minW={0}
-              h="64px"
+              h="56px"
               px={1}
               gap={1}
               flexDirection="column"

@@ -40,6 +40,8 @@ interface ISpotifyAddToPlaylistMenu {
   /** Element that opens the popover when clicked. Must accept a ref. */
   trigger: ReactElement;
   onOpenChange?: (open: boolean) => void;
+  /** Defaults to true on desktop; sticky triggers can opt out to avoid scroll jumps. */
+  autoFocusInput?: boolean;
 }
 
 /**
@@ -56,6 +58,7 @@ export default function SpotifyAddToPlaylistMenu({
   track,
   trigger,
   onOpenChange,
+  autoFocusInput = true,
 }: ISpotifyAddToPlaylistMenu) {
   const [open, setOpen] = useState(false);
 
@@ -95,14 +98,35 @@ export default function SpotifyAddToPlaylistMenu({
   return (
     <Popover.Root
       open={open}
+      autoFocus={autoFocusInput}
       onOpenChange={(e) => handleOpenChange(e.open)}
-      positioning={{ placement: "bottom-end" }}
+      onPointerDownOutside={(e) => e.preventDefault()}
+      positioning={{ placement: "bottom-end", strategy: "fixed" }}
       lazyMount
       unmountOnExit
     >
       <Popover.Trigger asChild>{trigger}</Popover.Trigger>
       {open && (
         <Portal>
+          <Box
+            position="fixed"
+            inset={0}
+            zIndex={1499}
+            bg="transparent"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onPointerUp={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleOpenChange(false);
+            }}
+          />
           <Popover.Positioner>
             <Popover.Content
               bg="black"
@@ -123,7 +147,11 @@ export default function SpotifyAddToPlaylistMenu({
                 />
               </Popover.Arrow>
               <Popover.Body p={0}>
-                <MenuBody track={track} onClose={() => setOpen(false)} />
+                <MenuBody
+                  track={track}
+                  onClose={() => setOpen(false)}
+                  autoFocusInput={autoFocusInput}
+                />
               </Popover.Body>
             </Popover.Content>
           </Popover.Positioner>

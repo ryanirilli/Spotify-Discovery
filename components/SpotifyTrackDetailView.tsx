@@ -15,6 +15,7 @@ import {
   AspectRatio,
   Box,
   Flex,
+  FlexProps,
   Heading,
   Icon,
   Image,
@@ -34,14 +35,19 @@ import spotifyGetArtistAlbumsQuery from "@/queries/spotifyGetArtistAlbumsQuery";
 import spotifyGetAlbumTracksQuery from "@/queries/spotifyGetAlbumTracksQuery";
 import scrollBarStyle from "@/utils/scrollBarStyle";
 import useHoverPreview from "@/utils/useHoverPreview";
+import useElementHeight from "@/utils/useElementHeight";
 import { TSpotifyAlbum } from "@/types/SpotifyAlbum";
 import { TSpotifyAlbumTrack } from "@/types/SpotifyAlbumTrack";
+import { TSpotifyArtist } from "@/types/SpotifyArtist";
+import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import animationData from "@/public/sound-bars.json";
 import Lottie from "./Lottie";
-import { LoadingBox, LoadingTextRows } from "./LoadingSkeleton";
+import { LoadingBox } from "./LoadingSkeleton";
 import SpotifyTrackDetails from "./SpotifyTrackDetails";
 import SpotifyLink from "./SpotifyLink";
 import SpotifyAddToPlaylistMenu from "./SpotifyAddToPlaylistMenu";
+import { buildSearchStringFromConfig } from "@/utils/spotifySearchConfig";
+import { TopNavHeightContext } from "./DesktopAppLayout";
 import {
   SpotifyCurrentTrackContext,
   TSpotifyCurrentTrackContext,
@@ -52,10 +58,20 @@ import {
 } from "./SpotifyRecommendationsProvider";
 
 const lottiePlayerOptions = { animationData };
+const ALBUM_TRACK_ROW_HEIGHT = "50px";
+const SIDEBAR_COLLAPSE_TRANSITION = "450ms cubic-bezier(0.87, 0, 0.13, 1)";
+const STICKY_ACTION_FADE_OUT_MS = 120;
+const STICKY_ACTION_RETRACT_OFFSET_PX = 28;
 
 type TPreviewTrack = {
   id: string;
   preview_url: string | null;
+};
+
+type TSpotifyArtistDetails = TSpotifyArtist & {
+  followers?: {
+    total?: number;
+  };
 };
 
 export default function SpotifyTrackDetailView({ id }: { id: string }) {
@@ -81,6 +97,15 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
   });
 
   const audioRef = useRef<HTMLAudioElement>(null);
+  const backBarRef = useRef<HTMLDivElement>(null);
+  const stickyMediaRef = useRef<HTMLDivElement>(null);
+  const trackDetailsCardRef = useRef<HTMLDivElement>(null);
+  const previousDetailsCardBottomRef = useRef<number | null>(null);
+  const stickyActionsFadeTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+  const stickyActionsVisibleRef = useRef(false);
+  const stickyActionsFadingRef = useRef(false);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
   const [lastPreviewTrackId, setLastPreviewTrackId] = useState<string | null>(
@@ -88,14 +113,20 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
   );
   const [trackProgress, setTrackProgress] = useState(0);
   const [menuOpenTrackId, setMenuOpenTrackId] = useState<string | null>(null);
+  const [showStickyTrackActions, setShowStickyTrackActions] = useState(false);
+  const [isFadingStickyTrackActions, setIsFadingStickyTrackActions] =
+    useState(false);
 
   const { curTrack, setCurTrack } =
     useContext<TSpotifyCurrentTrackContext | null>(
       SpotifyCurrentTrackContext
     ) || {};
 
-  const { addArtists, fetchRecs, isSeedLimitReached, artists, genres, filters } =
+  const { addArtists, isSeedLimitReached, artists, genres, filters } =
     useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
+  const { topNavHeight } = useContext(TopNavHeightContext);
+  const backBarHeight = useElementHeight(backBarRef);
+  const stickyTrackDetailsTop = topNavHeight + backBarHeight;
   const [hoverPreviewEnabled] = useHoverPreview();
 
   useEffect(() => {
@@ -108,6 +139,9 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
   useEffect(() => {
     return () => {
       if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+      if (stickyActionsFadeTimeoutRef.current) {
+        clearTimeout(stickyActionsFadeTimeoutRef.current);
+      }
       audioRef.current?.pause();
     };
   }, []);
@@ -139,6 +173,125 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [playingTrackId]);
+
+  useEffect(() => {
+    if (!track) {
+      stickyActionsVisibleRef.current = false;
+      stickyActionsFadingRef.current = false;
+      if (stickyActionsFadeTimeoutRef.current) {
+        clearTimeout(stickyActionsFadeTimeoutRef.current);
+        stickyActionsFadeTimeoutRef.current = null;
+      }
+      setIsFadingStickyTrackActions(false);
+      setShowStickyTrackActions(false);
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(min-width: 48rem)");
+    let frameId: number | null = null;
+
+    const clearStickyActionsFade = () => {
+      if (!stickyActionsFadeTimeoutRef.current) return;
+      clearTimeout(stickyActionsFadeTimeoutRef.current);
+      stickyActionsFadeTimeoutRef.current = null;
+    };
+
+    const revealStickyActions = () => {
+      clearStickyActionsFade();
+      stickyActionsVisibleRef.current = true;
+      stickyActionsFadingRef.current = false;
+      setIsFadingStickyTrackActions(false);
+      setShowStickyTrackActions(true);
+    };
+
+    const hideStickyActions = (quickFade: boolean) => {
+      if (quickFade && stickyActionsFadingRef.current) return;
+      clearStickyActionsFade();
+
+      if (quickFade && stickyActionsVisibleRef.current) {
+        stickyActionsFadingRef.current = true;
+        setIsFadingStickyTrackActions(true);
+        stickyActionsFadeTimeoutRef.current = setTimeout(() => {
+          stickyActionsFadeTimeoutRef.current = null;
+          stickyActionsVisibleRef.current = false;
+          stickyActionsFadingRef.current = false;
+          setShowStickyTrackActions(false);
+          setIsFadingStickyTrackActions(false);
+        }, STICKY_ACTION_FADE_OUT_MS);
+        return;
+      }
+
+      stickyActionsVisibleRef.current = false;
+      stickyActionsFadingRef.current = false;
+      setShowStickyTrackActions(false);
+      setIsFadingStickyTrackActions(false);
+    };
+
+    const updateStickyActions = () => {
+      frameId = null;
+
+      const stickyMedia = stickyMediaRef.current;
+      const trackDetailsCard = trackDetailsCardRef.current;
+      if (!stickyMedia || !trackDetailsCard || !mediaQuery.matches) {
+        previousDetailsCardBottomRef.current = null;
+        hideStickyActions(false);
+        return;
+      }
+
+      const mediaRect = stickyMedia.getBoundingClientRect();
+      const cardRect = trackDetailsCard.getBoundingClientRect();
+      const previousCardBottom = previousDetailsCardBottomRef.current;
+      const isScrollingBackToTop =
+        previousCardBottom !== null && cardRect.bottom > previousCardBottom;
+      const isMediaPinned = mediaRect.top <= stickyTrackDetailsTop + 1;
+      const hasCardClearedMedia = cardRect.bottom <= mediaRect.bottom;
+      const isCardCloseToReturning =
+        cardRect.bottom >= mediaRect.bottom - STICKY_ACTION_RETRACT_OFFSET_PX;
+
+      previousDetailsCardBottomRef.current = cardRect.bottom;
+
+      if (!isMediaPinned) {
+        hideStickyActions(false);
+        return;
+      }
+
+      if (
+        stickyActionsVisibleRef.current &&
+        isScrollingBackToTop &&
+        isCardCloseToReturning
+      ) {
+        hideStickyActions(true);
+        return;
+      }
+
+      if (
+        (!stickyActionsVisibleRef.current || stickyActionsFadingRef.current) &&
+        hasCardClearedMedia
+      ) {
+        revealStickyActions();
+      }
+    };
+
+    const scheduleUpdate = () => {
+      if (frameId !== null) return;
+      frameId = window.requestAnimationFrame(updateStickyActions);
+    };
+
+    updateStickyActions();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    mediaQuery.addEventListener("change", scheduleUpdate);
+
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+      clearStickyActionsFade();
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      mediaQuery.removeEventListener("change", scheduleUpdate);
+    };
+  }, [stickyTrackDetailsTop, track?.id]);
 
   const playPreview = (previewTrack: TPreviewTrack) => {
     const el = audioRef.current;
@@ -214,8 +367,12 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
       genres,
       filters,
     };
-    addArtists([artistId]);
-    void fetchRecs(nextConfig);
+    const qs = buildSearchStringFromConfig(nextConfig);
+
+    addArtists([artistId], artist ? [artist] : undefined);
+    startTransition(() => {
+      router.push(qs ? `/search?${qs}` : "/search");
+    });
   };
 
   const onBack = () => {
@@ -228,7 +385,7 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
     });
   };
 
-  const artist = artistQuery.data;
+  const artist = artistQuery.data as TSpotifyArtistDetails | undefined;
   const albums: TSpotifyAlbum[] = albumsQuery.data?.items || [];
   const albumImageUrl = useMemo(
     () => track?.album?.images?.[0]?.url,
@@ -238,15 +395,16 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
   const shouldShowMainTrackProgress = Boolean(
     track && lastPreviewTrackId === track.id
   );
-
+  const stickyActionsMaxHeight = `max(112px, calc(100dvh - ${stickyTrackDetailsTop}px - 320px))`;
   return (
     <Box color="white">
       <Box
+        ref={backBarRef}
         bg="gray.900/70"
         backdropFilter="blur(12px) saturate(140%)"
         p={[1, 2]}
         position="sticky"
-        top={0}
+        top={`${topNavHeight}px`}
         zIndex="banner"
       >
         <Flex alignItems="center" ml={[1, 0]}>
@@ -262,6 +420,13 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
       </Box>
 
       <Box p={[4, 6, 8]}>
+        <ArtistSummary
+          artist={artist}
+          fallbackName={track?.artists?.[0]?.name}
+          isLoading={trackQuery.isLoading || artistQuery.isLoading}
+          display={{ base: "flex", md: "none" }}
+          mb={4}
+        />
         <Flex
           direction={{ base: "column", md: "row" }}
           gap={6}
@@ -270,20 +435,26 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
           <Box
             w={{ base: "100%", md: "320px" }}
             flexShrink={0}
+            alignSelf={{ md: "stretch" }}
           >
             {track && (
-              <Stack gap={4}>
-                <Heading as="h2" textStyle="sectionTitle">
+              <>
+                <Heading as="h2" textStyle="sectionTitle" mb={4}>
                   Track Details
                 </Heading>
                 <Box
-                  borderWidth="1px"
-                  borderColor="whiteAlpha.300"
-                  borderRadius="md"
-                  overflow="hidden"
-                  bg="blackAlpha.300"
+                  position={{ base: "static", md: "sticky" }}
+                  top={{ md: `${stickyTrackDetailsTop}px` }}
+                  zIndex="docked"
                 >
-                  <Box bg="whiteAlpha.100">
+                  <Box
+                    ref={stickyMediaRef}
+                    borderWidth="1px"
+                    borderColor="whiteAlpha.300"
+                    borderRadius="md"
+                    bg="whiteAlpha.100"
+                    overflow="hidden"
+                  >
                     <AspectRatio
                       ratio={1}
                       cursor={isTrackPreviewPlayable ? "pointer" : "default"}
@@ -320,6 +491,69 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                       </Progress.Track>
                     </Progress.Root>
                   </Box>
+                  <Box
+                    display={{ base: "none", md: "block" }}
+                    position="absolute"
+                    top="100%"
+                    left={0}
+                    right={0}
+                    maxH={showStickyTrackActions ? stickyActionsMaxHeight : "0"}
+                    overflowX="hidden"
+                    overflowY={showStickyTrackActions ? "auto" : "hidden"}
+                    opacity={
+                      showStickyTrackActions && !isFadingStickyTrackActions
+                        ? 1
+                        : 0
+                    }
+                    pointerEvents={
+                      showStickyTrackActions && !isFadingStickyTrackActions
+                        ? "auto"
+                        : "none"
+                    }
+                    transition={[
+                      `max-height ${SIDEBAR_COLLAPSE_TRANSITION}`,
+                      `opacity ${
+                        isFadingStickyTrackActions
+                          ? `${STICKY_ACTION_FADE_OUT_MS}ms ease`
+                          : "0ms linear"
+                      }`,
+                    ].join(", ")}
+                    css={scrollBarStyle}
+                  >
+                    <Stack
+                      gap={3}
+                      pt={2}
+                      transform={`translateY(${
+                        showStickyTrackActions ? "0" : "-100%"
+                      })`}
+                      transition={`transform ${SIDEBAR_COLLAPSE_TRANSITION}`}
+                    >
+                      <Box>
+                        <SpotifyLink isExternal rec={track}>
+                          <Text textStyle="itemTitle" color="white" lineClamp={1}>
+                            {track.name}
+                          </Text>
+                        </SpotifyLink>
+                        <Text textStyle="itemMeta" color="gray.400" lineClamp={1}>
+                          {track.album.name}
+                        </Text>
+                      </Box>
+                      <TrackActionButtons
+                        track={track}
+                        isSeedLimitReached={isSeedLimitReached}
+                        onAddArtistToSeed={onAddArtistToSeed}
+                      />
+                    </Stack>
+                  </Box>
+                </Box>
+                <Box
+                  ref={trackDetailsCardRef}
+                  mt={4}
+                  borderWidth="1px"
+                  borderColor="whiteAlpha.300"
+                  borderRadius="md"
+                  bg="blackAlpha.300"
+                >
                   <Stack gap={4} p={4}>
                     <Box>
                       <SpotifyLink isExternal rec={track}>
@@ -332,34 +566,16 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                       </Text>
                     </Box>
                     <Stack gap={2}>
-                      <SpotifyAddToPlaylistMenu
+                      <TrackActionButtons
                         track={track}
-                        trigger={
-                          <Button
-                            visual="primary"
-                            size="sm"
-                            w="100%"
-                          >
-                            <Icon as={MdPlaylistAdd} boxSize={5} />
-                            Add to playlist
-                          </Button>
-                        }
+                        isSeedLimitReached={isSeedLimitReached}
+                        onAddArtistToSeed={onAddArtistToSeed}
                       />
-                      <Button
-                        visual="primary"
-                        size="sm"
-                        w="100%"
-                        disabled={isSeedLimitReached}
-                        onClick={onAddArtistToSeed}
-                      >
-                        <Icon as={AiOutlineUserAdd} boxSize={4} />
-                        Add artist as seed
-                      </Button>
                     </Stack>
                     <SpotifyTrackDetails id={track.id} />
                   </Stack>
                 </Box>
-              </Stack>
+              </>
             )}
             {!track && trackQuery.isLoading && (
               <Stack gap={4}>
@@ -395,39 +611,12 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
             pt={{ base: 0, md: 10 }}
             css={scrollBarStyle}
           >
-            <Flex alignItems="center" gap={3} minW={0}>
-              <Box
-                boxSize="48px"
-                flexShrink={0}
-                borderRadius="full"
-                overflow="hidden"
-                bg="whiteAlpha.100"
-              >
-                {artist?.images?.[0]?.url ? (
-                  <Image
-                    alt={artist?.name || "artist"}
-                    src={artist.images[0].url}
-                    w="100%"
-                    h="100%"
-                    objectFit="cover"
-                  />
-                ) : (
-                  <LoadingBox w="100%" h="100%" borderRadius="full" />
-                )}
-              </Box>
-              <Box minW={0}>
-                <Heading as="h1" textStyle="pageTitle" lineClamp={1}>
-                  {artist?.name ||
-                    track?.artists?.[0]?.name ||
-                    (artistQuery.isLoading ? "…" : "Artist")}
-                </Heading>
-                {artist?.followers?.total !== undefined && (
-                  <Text textStyle="itemMeta" color="gray.400">
-                    {artist.followers.total.toLocaleString()} followers
-                  </Text>
-                )}
-              </Box>
-            </Flex>
+            <ArtistSummary
+              artist={artist}
+              fallbackName={track?.artists?.[0]?.name}
+              isLoading={trackQuery.isLoading || artistQuery.isLoading}
+              display={{ base: "none", md: "flex" }}
+            />
             <Heading as="h2" textStyle="sectionTitle">
               Discography
             </Heading>
@@ -489,6 +678,128 @@ function DiscographySkeleton() {
         </Flex>
       ))}
     </Stack>
+  );
+}
+
+interface ITrackActionButtons {
+  track: TSpotifyTrack;
+  isSeedLimitReached: boolean;
+  onAddArtistToSeed: () => void;
+}
+
+function TrackActionButtons({
+  track,
+  isSeedLimitReached,
+  onAddArtistToSeed,
+}: ITrackActionButtons) {
+  return (
+    <>
+      <SpotifyAddToPlaylistMenu
+        track={track}
+        autoFocusInput={false}
+        trigger={
+          <Button visual="primary" size="sm" w="100%">
+            <Icon as={MdPlaylistAdd} boxSize={5} />
+            Add to playlist
+          </Button>
+        }
+      />
+      <Button
+        visual="secondary"
+        size="sm"
+        w="100%"
+        disabled={isSeedLimitReached}
+        onClick={onAddArtistToSeed}
+      >
+        <Icon as={AiOutlineUserAdd} boxSize={4} />
+        Add artist as seed
+      </Button>
+    </>
+  );
+}
+
+interface IArtistSummary extends FlexProps {
+  artist?: TSpotifyArtistDetails;
+  fallbackName?: string;
+  isLoading?: boolean;
+}
+
+function ArtistSummary({
+  artist,
+  fallbackName,
+  isLoading = false,
+  ...props
+}: IArtistSummary) {
+  return (
+    <Flex alignItems="center" gap={3} minW={0} {...props}>
+      <Box
+        boxSize="48px"
+        flexShrink={0}
+        borderRadius="full"
+        overflow="hidden"
+        bg="whiteAlpha.100"
+      >
+        {artist?.images?.[0]?.url ? (
+          <Image
+            alt={artist?.name || "artist"}
+            src={artist.images[0].url}
+            w="100%"
+            h="100%"
+            objectFit="cover"
+          />
+        ) : (
+          <LoadingBox w="100%" h="100%" borderRadius="full" />
+        )}
+      </Box>
+      <Box minW={0}>
+        <Heading as="h1" textStyle="pageTitle" lineClamp={1}>
+          {artist?.name || fallbackName || (isLoading ? "..." : "Artist")}
+        </Heading>
+        {artist?.followers?.total !== undefined && (
+          <Text textStyle="itemMeta" color="gray.400">
+            {artist.followers.total.toLocaleString()} followers
+          </Text>
+        )}
+      </Box>
+    </Flex>
+  );
+}
+
+function AlbumTrackSkeletonRows({ count }: { count: number }) {
+  return (
+    <Box>
+      {Array.from({ length: count }).map((_, index) => (
+        <Flex
+          key={index}
+          alignItems="center"
+          justifyContent="space-between"
+          minH={ALBUM_TRACK_ROW_HEIGHT}
+          py={2}
+          px={3}
+          borderTop="1px solid transparent"
+          opacity={0.75}
+        >
+          <Flex gap={3} minW={0} flex={1} alignItems="center">
+            <Box w="24px" h="20px" flexShrink={0}>
+              <LoadingBox
+                h="12px"
+                w={index < 9 ? "10px" : "18px"}
+                mt="4px"
+                ml="auto"
+                borderRadius="full"
+              />
+            </Box>
+            <LoadingBox
+              h="18px"
+              w={index % 2 === 0 ? "72%" : "56%"}
+              maxW="420px"
+              borderRadius="full"
+            />
+          </Flex>
+          <LoadingBox h="12px" w="34px" ml={2} borderRadius="full" />
+        </Flex>
+      ))}
+    </Box>
   );
 }
 
@@ -567,13 +878,7 @@ function AlbumAccordionItem({
       <Accordion.ItemContent>
         <Accordion.ItemBody pt={0} pb={2}>
           {tracksQuery.isLoading ? (
-            <LoadingTextRows
-              count={album.total_tracks}
-              px={3}
-              my={2}
-              height="18px"
-              widths={["94%", "78%", "88%", "64%"]}
-            />
+            <AlbumTrackSkeletonRows count={album.total_tracks} />
           ) : (
             <Box>
               {tracks.map((track) => {
@@ -587,6 +892,7 @@ function AlbumAccordionItem({
                     position="relative"
                     alignItems="center"
                     justifyContent="space-between"
+                    minH={ALBUM_TRACK_ROW_HEIGHT}
                     py={2}
                     px={3}
                     borderRadius="sm"

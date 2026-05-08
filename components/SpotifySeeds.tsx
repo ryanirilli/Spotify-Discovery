@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Avatar, Box, Icon, Tag, Flex } from "@chakra-ui/react";
 import { Button } from "@/components/ui/Button";
 import { MdClose, MdLibraryMusic } from "react-icons/md";
@@ -14,6 +14,7 @@ import { topNavScrollBarStyle } from "@/utils/scrollBarStyle";
 
 export default function SpotifySeeds() {
   const router = useRouter();
+  const pathname = usePathname();
   const {
     artists,
     artistsDetails,
@@ -29,6 +30,7 @@ export default function SpotifySeeds() {
   ) as TSpotifyRecommendationsContext;
 
   const hasSeeds = artists.length > 0 || genres.length > 0;
+  const shouldShowSeeds = hasSeeds && pathname !== "/home";
 
   const syncAfterSeedRemoval = (
     nextArtists: string[],
@@ -45,11 +47,12 @@ export default function SpotifySeeds() {
   // Render in insertion order so disabled (oldest) chips appear first.
   const orderedArtistDetails = artists
     .map((id) => artistsDetails.find((a) => a.id === id))
-    .filter((a): a is (typeof artistsDetails)[number] => Boolean(a));
+    .filter((a): a is (typeof artistsDetails)[number] => Boolean(a))
+    .reverse();
 
   return (
     <>
-      {hasSeeds && (
+      {shouldShowSeeds && (
         <Box
           mt={[1, 2]}
           bg="blackAlpha.500"

@@ -146,39 +146,38 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
     }
   }, [curTrack, rec, isLoadingRecs]);
 
-  // Drive the progress bar from the audio element's own events while playing.
-  // This avoids relying on HTMLMediaElement.play() promise timing and keeps
-  // updates in sync with React's render cycle.
+  // Drive the progress bar from media events instead of a RAF loop. Updating
+  // React state every frame can trip React's nested update guard in dev.
   useEffect(() => {
-    if (!isPlaying) return;
     const el = previewRef.current;
     if (!el) return;
 
-    let rafId: number | null = null;
-    const tick = () => {
-      if (el.paused || el.ended) {
-        rafId = null;
-        return;
-      }
-      if (el.duration > 0) {
-        setTrackProgress((el.currentTime / el.duration) * 100);
-      }
-      rafId = requestAnimationFrame(tick);
+    setTrackProgress(0);
+
+    const syncProgress = () => {
+      const nextProgress =
+        Number.isFinite(el.duration) && el.duration > 0
+          ? (el.currentTime / el.duration) * 100
+          : 0;
+      setTrackProgress((current) =>
+        Math.abs(current - nextProgress) < 0.1 ? current : nextProgress
+      );
     };
-    // Kick the loop once the element is actually playing. Use the native
-    // `playing` event to avoid racing the async play() promise; fall back
-    // to starting immediately if the element is already unpaused.
-    const onPlaying = () => {
-      if (rafId === null) rafId = requestAnimationFrame(tick);
-    };
-    el.addEventListener("playing", onPlaying);
-    if (!el.paused) onPlaying();
+
+    el.addEventListener("loadedmetadata", syncProgress);
+    el.addEventListener("durationchange", syncProgress);
+    el.addEventListener("timeupdate", syncProgress);
+    el.addEventListener("seeked", syncProgress);
+    el.addEventListener("ended", syncProgress);
 
     return () => {
-      el.removeEventListener("playing", onPlaying);
-      if (rafId !== null) cancelAnimationFrame(rafId);
+      el.removeEventListener("loadedmetadata", syncProgress);
+      el.removeEventListener("durationchange", syncProgress);
+      el.removeEventListener("timeupdate", syncProgress);
+      el.removeEventListener("seeked", syncProgress);
+      el.removeEventListener("ended", syncProgress);
     };
-  }, [isPlaying]);
+  }, [rec.preview_url]);
 
   const playTrack = () => {
     const el = previewRef.current;

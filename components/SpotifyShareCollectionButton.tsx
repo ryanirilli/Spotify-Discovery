@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, MouseEvent, useContext, useEffect, useState } from "react";
+import { FormEvent, useContext, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AspectRatio,
@@ -13,6 +13,7 @@ import {
   Input,
   Portal,
   Text,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import {
   MdAutoAwesome,
@@ -51,6 +52,10 @@ export default function SpotifyShareCollectionButton() {
   const [step, setStep] = useState<Step>("name");
   const [title, setTitle] = useState("");
   const [collection, setCollection] = useState<TSpotifyCollection | null>(null);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const shouldAutoFocusTitle =
+    useBreakpointValue({ base: false, md: true }, { ssr: false }) ?? false;
   const config = { artists, genres, filters };
   const canShare = hasRecommendationSeeds(config);
   const isCreated = step === "created" && !!collection;
@@ -93,9 +98,14 @@ export default function SpotifyShareCollectionButton() {
   });
 
   const handleOpenChange = (nextOpen: boolean) => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = null;
+    }
     setOpen(nextOpen);
     if (!nextOpen) {
-      setTimeout(() => {
+      resetTimerRef.current = setTimeout(() => {
+        resetTimerRef.current = null;
         setStep("name");
         setTitle("");
         setCollection(null);
@@ -104,11 +114,13 @@ export default function SpotifyShareCollectionButton() {
     }
   };
 
-  const closeDialog = (event?: MouseEvent<HTMLButtonElement>) => {
-    event?.preventDefault();
-    event?.stopPropagation();
-    handleOpenChange(false);
-  };
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+      }
+    };
+  }, []);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -117,10 +129,6 @@ export default function SpotifyShareCollectionButton() {
       submitter instanceof HTMLElement &&
       submitter.dataset.shareSubmit !== "true"
     ) {
-      return;
-    }
-    if (isCreated) {
-      handleOpenChange(false);
       return;
     }
     const trimmedTitle = title.trim();
@@ -144,9 +152,26 @@ export default function SpotifyShareCollectionButton() {
     : isCreated
       ? "Done"
       : "Generate cover image";
+  const submitButton = (
+    <Button
+      visual="primary"
+      w="100%"
+      type={isCreated ? "button" : "submit"}
+      data-share-submit={isCreated ? undefined : "true"}
+      disabled={submitDisabled || mutation.isPending}
+    >
+      {submitLabel}
+    </Button>
+  );
 
   return (
-    <Dialog.Root open={open} onOpenChange={(e) => handleOpenChange(e.open)}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(e) => handleOpenChange(e.open)}
+      initialFocusEl={() =>
+        shouldAutoFocusTitle ? titleInputRef.current : null
+      }
+    >
       <Dialog.Trigger asChild>
         <Button
           type="button"
@@ -169,7 +194,9 @@ export default function SpotifyShareCollectionButton() {
             w="100%"
             maxW="md"
           >
-            <DialogCloseButton onClick={closeDialog}>Done</DialogCloseButton>
+            <Dialog.CloseTrigger asChild>
+              <DialogCloseButton>Done</DialogCloseButton>
+            </Dialog.CloseTrigger>
             <form onSubmit={onSubmit} noValidate>
               <Dialog.Header
                 pt={[6, 5]}
@@ -189,7 +216,7 @@ export default function SpotifyShareCollectionButton() {
               <Dialog.Body px={[6, 5]} py={4}>
                 <Flex direction="column" gap={4}>
                   <Input
-                    autoFocus={!isCreated}
+                    ref={titleInputRef}
                     value={inputValue}
                     textStyle="body"
                     onChange={(event) => setTitle(event.target.value)}
@@ -229,15 +256,13 @@ export default function SpotifyShareCollectionButton() {
                 </Flex>
               </Dialog.Body>
               <Dialog.Footer px={[6, 5]} pb={[6, 5]}>
-                <Button
-                  visual="primary"
-                  w="100%"
-                  type="submit"
-                  data-share-submit="true"
-                  disabled={submitDisabled || mutation.isPending}
-                >
-                  {submitLabel}
-                </Button>
+                {isCreated ? (
+                  <Dialog.CloseTrigger asChild>
+                    {submitButton}
+                  </Dialog.CloseTrigger>
+                ) : (
+                  submitButton
+                )}
               </Dialog.Footer>
             </form>
           </Dialog.Content>

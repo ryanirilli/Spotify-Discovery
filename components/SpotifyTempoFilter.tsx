@@ -95,7 +95,6 @@ export default function SpotifyTempoFilter({
   const onReset = () => {
     setTempoDraft(DEFAULT_TEMPO_RANGE);
     onCommit({});
-    onApplied?.();
   };
 
   const onApply = () => {

@@ -1,33 +1,80 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useState, type SyntheticEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AspectRatio,
   Box,
+  Dialog,
   Flex,
   Heading,
   Icon,
+  Menu,
+  Portal,
   Text,
 } from "@chakra-ui/react";
-import { MdImageNotSupported, MdLibraryMusic } from "react-icons/md";
+import {
+  MdDeleteOutline,
+  MdImageNotSupported,
+  MdLibraryMusic,
+  MdMoreVert,
+} from "react-icons/md";
 import CollectionCoverSwirl from "./CollectionCoverSwirl";
+import DialogCloseButton from "./DialogCloseButton";
 import LazyImage from "./LazyImage";
+import { Button, IconButton } from "@/components/ui/Button";
 import { SpotifyRecommendationsContext } from "./SpotifyRecommendationsProvider";
+import { deleteSpotifyCollection } from "@/queries/spotifyCollections";
 import { TSpotifyCollection } from "@/types/SpotifyCollection";
 import { buildSearchStringFromConfig } from "@/utils/spotifySearchConfig";
+import { toaster } from "@/utils/toaster";
 
 type SpotifyCollectionCardProps = {
   collection: TSpotifyCollection;
+  currentUserId?: string | null;
 };
 
 export function SpotifyCollectionCard({
   collection,
+  currentUserId,
 }: SpotifyCollectionCardProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { setSearchConfig } = useContext(SpotifyRecommendationsContext) || {};
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isPending = collection.cover_status === "pending";
   const isFailed = collection.cover_status === "failed";
+  const canDelete =
+    !!currentUserId && currentUserId === collection.owner_spotify_user_id;
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteSpotifyCollection(collection.id),
+    onSuccess: () => {
+      setDeleteDialogOpen(false);
+      queryClient.setQueryData<TSpotifyCollection[]>(
+        ["spotifyCollections"],
+        (current) =>
+          current?.filter((item) => item.id !== collection.id) ?? current
+      );
+      queryClient.invalidateQueries({ queryKey: ["spotifyCollections"] });
+      toaster.create({
+        title: "Collection deleted",
+        type: "success",
+        duration: 2500,
+      });
+    },
+    onError: (error) => {
+      toaster.create({
+        title:
+          error instanceof Error
+            ? error.message
+            : "Could not delete collection",
+        type: "error",
+        duration: 3000,
+      });
+    },
+  });
 
   const onSelectCollection = () => {
     setSearchConfig?.(collection.config);
@@ -35,71 +82,189 @@ export function SpotifyCollectionCard({
     router.push(qs ? `/search?${qs}` : "/search");
   };
 
+  const stopCardClick = (event: SyntheticEvent) => {
+    event.stopPropagation();
+  };
+
+  const onOpenDeleteDialog = (event: SyntheticEvent) => {
+    event.stopPropagation();
+    deleteMutation.reset();
+    setDeleteDialogOpen(true);
+  };
+
+  const onConfirmDelete = () => {
+    if (!deleteMutation.isPending) {
+      deleteMutation.mutate();
+    }
+  };
+
   return (
-    <Box
-      role="button"
-      cursor="pointer"
-      onClick={onSelectCollection}
-      borderRadius="md"
-      h="100%"
-      overflow="hidden"
-      bg="blackAlpha.400"
-      position="relative"
-      _hover={{ bg: "blackAlpha.700" }}
-    >
-      <AspectRatio ratio={1} overflow="hidden" bg="blackAlpha.600">
-        {collection.cover_image_url && collection.cover_status === "ready" ? (
-          <LazyImage
-            src={collection.cover_image_url}
-            alt=""
-            w="100%"
-            h="100%"
-            objectFit="cover"
-          />
-        ) : (
-          <Flex
-            h="100%"
-            w="100%"
-            position="relative"
-            direction="column"
-            alignItems="center"
-            justifyContent="center"
-            gap={3}
-            color="whiteAlpha.700"
-            bg="gray.950"
-          >
-            {isPending ? (
-              <CollectionCoverSwirl />
-            ) : (
-              <>
-                <Icon
-                  as={isFailed ? MdImageNotSupported : MdLibraryMusic}
-                  boxSize={10}
-                />
-                <Text textStyle="statusText">
-                  {isFailed ? "Cover unavailable" : "Collection"}
-                </Text>
-              </>
-            )}
-          </Flex>
+    <>
+      <Box
+        role="button"
+        cursor="pointer"
+        onClick={onSelectCollection}
+        borderRadius="md"
+        h="100%"
+        overflow="hidden"
+        bg="blackAlpha.400"
+        position="relative"
+        _hover={{ bg: "blackAlpha.700" }}
+      >
+        {canDelete && (
+          <Menu.Root>
+            <Menu.Trigger asChild>
+              <IconButton
+                aria-label="Collection options"
+                position="absolute"
+                top={2}
+                right={2}
+                zIndex={2}
+                size="sm"
+                bg="blackAlpha.600"
+                color="white"
+                _hover={{ bg: "blackAlpha.800" }}
+                _active={{ bg: "blackAlpha.900" }}
+                onPointerDown={stopCardClick}
+                onClick={stopCardClick}
+              >
+                <Icon as={MdMoreVert} boxSize={5} />
+              </IconButton>
+            </Menu.Trigger>
+            <Portal>
+              <Menu.Positioner>
+                <Menu.Content bg="blackAlpha.900" color="white" minW="180px">
+                  <Menu.Item
+                    value="delete"
+                    bg="transparent"
+                    color="white"
+                    textStyle="body"
+                    _hover={{ bg: "whiteAlpha.200" }}
+                    onClick={onOpenDeleteDialog}
+                  >
+                    <Icon boxSize={5} as={MdDeleteOutline} color="white" />
+                    Delete collection
+                  </Menu.Item>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Portal>
+          </Menu.Root>
         )}
-      </AspectRatio>
-      <Box p={3} minH="84px">
-        <Heading
-          as="h4"
-          color="whiteAlpha.900"
-          textStyle="itemTitle"
-          lineClamp={1}
-          title={collection.title}
-        >
-          {collection.title}
-        </Heading>
-        <Text mt={1} color="whiteAlpha.600" textStyle="itemMeta" lineClamp={1}>
-          {collection.owner_display_name
-            ? `Shared by ${collection.owner_display_name}`
-            : "Shared collection"}
-        </Text>
+        <AspectRatio ratio={1} overflow="hidden" bg="blackAlpha.600">
+          {collection.cover_image_url &&
+          collection.cover_status === "ready" ? (
+            <LazyImage
+              src={collection.cover_image_url}
+              alt=""
+              w="100%"
+              h="100%"
+              objectFit="cover"
+            />
+          ) : (
+            <Flex
+              h="100%"
+              w="100%"
+              position="relative"
+              direction="column"
+              alignItems="center"
+              justifyContent="center"
+              gap={3}
+              color="whiteAlpha.700"
+              bg="gray.950"
+            >
+              {isPending ? (
+                <CollectionCoverSwirl />
+              ) : (
+                <>
+                  <Icon
+                    as={isFailed ? MdImageNotSupported : MdLibraryMusic}
+                    boxSize={10}
+                  />
+                  <Text textStyle="statusText">
+                    {isFailed ? "Cover unavailable" : "Collection"}
+                  </Text>
+                </>
+              )}
+            </Flex>
+          )}
+        </AspectRatio>
+        <Box p={3} minH="84px">
+          <Heading
+            as="h4"
+            color="whiteAlpha.900"
+            textStyle="itemTitle"
+            lineClamp={1}
+            title={collection.title}
+          >
+            {collection.title}
+          </Heading>
+          <Text mt={1} color="whiteAlpha.600" textStyle="itemMeta" lineClamp={1}>
+            {collection.owner_display_name
+              ? `Shared by ${collection.owner_display_name}`
+              : "Shared collection"}
+          </Text>
+        </Box>
       </Box>
-    </Box>
+
+      {canDelete && (
+        <Dialog.Root
+          open={deleteDialogOpen}
+          onOpenChange={(event) => {
+            if (!deleteMutation.isPending) {
+              setDeleteDialogOpen(event.open);
+            }
+          }}
+        >
+          <Portal>
+            <Dialog.Backdrop />
+            <Dialog.Positioner padding={[4, 6]}>
+              <Dialog.Content
+                bg="gray.950"
+                color="white"
+                borderRadius={["3xl", "xl"]}
+                overflow="hidden"
+                w="100%"
+                maxW="sm"
+              >
+                <Dialog.Header>
+                  <Dialog.Title textStyle="dialogTitle">
+                    Delete collection
+                  </Dialog.Title>
+                </Dialog.Header>
+                <Dialog.CloseTrigger asChild>
+                  <DialogCloseButton />
+                </Dialog.CloseTrigger>
+                <Dialog.Body px={6} py={3}>
+                  <Text color="whiteAlpha.700" textStyle="body">
+                    Delete &quot;{collection.title}&quot; from Community
+                    Collections?
+                  </Text>
+                </Dialog.Body>
+                <Dialog.Footer px={6} pb={6} gap={3}>
+                  <Dialog.CloseTrigger asChild>
+                    <Button
+                      visual="secondary"
+                      disabled={deleteMutation.isPending}
+                    >
+                      Cancel
+                    </Button>
+                  </Dialog.CloseTrigger>
+                  <Button
+                    visual="primary"
+                    bg="red.500"
+                    _hover={{ bg: "red.400" }}
+                    _active={{ bg: "red.600" }}
+                    disabled={deleteMutation.isPending}
+                    onClick={onConfirmDelete}
+                  >
+                    {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                  </Button>
+                </Dialog.Footer>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
+        </Dialog.Root>
+      )}
+    </>
   );
 }

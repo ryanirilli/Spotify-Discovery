@@ -8,6 +8,7 @@ import { SpotifyCollectionCard } from "./SpotifyCollectionCard";
 import { SpotifyCollectionCardSkeleton } from "./SpotifyCollectionCardSkeleton";
 import { SpotifyAutocompleteContext } from "./SpotifyAutocomplete";
 import { spotifyCollectionsQuery } from "@/queries/spotifyCollections";
+import spotifyUserInfo from "@/queries/spotifyUserInfo";
 
 export default function SpotifyDefaultContent() {
   const { setIsNew } = useContext(SpotifyAutocompleteContext);
@@ -20,6 +21,11 @@ export default function SpotifyDefaultContent() {
     queryKey: ["spotifyCollections"],
     queryFn: spotifyCollectionsQuery,
   });
+  const { data: user } = useQuery({
+    queryKey: ["user"],
+    queryFn: spotifyUserInfo,
+  });
+  const currentUserId = typeof user?.id === "string" ? user.id : null;
 
   useEffect(() => {
     const hasPendingCover = collections.some(
@@ -61,7 +67,10 @@ export default function SpotifyDefaultContent() {
           <Wrap gap={[8, 4]}>
             {collections.map((collection) => (
               <Box key={collection.id} {...itemContainerProps}>
-                <SpotifyCollectionCard collection={collection} />
+                <SpotifyCollectionCard
+                  collection={collection}
+                  currentUserId={currentUserId}
+                />
               </Box>
             ))}
           </Wrap>

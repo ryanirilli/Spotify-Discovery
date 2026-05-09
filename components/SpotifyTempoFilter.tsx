@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Box, Flex, Grid, HStack, Slider, Text } from "@chakra-ui/react";
 import { Button } from "@/components/ui/Button";
 import { TSpotifyRecommendationFilters } from "./SpotifyRecommendationsProvider";
@@ -41,6 +41,23 @@ function getTempoRange(filters: TSpotifyRecommendationFilters): [number, number]
   const min = clampTempo(filters.min_tempo ?? DEFAULT_TEMPO_RANGE[0]);
   const max = clampTempo(filters.max_tempo ?? DEFAULT_TEMPO_RANGE[1]);
   return min <= max ? [min, max] : [max, min];
+}
+
+function areTempoRangesEqual(left: [number, number], right: [number, number]) {
+  return left[0] === right[0] && left[1] === right[1];
+}
+
+function areTempoFiltersEqual(
+  left: TSpotifyRecommendationFilters,
+  right: TSpotifyRecommendationFilters
+) {
+  return (
+    left.min_tempo === right.min_tempo && left.max_tempo === right.max_tempo
+  );
+}
+
+function cloneTempoRange(range: [number, number]): [number, number] {
+  return [range[0], range[1]];
 }
 
 function getTempoFilters(range: [number, number]) {
@@ -84,21 +101,32 @@ export default function SpotifyTempoFilter({
     getTempoRange(value)
   );
 
+  const setTempoDraftIfChanged = useCallback((next: [number, number]) => {
+    setTempoDraft((current) =>
+      areTempoRangesEqual(current, next) ? current : next
+    );
+  }, []);
+
   useEffect(() => {
-    setTempoDraft(getTempoRange(value));
-  }, [value.min_tempo, value.max_tempo]);
+    setTempoDraftIfChanged(getTempoRange(value));
+  }, [setTempoDraftIfChanged, value.min_tempo, value.max_tempo]);
 
   const activeTempoPresetLabel = TEMPO_PRESETS.find((preset) =>
     isTempoPresetMatch(tempoDraft, preset)
   )?.label;
 
   const onReset = () => {
-    setTempoDraft(DEFAULT_TEMPO_RANGE);
-    onCommit({});
+    setTempoDraftIfChanged(cloneTempoRange(DEFAULT_TEMPO_RANGE));
+    if (hasTempoFilter(value)) {
+      onCommit({});
+    }
   };
 
   const onApply = () => {
-    onCommit(getTempoFilters(tempoDraft));
+    const nextFilters = getTempoFilters(tempoDraft);
+    if (!areTempoFiltersEqual(value, nextFilters)) {
+      onCommit(nextFilters);
+    }
     onApplied?.();
   };
 
@@ -125,7 +153,9 @@ export default function SpotifyTempoFilter({
                 label={preset.label}
                 description={preset.description}
                 active={activeTempoPresetLabel === preset.label}
-                onClick={() => setTempoDraft(preset.range)}
+                onClick={() =>
+                  setTempoDraftIfChanged(cloneTempoRange(preset.range))
+                }
               />
             ))}
           </Grid>

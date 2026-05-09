@@ -38,6 +38,12 @@ function toNumberInRange(value: unknown, min: number, max: number) {
   return Number.isFinite(num) && num >= min && num <= max ? num : undefined;
 }
 
+export function areStringArraysEqual(left: string[], right: string[]) {
+  if (left === right) return true;
+  if (left.length !== right.length) return false;
+  return left.every((value, index) => value === right[index]);
+}
+
 export function sanitizeRecommendationFilters(
   filters: TSpotifyRecommendationFilters
 ) {
@@ -50,6 +56,18 @@ export function sanitizeRecommendationFilters(
   });
 
   return next;
+}
+
+export function areRecommendationFiltersEqual(
+  left: TSpotifyRecommendationFilters,
+  right: TSpotifyRecommendationFilters
+) {
+  const leftFilters = sanitizeRecommendationFilters(left);
+  const rightFilters = sanitizeRecommendationFilters(right);
+
+  return FILTER_PARAM_KEYS.every(
+    (key) => leftFilters[key] === rightFilters[key]
+  );
 }
 
 export function buildSearchStringFromConfig(config: TSpotifySearchConfig) {

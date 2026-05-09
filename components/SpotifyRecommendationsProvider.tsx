@@ -16,6 +16,8 @@ import { TSpotifyTrack } from "@/types/SpotifyTrack";
 import { TSpotifyRecommendationsOptions } from "@/types/SpotifyRecommendationsOptions";
 import { artistsQuery } from "@/queries/spotifyArtitstsQuery";
 import {
+  areRecommendationFiltersEqual,
+  areStringArraysEqual,
   buildSearchStringFromConfig,
   getEnabledArtistsForConfig,
   MAX_ENABLED_SEEDS,
@@ -60,6 +62,8 @@ export const SpotifyRecommendationsContext = createContext<
 const getRecommendationsQueryKey = (config: TSpotifySearchConfig) =>
   ["spotifyRecommendations", buildSearchStringFromConfig(config)] as const;
 
+const EMPTY_RECOMMENDATIONS: TSpotifyTrack[] = [];
+
 async function fetchRecommendationsForConfig(config: TSpotifySearchConfig) {
   const enabledArtists = getEnabledArtistsForConfig(config);
 
@@ -82,9 +86,11 @@ export default function SpotifyRecommendationsProvider({
   children,
 }: ISpotifyRecommendationsProvider) {
   const queryClient = useQueryClient();
-  const [artists, setArtists] = useState<string[]>([]);
-  const [genres, setGenres] = useState<string[]>([]);
-  const [filters, setFilters] = useState<TSpotifyRecommendationFilters>({});
+  const [artists, setArtistsState] = useState<string[]>([]);
+  const [genres, setGenresState] = useState<string[]>([]);
+  const [filters, setFiltersState] = useState<TSpotifyRecommendationFilters>(
+    {}
+  );
   const searchConfig = useMemo<TSpotifySearchConfig>(
     () => ({ artists, genres, filters }),
     [artists, genres, filters]
@@ -104,10 +110,13 @@ export default function SpotifyRecommendationsProvider({
 
   const disabledCount = artists.length - enabledArtists.length;
 
-  const isArtistDisabled = (id: string) => {
-    const idx = artists.indexOf(id);
-    return idx !== -1 && idx < disabledCount;
-  };
+  const isArtistDisabled = useCallback(
+    (id: string) => {
+      const idx = artists.indexOf(id);
+      return idx !== -1 && idx < disabledCount;
+    },
+    [artists, disabledCount]
+  );
 
   const { data: recommendations, isFetching: isLoadingRecs } = useQuery<
     TSpotifyTrack[]
@@ -120,9 +129,14 @@ export default function SpotifyRecommendationsProvider({
 
   const fetchRecs = useCallback(
     (config: TSpotifySearchConfig = searchConfig) => {
+      const nextConfig = {
+        artists: config.artists,
+        genres: config.genres,
+        filters: sanitizeRecommendationFilters(config.filters),
+      };
       return queryClient.fetchQuery({
-        queryKey: getRecommendationsQueryKey(config),
-        queryFn: () => fetchRecommendationsForConfig(config),
+        queryKey: getRecommendationsQueryKey(nextConfig),
+        queryFn: () => fetchRecommendationsForConfig(nextConfig),
         staleTime: 0,
       });
     },
@@ -135,37 +149,75 @@ export default function SpotifyRecommendationsProvider({
     return genres.length >= MAX_ENABLED_SEEDS;
   }, [genres]);
 
-  const addArtists = (artist: string[], details?: TSpotifyArtist[]) => {
-    if (details?.length) {
-      // Prime the React Query cache so the seed pill renders immediately
-      // from the data the caller already has, rather than waiting for the
-      // /api/spotify-get-artists-detail roundtrip.
-      queryClient.setQueryData<TSpotifyArtist[]>(
-        ["spotifyArtistsDetails"],
-        (existing) => {
-          const byId = new Map<string, TSpotifyArtist>();
-          existing?.forEach((a) => byId.set(a.id, a));
-          details.forEach((a) => byId.set(a.id, a));
-          return Array.from(byId.values());
-        }
-      );
-    }
-    setArtists((currentArtists) =>
-      produce(currentArtists, (draft: string[]) => {
-        draft.push(...artist);
-        return draft;
-      })
+  const setArtists = useCallback((nextArtists: string[]) => {
+    setArtistsState((currentArtists) =>
+      areStringArraysEqual(currentArtists, nextArtists)
+        ? currentArtists
+        : nextArtists
     );
-  };
+  }, []);
 
-  const setSearchConfig = (config: TSpotifySearchConfig) => {
-    setArtists(config.artists);
-    setGenres(config.genres);
-    setFilters(config.filters);
-  };
+  const setFilters = useCallback(
+    (nextFilters: TSpotifyRecommendationFilters) => {
+      const sanitizedFilters = sanitizeRecommendationFilters(nextFilters);
+      setFiltersState((currentFilters) =>
+        areRecommendationFiltersEqual(currentFilters, sanitizedFilters)
+          ? currentFilters
+          : sanitizedFilters
+      );
+    },
+    []
+  );
 
-  const removeArtist = (artist: string) => {
-    setArtists((currentArtists) =>
+  const addArtists = useCallback(
+    (artist: string[], details?: TSpotifyArtist[]) => {
+      if (!artist.length) return;
+
+      if (details?.length) {
+        // Prime the React Query cache so the seed pill renders immediately
+        // from the data the caller already has, rather than waiting for the
+        // /api/spotify-get-artists-detail roundtrip.
+        queryClient.setQueryData<TSpotifyArtist[]>(
+          ["spotifyArtistsDetails"],
+          (existing) => {
+            const byId = new Map<string, TSpotifyArtist>();
+            existing?.forEach((a) => byId.set(a.id, a));
+            details.forEach((a) => byId.set(a.id, a));
+            return Array.from(byId.values());
+          }
+        );
+      }
+      setArtistsState((currentArtists) =>
+        produce(currentArtists, (draft: string[]) => {
+          draft.push(...artist);
+          return draft;
+        })
+      );
+    },
+    [queryClient]
+  );
+
+  const setSearchConfig = useCallback((config: TSpotifySearchConfig) => {
+    setArtistsState((currentArtists) =>
+      areStringArraysEqual(currentArtists, config.artists)
+        ? currentArtists
+        : config.artists
+    );
+    setGenresState((currentGenres) =>
+      areStringArraysEqual(currentGenres, config.genres)
+        ? currentGenres
+        : config.genres
+    );
+    const sanitizedFilters = sanitizeRecommendationFilters(config.filters);
+    setFiltersState((currentFilters) =>
+      areRecommendationFiltersEqual(currentFilters, sanitizedFilters)
+        ? currentFilters
+        : sanitizedFilters
+    );
+  }, []);
+
+  const removeArtist = useCallback((artist: string) => {
+    setArtistsState((currentArtists) =>
       produce(currentArtists, (draft: string[]) => {
         const index = draft.findIndex((a) => a === artist);
         if (index > -1) {
@@ -173,18 +225,18 @@ export default function SpotifyRecommendationsProvider({
         }
       })
     );
-  };
+  }, []);
 
-  const addGenre = (genre: string) => {
-    setGenres((currentGenres) =>
+  const addGenre = useCallback((genre: string) => {
+    setGenresState((currentGenres) =>
       produce(currentGenres, (draft: string[]) => {
         draft.push(genre);
       })
     );
-  };
+  }, []);
 
-  const removeGenre = (genre: string) => {
-    setGenres((currentGenres) =>
+  const removeGenre = useCallback((genre: string) => {
+    setGenresState((currentGenres) =>
       produce(currentGenres, (draft: string[]) => {
         const index = draft.findIndex((g) => g === genre);
         if (index > -1) {
@@ -192,7 +244,7 @@ export default function SpotifyRecommendationsProvider({
         }
       })
     );
-  };
+  }, []);
 
   const { data: artistsDetailsData, refetch: fetchArtistsDetails } = useQuery<
     TSpotifyArtist[]
@@ -214,25 +266,46 @@ export default function SpotifyRecommendationsProvider({
     );
   }, [artistsDetailsData, artists]);
 
-  const contextValue = {
-    addArtists,
-    setArtists,
-    setSearchConfig,
-    removeArtist,
-    addGenre,
-    removeGenre,
-    genres,
-    artists,
-    artistsDetails,
-    enabledArtists,
-    isArtistDisabled,
-    fetchRecs,
-    recommendations: recommendations || [],
-    isSeedLimitReached,
-    filters,
-    setFilters,
-    isLoadingRecs,
-  };
+  const contextValue = useMemo(
+    () => ({
+      addArtists,
+      setArtists,
+      setSearchConfig,
+      removeArtist,
+      addGenre,
+      removeGenre,
+      genres,
+      artists,
+      artistsDetails,
+      enabledArtists,
+      isArtistDisabled,
+      fetchRecs,
+      recommendations: recommendations || EMPTY_RECOMMENDATIONS,
+      isSeedLimitReached,
+      filters,
+      setFilters,
+      isLoadingRecs,
+    }),
+    [
+      addArtists,
+      setArtists,
+      setSearchConfig,
+      removeArtist,
+      addGenre,
+      removeGenre,
+      genres,
+      artists,
+      artistsDetails,
+      enabledArtists,
+      isArtistDisabled,
+      fetchRecs,
+      recommendations,
+      isSeedLimitReached,
+      filters,
+      setFilters,
+      isLoadingRecs,
+    ]
+  );
 
   return (
     <SpotifyRecommendationsContext.Provider value={contextValue}>

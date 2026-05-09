@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   SpotifyRecommendationsContext,
@@ -26,14 +26,17 @@ export default function SpotifySearchSync() {
   } = useContext(SpotifyRecommendationsContext) as TSpotifyRecommendationsContext;
 
   const [isHydrated, setIsHydrated] = useState(false);
+  const didHydrateRef = useRef(false);
+  const currentSearch = searchParams?.toString() ?? "";
 
   // Hydrate from URL on first mount. If URL has no params but provider has
   // state (e.g. navigating from /home after seeding), push provider state
   // into the URL instead. Then fetch recommendations.
   useEffect(() => {
-    if (isHydrated) return;
+    if (didHydrateRef.current) return;
+    didHydrateRef.current = true;
 
-    const params = searchParams ?? new URLSearchParams();
+    const params = new URLSearchParams(currentSearch);
     const urlConfig = parseSearchConfigFromParams(params);
 
     const hasUrlState =
@@ -68,15 +71,14 @@ export default function SpotifySearchSync() {
     setIsHydrated(true);
   }, [
     artists,
+    currentSearch,
     fetchRecs,
     filters,
     genres,
-    isHydrated,
     isLoadingRecs,
     pathname,
     recommendations.length,
     router,
-    searchParams,
     setSearchConfig,
   ]);
 
@@ -90,10 +92,9 @@ export default function SpotifySearchSync() {
     }
 
     const qs = buildSearchStringFromConfig({ artists, genres, filters });
-    const current = searchParams?.toString() ?? "";
-    if (qs === current) return;
+    if (qs === currentSearch) return;
     router.replace(qs ? `${pathname}?${qs}` : pathname);
-  }, [artists, genres, filters, isHydrated, pathname, router, searchParams]);
+  }, [artists, currentSearch, genres, filters, isHydrated, pathname, router]);
 
   return null;
 }

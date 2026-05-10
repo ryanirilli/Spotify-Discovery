@@ -25,6 +25,7 @@ const TEMPO_PRESETS: TTempoPreset[] = [
 
 interface ISpotifyTempoFilter {
   value: TSpotifyRecommendationFilters;
+  onDraftChange?: (next: TSpotifyRecommendationFilters) => void;
   onCommit: (next: TSpotifyRecommendationFilters) => void;
   onApplied?: () => void;
 }
@@ -45,15 +46,6 @@ function getTempoRange(filters: TSpotifyRecommendationFilters): [number, number]
 
 function areTempoRangesEqual(left: [number, number], right: [number, number]) {
   return left[0] === right[0] && left[1] === right[1];
-}
-
-function areTempoFiltersEqual(
-  left: TSpotifyRecommendationFilters,
-  right: TSpotifyRecommendationFilters
-) {
-  return (
-    left.min_tempo === right.min_tempo && left.max_tempo === right.max_tempo
-  );
 }
 
 function cloneTempoRange(range: [number, number]): [number, number] {
@@ -94,6 +86,7 @@ export function getTempoFilterLabel(filters: TSpotifyRecommendationFilters) {
 
 export default function SpotifyTempoFilter({
   value,
+  onDraftChange,
   onCommit,
   onApplied,
 }: ISpotifyTempoFilter) {
@@ -107,6 +100,15 @@ export default function SpotifyTempoFilter({
     );
   }, []);
 
+  const updateTempoDraft = useCallback(
+    (next: [number, number]) => {
+      const nextRange = cloneTempoRange(next);
+      setTempoDraftIfChanged(nextRange);
+      onDraftChange?.(getTempoFilters(nextRange));
+    },
+    [onDraftChange, setTempoDraftIfChanged]
+  );
+
   useEffect(() => {
     setTempoDraftIfChanged(getTempoRange(value));
   }, [setTempoDraftIfChanged, value.min_tempo, value.max_tempo]);
@@ -116,17 +118,13 @@ export default function SpotifyTempoFilter({
   )?.label;
 
   const onReset = () => {
-    setTempoDraftIfChanged(cloneTempoRange(DEFAULT_TEMPO_RANGE));
-    if (hasTempoFilter(value)) {
-      onCommit({});
-    }
+    updateTempoDraft(DEFAULT_TEMPO_RANGE);
   };
 
   const onApply = () => {
     const nextFilters = getTempoFilters(tempoDraft);
-    if (!areTempoFiltersEqual(value, nextFilters)) {
-      onCommit(nextFilters);
-    }
+    onDraftChange?.(nextFilters);
+    onCommit(nextFilters);
     onApplied?.();
   };
 
@@ -153,9 +151,7 @@ export default function SpotifyTempoFilter({
                 label={preset.label}
                 description={preset.description}
                 active={activeTempoPresetLabel === preset.label}
-                onClick={() =>
-                  setTempoDraftIfChanged(cloneTempoRange(preset.range))
-                }
+                onClick={() => updateTempoDraft(preset.range)}
               />
             ))}
           </Grid>
@@ -177,7 +173,7 @@ export default function SpotifyTempoFilter({
             value={tempoDraft}
             colorPalette="electricPurple"
             onValueChange={(event) =>
-              setTempoDraftIfChanged(event.value as [number, number])
+              updateTempoDraft(event.value as [number, number])
             }
             css={{
               "--slider-thumb-size": "20px",

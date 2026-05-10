@@ -11,7 +11,14 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { Button } from "@/components/ui/Button";
-import { forwardRef, useCallback, useContext, useMemo } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { LuWaves } from "react-icons/lu";
 import { TopNavHeightContext } from "./DesktopAppLayout";
 import {
@@ -51,34 +58,101 @@ export default function SpotifyRecommendationFilters() {
   const recommendations = recommendationsContext?.recommendations;
   const fetchRecs = recommendationsContext?.fetchRecs;
   const setFilters = recommendationsContext?.setFilters;
+  const [draftFilters, setDraftFilters] =
+    useState<TSpotifyRecommendationFilters>(filters);
 
-  const onCommitFilter = useCallback(
+  const updateDraftFilters = useCallback(
     (next: TSpotifyRecommendationFilters) => {
       const nextFilters = sanitizeRecommendationFilters(next);
 
-      if (areRecommendationFiltersEqual(filters, nextFilters)) {
+      setDraftFilters((current) =>
+        areRecommendationFiltersEqual(current, nextFilters)
+          ? current
+          : nextFilters
+      );
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (isSheetOpen || isPopoverOpen) return;
+    updateDraftFilters(filters);
+  }, [filters, isPopoverOpen, isSheetOpen, updateDraftFilters]);
+
+  const commitFilters = useCallback(
+    (next: TSpotifyRecommendationFilters, closeFirst = false) => {
+      const nextFilters = sanitizeRecommendationFilters(next);
+      updateDraftFilters(nextFilters);
+
+      const runCommit = () => {
+        if (areRecommendationFiltersEqual(filters, nextFilters)) {
+          return;
+        }
+
+        setFilters?.(nextFilters);
+
+        const nextConfig = {
+          artists,
+          genres,
+          filters: nextFilters,
+        };
+
+        if (hasRecommendationSeeds(nextConfig)) {
+          void fetchRecs?.(nextConfig);
+        }
+      };
+
+      if (!closeFirst) {
+        runCommit();
         return;
       }
 
-      setFilters?.(nextFilters);
-
-      const nextConfig = {
-        artists,
-        genres,
-        filters: nextFilters,
-      };
-
-      if (hasRecommendationSeeds(nextConfig)) {
-        void fetchRecs?.(nextConfig);
-      }
+      setSheetOpen(false);
+      setPopoverOpen(false);
+      window.setTimeout(runCommit, 0);
     },
-    [artists, fetchRecs, filters, genres, setFilters]
+    [
+      artists,
+      fetchRecs,
+      filters,
+      genres,
+      setFilters,
+      setPopoverOpen,
+      setSheetOpen,
+      updateDraftFilters,
+    ]
   );
 
-  const onAppliedFilter = useCallback(() => {
-    setSheetOpen(false);
-    setPopoverOpen(false);
-  }, [setPopoverOpen, setSheetOpen]);
+  const onCommitFilter = useCallback(
+    (next: TSpotifyRecommendationFilters) => {
+      commitFilters(next, true);
+    },
+    [commitFilters]
+  );
+
+  const onDoneFilter = useCallback(() => {
+    commitFilters(draftFilters, true);
+  }, [commitFilters, draftFilters]);
+
+  const onSheetOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        updateDraftFilters(filters);
+      }
+      setSheetOpen(open);
+    },
+    [filters, setSheetOpen, updateDraftFilters]
+  );
+
+  const onPopoverOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        updateDraftFilters(filters);
+      }
+      setPopoverOpen(open);
+    },
+    [filters, setPopoverOpen, updateDraftFilters]
+  );
 
   const activeFilterCount = useMemo(
     () => getTempoFilterCount(filters),
@@ -87,12 +161,12 @@ export default function SpotifyRecommendationFilters() {
   const filterBody = useMemo(
     () => (
       <SpotifyTempoFilter
-        value={filters}
+        value={draftFilters}
+        onDraftChange={updateDraftFilters}
         onCommit={onCommitFilter}
-        onApplied={onAppliedFilter}
       />
     ),
-    [filters, onAppliedFilter, onCommitFilter]
+    [draftFilters, onCommitFilter, updateDraftFilters]
   );
 
   const { topNavHeight } = useContext(TopNavHeightContext);
@@ -124,9 +198,19 @@ export default function SpotifyRecommendationFilters() {
         <Box display={["block", "none"]} flexShrink={0}>
           <BottomSheet
             open={isSheetOpen}
-            onOpenChange={setSheetOpen}
+            onOpenChange={onSheetOpenChange}
             trigger={<FilterTrigger hasActiveFilters={activeFilterCount > 0} />}
             title="Filter"
+            headerEndElement={
+              <Button
+                type="button"
+                visual="secondary"
+                size="sm"
+                onClick={onDoneFilter}
+              >
+                Done
+              </Button>
+            }
           >
             {filterBody}
           </BottomSheet>
@@ -134,7 +218,7 @@ export default function SpotifyRecommendationFilters() {
         <Box display={["none", "block"]} flexShrink={0}>
           <Popover.Root
             open={isPopoverOpen}
-            onOpenChange={(e) => setPopoverOpen(e.open)}
+            onOpenChange={(e) => onPopoverOpenChange(e.open)}
             positioning={{ placement: "bottom-start", strategy: "fixed" }}
             lazyMount
             unmountOnExit

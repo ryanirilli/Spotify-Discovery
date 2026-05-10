@@ -164,20 +164,28 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
     if (!el || !rec.preview_url || isLoadingRecs) return;
 
     if (el.dataset.previewUrl !== rec.preview_url) {
+      setTrackProgress(0);
       el.src = rec.preview_url;
       el.dataset.previewUrl = rec.preview_url;
+      el.load();
     }
 
     // Call play() synchronously inside the user gesture so iOS Safari keeps
     // the activation context; only flip state once playback actually starts.
     const playPromise = el.play();
-    setIsPlaying(true);
-    playPromise?.catch((err) => {
-      console.warn("Audio preview failed to play", err);
-      setIsPlaying(false);
-      unloadPreview();
-    });
-  }, [isLoadingRecs, rec.preview_url, unloadPreview]);
+    setCurTrack?.(rec.id);
+    void playPromise
+      ?.then(() => {
+        if (el.dataset.previewUrl === rec.preview_url && !el.paused) {
+          setIsPlaying(true);
+        }
+      })
+      .catch((err) => {
+        console.warn("Audio preview failed to play", err);
+        setIsPlaying(false);
+        unloadPreview();
+      });
+  }, [isLoadingRecs, rec.id, rec.preview_url, setCurTrack, unloadPreview]);
 
   useEffect(() => {
     const previewIsActive =
@@ -204,6 +212,8 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
     if (!el) return;
 
     setTrackProgress(0);
+    const markPlaying = () => setIsPlaying(true);
+    const markPaused = () => setIsPlaying(false);
 
     const syncProgress = () => {
       const nextProgress =
@@ -220,6 +230,8 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
     el.addEventListener("timeupdate", syncProgress);
     el.addEventListener("seeked", syncProgress);
     el.addEventListener("ended", syncProgress);
+    el.addEventListener("playing", markPlaying);
+    el.addEventListener("pause", markPaused);
 
     return () => {
       el.removeEventListener("loadedmetadata", syncProgress);
@@ -227,6 +239,8 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
       el.removeEventListener("timeupdate", syncProgress);
       el.removeEventListener("seeked", syncProgress);
       el.removeEventListener("ended", syncProgress);
+      el.removeEventListener("playing", markPlaying);
+      el.removeEventListener("pause", markPaused);
     };
   }, []);
 

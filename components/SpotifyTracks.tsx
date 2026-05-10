@@ -1,6 +1,13 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState, ViewTransition } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  ViewTransition,
+} from "react";
 import NextLink from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { TbListDetails, TbMusicPlus, TbPlaylist } from "react-icons/tb";
@@ -136,15 +143,59 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
   const [trackProgress, setTrackProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  useEffect(() => {
-    const isPlaying = previewRef.current && !previewRef.current.paused;
-    const isPlayingButNotCurrentTrack = isPlaying && curTrack !== rec.id;
-    const isPlayingAndLoadingRecs = isPlaying && isLoadingRecs;
+  const unloadPreview = useCallback(() => {
+    const el = previewRef.current;
+    if (!el) return;
 
-    if (isPlayingButNotCurrentTrack || isPlayingAndLoadingRecs) {
+    el.pause();
+    el.removeAttribute("src");
+    delete el.dataset.previewUrl;
+    el.load();
+  }, []);
+
+  const pauseTrack = useCallback(() => {
+    setIsPlaying(false);
+    setTrackProgress(0);
+    unloadPreview();
+  }, [unloadPreview]);
+
+  const playTrack = useCallback(() => {
+    const el = previewRef.current;
+    if (!el || !rec.preview_url || isLoadingRecs) return;
+
+    if (el.dataset.previewUrl !== rec.preview_url) {
+      el.src = rec.preview_url;
+      el.dataset.previewUrl = rec.preview_url;
+    }
+
+    // Call play() synchronously inside the user gesture so iOS Safari keeps
+    // the activation context; only flip state once playback actually starts.
+    const playPromise = el.play();
+    setIsPlaying(true);
+    playPromise?.catch((err) => {
+      console.warn("Audio preview failed to play", err);
+      setIsPlaying(false);
+      unloadPreview();
+    });
+  }, [isLoadingRecs, rec.preview_url, unloadPreview]);
+
+  useEffect(() => {
+    const previewIsActive =
+      previewRef.current?.dataset.previewUrl === rec.preview_url;
+    const isPlayingButNotCurrentTrack = isPlaying && curTrack !== rec.id;
+    const shouldReleasePreview =
+      previewIsActive && (isPlayingButNotCurrentTrack || isLoadingRecs);
+
+    if (shouldReleasePreview) {
       pauseTrack();
     }
-  }, [curTrack, rec, isLoadingRecs]);
+  }, [curTrack, isLoadingRecs, isPlaying, pauseTrack, rec.id, rec.preview_url]);
+
+  useEffect(() => {
+    if (!isLoadingRecs) return;
+    clearTimeout(onMouseEnterTimeoutRef.current ?? undefined);
+    onMouseEnterTimeoutRef.current = null;
+  }, [isLoadingRecs]);
 
   // Drive the progress bar from media events instead of a RAF loop. Updating
   // React state every frame can trip React's nested update guard in dev.
@@ -177,28 +228,17 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
       el.removeEventListener("seeked", syncProgress);
       el.removeEventListener("ended", syncProgress);
     };
-  }, [rec.preview_url]);
+  }, []);
 
-  const playTrack = () => {
-    const el = previewRef.current;
-    if (!el) return;
-    // Call play() synchronously inside the user gesture so iOS Safari keeps
-    // the activation context; only flip state once playback actually starts.
-    const playPromise = el.play();
-    setIsPlaying(true);
-    playPromise?.catch((err) => {
-      console.warn("Audio preview failed to play", err);
-      setIsPlaying(false);
-    });
-  };
-
-  const pauseTrack = () => {
-    setIsPlaying(false);
-    previewRef.current?.pause();
-  };
+  useEffect(() => {
+    return () => {
+      clearTimeout(onMouseEnterTimeoutRef.current ?? undefined);
+      unloadPreview();
+    };
+  }, [unloadPreview]);
 
   const toggleTrack = () => {
-    if (previewRef.current?.paused) {
+    if (!isPlaying) {
       playTrack();
     } else {
       pauseTrack();
@@ -222,6 +262,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
       return;
     }
     clearTimeout(onMouseEnterTimeoutRef.current!);
+    onMouseEnterTimeoutRef.current = null;
     pauseTrack();
   };
 
@@ -294,10 +335,9 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
         </Box>
         <VisuallyHidden>
           <audio
-            src={rec.preview_url}
             ref={previewRef}
             loop
-            preload="auto"
+            preload="none"
             playsInline
           />
         </VisuallyHidden>

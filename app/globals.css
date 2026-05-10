@@ -143,6 +143,48 @@
   }
 }
 
+.collection-cover-placeholder {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(39, 48, 58, 0.34), transparent 48%),
+    linear-gradient(145deg, #0a0e13 0%, #161219 50%, #0c1315 100%);
+}
+
+.collection-cover-placeholder::before {
+  content: "";
+  position: absolute;
+  inset: -34%;
+  background:
+    radial-gradient(ellipse 48% 42% at 24% 20%, rgba(91, 118, 112, 0.78), transparent 68%),
+    radial-gradient(ellipse 44% 52% at 76% 18%, rgba(83, 68, 104, 0.74), transparent 70%),
+    radial-gradient(ellipse 58% 50% at 78% 78%, rgba(151, 96, 83, 0.68), transparent 72%),
+    radial-gradient(ellipse 46% 44% at 18% 78%, rgba(181, 138, 104, 0.58), transparent 70%),
+    radial-gradient(ellipse 46% 46% at 50% 54%, rgba(113, 88, 120, 0.54), transparent 72%),
+    linear-gradient(135deg, rgba(11, 14, 21, 0.82), rgba(21, 16, 24, 0.72));
+  filter: blur(46px) saturate(0.92) contrast(1.04);
+  transform: scale(1.18) rotate(-7deg);
+  z-index: 0;
+}
+
+.collection-cover-placeholder::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.35 0.35 0.35 0 0 0.35 0.35 0.35 0 0 0.35 0.35 0.35 0 0 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23noise)' opacity='0.86'/%3E%3C/svg%3E"),
+    repeating-radial-gradient(circle at 62% 38%, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 50% 50%, transparent 34%, rgba(0, 0, 0, 0.48) 100%),
+    linear-gradient(140deg, rgba(255, 244, 224, 0.05), transparent 38%, rgba(11, 18, 20, 0.18));
+  background-size: 132px 132px, 7px 7px, 100% 100%, 100% 100%;
+  mix-blend-mode: soft-light;
+  opacity: 0.72;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .collection-cover-swirl {
   position: absolute;
   inset: 0;

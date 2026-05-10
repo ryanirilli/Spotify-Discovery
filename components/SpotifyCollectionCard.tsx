@@ -7,7 +7,6 @@ import {
   AspectRatio,
   Box,
   Dialog,
-  Flex,
   Heading,
   Icon,
   Menu,
@@ -16,11 +15,9 @@ import {
 } from "@chakra-ui/react";
 import {
   MdDeleteOutline,
-  MdImageNotSupported,
-  MdLibraryMusic,
   MdMoreVert,
 } from "react-icons/md";
-import CollectionCoverSwirl from "./CollectionCoverSwirl";
+import CollectionCoverPlaceholder from "./CollectionCoverPlaceholder";
 import DialogCloseButton from "./DialogCloseButton";
 import LazyImage from "./LazyImage";
 import { Button, IconButton } from "@/components/ui/Button";
@@ -43,8 +40,6 @@ export function SpotifyCollectionCard({
   const queryClient = useQueryClient();
   const { setSearchConfig } = useContext(SpotifyRecommendationsContext) || {};
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const isPending = collection.cover_status === "pending";
-  const isFailed = collection.cover_status === "failed";
   const canDelete =
     !!currentUserId && currentUserId === collection.owner_spotify_user_id;
 
@@ -161,31 +156,7 @@ export function SpotifyCollectionCard({
               objectFit="cover"
             />
           ) : (
-            <Flex
-              h="100%"
-              w="100%"
-              position="relative"
-              direction="column"
-              alignItems="center"
-              justifyContent="center"
-              gap={3}
-              color="whiteAlpha.700"
-              bg="gray.950"
-            >
-              {isPending ? (
-                <CollectionCoverSwirl />
-              ) : (
-                <>
-                  <Icon
-                    as={isFailed ? MdImageNotSupported : MdLibraryMusic}
-                    boxSize={10}
-                  />
-                  <Text textStyle="statusText">
-                    {isFailed ? "Cover unavailable" : "Collection"}
-                  </Text>
-                </>
-              )}
-            </Flex>
+            <CollectionCoverPlaceholder />
           )}
         </AspectRatio>
         <Box p={3} minH="84px">

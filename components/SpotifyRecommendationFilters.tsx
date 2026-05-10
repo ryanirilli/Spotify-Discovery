@@ -99,7 +99,9 @@ export default function SpotifyRecommendationFilters() {
   const [hoverPreviewEnabled, setHoverPreviewEnabled] = useHoverPreview();
 
   const shouldShowToolbar = Boolean(
-    recommendations?.length ||
+    isSheetOpen ||
+      isPopoverOpen ||
+      recommendations?.length ||
       artists.length ||
       genres.length ||
       Object.keys(filters).length

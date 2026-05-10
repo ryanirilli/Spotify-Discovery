@@ -177,7 +177,7 @@ export default function SpotifyTempoFilter({
             value={tempoDraft}
             colorPalette="electricPurple"
             onValueChange={(event) =>
-              setTempoDraft(event.value as [number, number])
+              setTempoDraftIfChanged(event.value as [number, number])
             }
             css={{
               "--slider-thumb-size": "20px",

@@ -13,11 +13,17 @@ export function SpotifyCollectionCardSkeleton() {
       <AspectRatio ratio={1} overflow="hidden" bg="blackAlpha.600" position="relative">
         <LoadingBox w="100%" h="100%" borderRadius="0" />
       </AspectRatio>
-      <Box p={3} minH="84px">
+      <Box p={3} minH="104px">
         <LoadingBox
           h="20px"
           w="70%"
-          mb={3}
+          mb={2}
+          borderRadius="sm"
+        />
+        <LoadingBox
+          h="14px"
+          w="60%"
+          mb={2}
           borderRadius="sm"
         />
         <LoadingBox

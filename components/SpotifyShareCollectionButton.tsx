@@ -36,13 +36,14 @@ import {
   hasRecommendationSeeds,
 } from "@/utils/spotifySearchConfig";
 import { TSpotifyCollection } from "@/types/SpotifyCollection";
+import { getArtistNamesLabel } from "@/utils/collectionArtists";
 import { toaster } from "@/utils/toaster";
 
 type Step = "name" | "created";
 
 export default function SpotifyShareCollectionButton() {
   const queryClient = useQueryClient();
-  const { artists, genres, filters } = useContext(
+  const { artists, artistsDetails, enabledArtists, genres, filters } = useContext(
     SpotifyRecommendationsContext,
   ) as TSpotifyRecommendationsContext;
   const [open, setOpen] = useState(false);
@@ -61,6 +62,9 @@ export default function SpotifyShareCollectionButton() {
   const config = { artists, genres, filters };
   const canShare = hasRecommendationSeeds(config);
   const isCreated = step === "created" && !!collection;
+  const previewArtistNames = enabledArtists
+    .map((id) => artistsDetails.find((artist) => artist.id === id)?.name)
+    .filter((name): name is string => Boolean(name));
 
   const mutation = useMutation({
     mutationFn: createSpotifyCollection,
@@ -212,6 +216,7 @@ export default function SpotifyShareCollectionButton() {
         <CommunityCardPreview
           collection={collection}
           title={inputValue}
+          artistNames={previewArtistNames}
         />
       </Box>
       <Flex
@@ -348,14 +353,21 @@ export default function SpotifyShareCollectionButton() {
 function CommunityCardPreview({
   collection,
   title,
+  artistNames = [],
 }: {
   collection: TSpotifyCollection | null;
   title: string;
+  artistNames?: string[];
 }) {
   const isReady =
     collection?.cover_status === "ready" && !!collection.cover_image_url;
   const displayTitle =
     collection?.title || title.trim() || "Untitled collection";
+  const displayArtistNames = collection
+    ? collection.artist_snapshot.map((artist) => artist.name)
+    : artistNames;
+  const artistNamesLabel = getArtistNamesLabel(displayArtistNames);
+  const fullArtistNamesLabel = displayArtistNames.join(", ");
   const ownerLabel = collection
     ? collection.owner_display_name
       ? `Shared by ${collection.owner_display_name}`
@@ -385,7 +397,7 @@ function CommunityCardPreview({
           <CollectionCoverPlaceholder />
         )}
       </AspectRatio>
-      <Box p={3} minH="84px">
+      <Box p={3} minH={artistNamesLabel ? "104px" : "84px"}>
         <Heading
           as="h4"
           color="whiteAlpha.900"
@@ -395,6 +407,17 @@ function CommunityCardPreview({
         >
           {displayTitle}
         </Heading>
+        {artistNamesLabel && (
+          <Text
+            mt={1}
+            color="whiteAlpha.800"
+            textStyle="itemMeta"
+            lineClamp={1}
+            title={fullArtistNamesLabel}
+          >
+            {artistNamesLabel}
+          </Text>
+        )}
         <Text mt={1} color="whiteAlpha.600" textStyle="itemMeta" lineClamp={1}>
           {ownerLabel}
         </Text>

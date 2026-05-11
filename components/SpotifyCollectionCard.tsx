@@ -24,6 +24,7 @@ import { Button, IconButton } from "@/components/ui/Button";
 import { SpotifyRecommendationsContext } from "./SpotifyRecommendationsProvider";
 import { deleteSpotifyCollection } from "@/queries/spotifyCollections";
 import { TSpotifyCollection } from "@/types/SpotifyCollection";
+import { getArtistNamesLabel } from "@/utils/collectionArtists";
 import { buildSearchStringFromConfig } from "@/utils/spotifySearchConfig";
 import { toaster } from "@/utils/toaster";
 
@@ -42,6 +43,9 @@ export function SpotifyCollectionCard({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const canDelete =
     !!currentUserId && currentUserId === collection.owner_spotify_user_id;
+  const artistNames = collection.artist_snapshot.map((artist) => artist.name);
+  const artistNamesLabel = getArtistNamesLabel(artistNames);
+  const fullArtistNamesLabel = artistNames.join(", ");
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteSpotifyCollection(collection.id),
@@ -159,7 +163,7 @@ export function SpotifyCollectionCard({
             <CollectionCoverPlaceholder />
           )}
         </AspectRatio>
-        <Box p={3} minH="84px">
+        <Box p={3} minH={artistNamesLabel ? "104px" : "84px"}>
           <Heading
             as="h4"
             color="whiteAlpha.900"
@@ -169,6 +173,17 @@ export function SpotifyCollectionCard({
           >
             {collection.title}
           </Heading>
+          {artistNamesLabel && (
+            <Text
+              mt={1}
+              color="whiteAlpha.800"
+              textStyle="itemMeta"
+              lineClamp={1}
+              title={fullArtistNamesLabel}
+            >
+              {artistNamesLabel}
+            </Text>
+          )}
           <Text mt={1} color="whiteAlpha.600" textStyle="itemMeta" lineClamp={1}>
             {collection.owner_display_name
               ? `Shared by ${collection.owner_display_name}`

@@ -198,7 +198,8 @@ export default function SpotifyAutocomplete() {
   const shouldShowResults =
     isResultsShowing && (hasSearchTerm || isNewExperience);
 
-  const autocompleteBg = shouldShowResults ? "gray.950" : "black";
+  const autocompleteBg = shouldShowResults ? "gray.950" : "whiteAlpha.100";
+  const autocompleteHoverBg = shouldShowResults ? "gray.950" : "whiteAlpha.200";
   const autocompleteShadow = shouldShowResults ? "dark-lg" : "none";
   const autocompleteFocusShadow = [
     "0 0 0 1px rgba(255, 255, 255, 0.14)",
@@ -225,7 +226,12 @@ export default function SpotifyAutocomplete() {
         borderTopRadius={shouldShowResults ? "2xl" : "full"}
         borderBottomRadius={shouldShowResults ? "0" : "full"}
         boxShadow={autocompleteShadow}
+        cursor="pointer"
         transition="background-color 160ms ease, border-color 160ms ease, border-radius 160ms ease, box-shadow 160ms ease"
+        _hover={{
+          bg: autocompleteHoverBg,
+          borderColor: shouldShowResults ? "whiteAlpha.300" : "whiteAlpha.400",
+        }}
         _focusWithin={{
           borderColor: "whiteAlpha.500",
           boxShadow: autocompleteFocusShadow,
@@ -263,11 +269,13 @@ export default function SpotifyAutocomplete() {
             bg="transparent"
             w="100%"
             ref={inputRef}
+            cursor="pointer"
             onFocus={onFocus}
             placeholder="Search for an artist"
             value={artist}
             onChange={onArtistChange}
             _placeholder={{ color: "white" }}
+            _focus={{ cursor: "text" }}
             _focusVisible={{ boxShadow: "none", outline: "0" }}
           />
         </InputGroup>

@@ -151,6 +151,17 @@ export default function SpotifySeeds() {
                       <Tag.CloseTrigger
                         aria-label={`Remove ${artist.name}`}
                         boxSize="100%"
+                        borderRadius="full"
+                        color="whiteAlpha.800"
+                        cursor="pointer"
+                        transition="background-color 120ms ease, color 120ms ease"
+                        _hover={{
+                          bg: "whiteAlpha.200",
+                          color: "white",
+                        }}
+                        _active={{
+                          bg: "whiteAlpha.300",
+                        }}
                         css={{ "& svg": { width: "20px", height: "20px" } }}
                         onClick={() => {
                           const nextArtists = artists.filter(
@@ -193,6 +204,17 @@ export default function SpotifySeeds() {
                     <Tag.CloseTrigger
                       aria-label={`Remove ${genre}`}
                       boxSize="100%"
+                      borderRadius="full"
+                      color="whiteAlpha.800"
+                      cursor="pointer"
+                      transition="background-color 120ms ease, color 120ms ease"
+                      _hover={{
+                        bg: "whiteAlpha.200",
+                        color: "white",
+                      }}
+                      _active={{
+                        bg: "whiteAlpha.300",
+                      }}
                       css={{ "& svg": { width: "20px", height: "20px" } }}
                       onClick={() => {
                         const nextGenres = genres.filter((g) => g !== genre);

@@ -1,22 +1,33 @@
 "use client";
 
 import spotifyTrackDetailsQuery from "@/queries/spotifyTrackDetailsQuery";
-import { Slider, Table } from "@chakra-ui/react";
-import { ReactNode, useMemo } from "react";
+import { Box, Flex, Stack, Text } from "@chakra-ui/react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingTextRows } from "./LoadingSkeleton";
 
-const attributes = new Set(["duration_ms", "tempo"]);
+const attributes = [
+  {
+    key: "duration_ms",
+    label: "Duration",
+    format: msToMinAndSec,
+  },
+  {
+    key: "tempo",
+    label: "BPM",
+    format: (value: number) => value.toFixed(1),
+  },
+] as const;
 
-const sliderAttributes = new Set([
-  "danceability",
-  "energy",
-  "speechiness",
-  "acousticness",
-  "instrumentalness",
-  "liveness",
-  "valence",
-]);
+const meterAttributes = [
+  { key: "danceability", label: "Danceability" },
+  { key: "energy", label: "Energy" },
+  { key: "speechiness", label: "Speechiness" },
+  { key: "acousticness", label: "Acousticness" },
+  { key: "instrumentalness", label: "Instrumentalness" },
+  { key: "liveness", label: "Liveness" },
+  { key: "valence", label: "Positive vibe" },
+] as const;
 
 function msToMinAndSec(ms: number) {
   const minutes = Math.floor(ms / 60000);
@@ -39,83 +50,89 @@ export default function SpotifyTrackDetails({ id }: ISpotifyTrackDetails) {
     if (!data) {
       return [];
     }
-    const nodes: ReactNode[] = [];
-    attributes.forEach((key) =>
-      nodes.push(
-        <Table.Row key={key}>
-          <Table.Cell textStyle="itemMeta">
-            {key.toLowerCase() === "duration_ms"
-              ? "duration"
-              : key.toLowerCase() === "tempo"
-              ? "bpm"
-              : key}
-          </Table.Cell>
-          <Table.Cell textStyle="itemMeta" textAlign="right">
-            {key.toLowerCase() === "duration_ms"
-              ? msToMinAndSec(data[key])
-              : key.toLowerCase() === "tempo"
-              ? Number(data[key]).toFixed(1)
-              : data[key]}
-          </Table.Cell>
-        </Table.Row>
-      )
-    );
-    return nodes;
+    return attributes
+      .filter(({ key }) => typeof data[key] === "number")
+      .map(({ key, label, format }) => ({
+        key,
+        label,
+        value: format(data[key]),
+      }));
   }, [data]);
 
-  const sliderAtts = useMemo(() => {
+  const meterAtts = useMemo(() => {
     if (!data) {
       return [];
     }
-    const nodes: ReactNode[] = [];
-    sliderAttributes.forEach((key) => {
-      nodes.push(
-        <Table.Row key={key}>
-          <Table.Cell textStyle="itemMeta">
-            {key === "valence" ? "positive vibe" : key}
-          </Table.Cell>
-          <Table.Cell textStyle="itemMeta" textAlign="right">
-            <Slider.Root
-              aria-label={[`${key} slider`]}
-              defaultValue={[data[key] * 100]}
-              min={0}
-              max={100}
-            >
-              <Slider.Control>
-                <Slider.Track>
-                  <Slider.Range />
-                </Slider.Track>
-              </Slider.Control>
-            </Slider.Root>
-          </Table.Cell>
-        </Table.Row>
-      );
-    });
-    return nodes;
+    return meterAttributes
+      .filter(({ key }) => typeof data[key] === "number")
+      .map(({ key, label }) => ({
+        key,
+        label,
+        percent: Math.max(0, Math.min(100, Math.round(data[key] * 100))),
+      }));
   }, [data]);
 
   return isLoading ? (
     <LoadingTextRows count={9} my={4} opacity={0.5} />
   ) : (
-    <Table.ScrollArea bg="transparent">
-      <Table.Root
-        size="sm"
-        bg="transparent"
-        css={{
-          "& tr": { background: "transparent !important" },
-          "& td": {
-            background: "transparent !important",
-            border: "none",
-            color: "var(--chakra-colors-whiteAlpha-900)",
-            textTransform: "capitalize",
-          },
-        }}
-      >
-        <Table.Body>
-          {atts}
-          {sliderAtts}
-        </Table.Body>
-      </Table.Root>
-    </Table.ScrollArea>
+    <Stack gap={4}>
+      {atts.length > 0 && (
+        <Stack gap={2}>
+          {atts.map((attribute) => (
+            <Flex
+              key={attribute.key}
+              alignItems="center"
+              justifyContent="space-between"
+              gap={3}
+            >
+              <Text textStyle="itemMeta" color="whiteAlpha.600">
+                {attribute.label}
+              </Text>
+              <Text textStyle="itemMeta" color="whiteAlpha.900">
+                {attribute.value}
+              </Text>
+            </Flex>
+          ))}
+        </Stack>
+      )}
+      <Stack gap={3}>
+        {meterAtts.map((attribute) => (
+          <Flex
+            key={attribute.key}
+            alignItems="center"
+            justifyContent="space-between"
+            gap={3}
+          >
+            <Flex
+              alignItems="center"
+              minW={0}
+              flex={1}
+            >
+              <Text textStyle="itemMeta" color="whiteAlpha.700">
+                {attribute.label}
+              </Text>
+            </Flex>
+            <Box
+              h="6px"
+              w="46%"
+              minW="112px"
+              maxW="160px"
+              overflow="hidden"
+              borderRadius="full"
+              bg="whiteAlpha.100"
+              boxShadow="inset 0 0 0 1px rgba(255, 255, 255, 0.04)"
+            >
+              <Box
+                h="100%"
+                w={`${attribute.percent}%`}
+                minW={attribute.percent > 0 ? "2px" : 0}
+                borderRadius="full"
+                bg="whiteAlpha.700"
+              />
+            </Box>
+          </Flex>
+        ))}
+      </Stack>
+    </Stack>
   );
 }

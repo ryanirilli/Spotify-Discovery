@@ -479,17 +479,6 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                         <Box />
                       )}
                     </AspectRatio>
-                    <Progress.Root
-                      value={shouldShowMainTrackProgress ? trackProgress : 0}
-                    >
-                      <Progress.Track h="2px" bg="whiteAlpha.200">
-                        <Progress.Range
-                          bg="electricPurple.500"
-                          borderRightRadius="full"
-                          transition="none"
-                        />
-                      </Progress.Track>
-                    </Progress.Root>
                   </Box>
                   <Box
                     display={{ base: "none", md: "block" }}
@@ -553,7 +542,19 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                   borderColor="whiteAlpha.300"
                   borderRadius="md"
                   bg="blackAlpha.300"
+                  overflow="hidden"
                 >
+                  <Progress.Root
+                    value={shouldShowMainTrackProgress ? trackProgress : 0}
+                  >
+                    <Progress.Track h="2px" bg="whiteAlpha.200">
+                      <Progress.Range
+                        bg="electricPurple.500"
+                        borderRightRadius="full"
+                        transition="none"
+                      />
+                    </Progress.Track>
+                  </Progress.Root>
                   <Stack gap={4} p={4}>
                     <Box>
                       <SpotifyLink isExternal rec={track}>

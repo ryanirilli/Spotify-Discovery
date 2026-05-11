@@ -169,12 +169,12 @@ export default function SpotifyShareCollectionButton() {
       : "Share";
   const description = isCreated
     ? "Shared to Community Collections"
-    : "Preview your card before it appears in Community Collections";
+    : "Your search will be published on the home page";
   const statusMessage = mutation.isPending
     ? "Sharing to Community Collections. You can close this and keep exploring."
     : isCreated
       ? "Shared to Community Collections."
-      : "This is how the card will appear in the community feed.";
+      : null;
   const handleClose = () => handleOpenChange(false);
   const shareTrigger = (
     <Button
@@ -201,17 +201,6 @@ export default function SpotifyShareCollectionButton() {
   );
   const formControls = (
     <Flex direction="column" gap={4}>
-      <Input
-        ref={titleInputRef}
-        value={inputValue}
-        textStyle="body"
-        onChange={(event) => setTitle(event.target.value)}
-        placeholder="Collection title"
-        aria-label="Collection title"
-        maxLength={80}
-        disabled={isCreated}
-        required
-      />
       <Box mx="auto" w="100%" maxW="280px">
         <CommunityCardPreview
           collection={collection}
@@ -219,27 +208,29 @@ export default function SpotifyShareCollectionButton() {
           artistNames={previewArtistNames}
         />
       </Box>
-      <Flex
-        align="flex-start"
-        gap={2}
-        color="whiteAlpha.700"
-        bg="whiteAlpha.100"
-        borderWidth="1px"
-        borderColor="whiteAlpha.100"
-        borderRadius="md"
-        px={3}
-        py={2}
-        aria-live="polite"
-      >
-        <Icon
-          as={isCreated ? MdCheck : MdAutoAwesome}
-          boxSize={4}
-          color={isCreated ? "green.300" : "whiteAlpha.600"}
-          mt="2px"
-          flexShrink={0}
-        />
-        <Text textStyle="body">{statusMessage}</Text>
-      </Flex>
+      {statusMessage && (
+        <Flex
+          align="flex-start"
+          gap={2}
+          color="whiteAlpha.700"
+          bg="whiteAlpha.100"
+          borderWidth="1px"
+          borderColor="whiteAlpha.100"
+          borderRadius="md"
+          px={3}
+          py={2}
+          aria-live="polite"
+        >
+          <Icon
+            as={isCreated ? MdCheck : MdAutoAwesome}
+            boxSize={4}
+            color={isCreated ? "green.300" : "whiteAlpha.600"}
+            mt="2px"
+            flexShrink={0}
+          />
+          <Text textStyle="body">{statusMessage}</Text>
+        </Flex>
+      )}
       {isCreated && (
         <Clipboard.Root value={shareUrl}>
           <Clipboard.Label
@@ -264,6 +255,17 @@ export default function SpotifyShareCollectionButton() {
           </Flex>
         </Clipboard.Root>
       )}
+      <Input
+        ref={titleInputRef}
+        value={inputValue}
+        textStyle="body"
+        onChange={(event) => setTitle(event.target.value)}
+        placeholder="Collection title"
+        aria-label="Collection title"
+        maxLength={80}
+        disabled={isCreated}
+        required
+      />
     </Flex>
   );
 

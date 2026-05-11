@@ -71,8 +71,6 @@ async function fetchRecommendationsForConfig(config: TSpotifySearchConfig) {
     return [];
   }
 
-  document.body.scrollIntoView({ behavior: "smooth", block: "start" });
-
   const settings: TSpotifyRecommendationsOptions = {
     artists: enabledArtists,
     genres: config.genres,

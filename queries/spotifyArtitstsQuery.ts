@@ -9,5 +9,10 @@ export async function artistsQuery(
   const res = await fetch(
     `/api/spotify-get-artists-detail?artists=${artists.join(",")}`
   );
-  return res.json();
+  if (!res.ok) {
+    console.warn("Could not fetch Spotify artist details", await res.json());
+    return [];
+  }
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
 }

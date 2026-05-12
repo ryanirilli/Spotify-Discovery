@@ -20,6 +20,10 @@ export default async function spotifyRecommendations({
   const res = await fetch(
     `/api/spotify-get-recommendations?${params.toString()}`
   );
+  if (!res.ok) {
+    console.warn("Could not fetch Spotify recommendations", await res.json());
+    return [];
+  }
   const data = await res.json();
-  return data;
+  return Array.isArray(data) ? data : [];
 }

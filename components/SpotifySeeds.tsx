@@ -121,21 +121,34 @@ export default function SpotifySeeds() {
                     size="lg"
                     borderRadius="full"
                     variant="solid"
-                    pl={0}
+                    pl="6px"
                     minH={["44px", "40px"]}
                     maxW="none"
                     flexShrink={0}
+                    alignItems="center"
                     whiteSpace="nowrap"
                   >
                     <Tag.StartElement
-                      boxSize={["32px", "28px"]}
+                      boxSize={["30px", "28px"]}
+                      minW={["30px", "28px"]}
+                      flex="0 0 auto"
+                      display="inline-flex"
+                      alignItems="center"
+                      justifyContent="center"
                       overflow="hidden"
                       borderRadius="full"
+                      ml={0}
                       mr={2}
                     >
-                      <Avatar.Root boxSize="100%">
-                        <Avatar.Image src={artistImg} />
-                        <Avatar.Fallback name={artist.name} />
+                      <Avatar.Root boxSize="100%" flexShrink={0}>
+                        <Avatar.Image
+                          src={artistImg}
+                          w="100%"
+                          h="100%"
+                          objectFit="cover"
+                          display="block"
+                        />
+                        <Avatar.Fallback name={artist.name} fontSize="xs" />
                       </Avatar.Root>
                     </Tag.StartElement>
                     <Tag.Label

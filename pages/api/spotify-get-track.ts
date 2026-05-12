@@ -6,7 +6,7 @@ export default async function SpotifyGetTrack(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     const data = await spotifyApi.getTrack(req.query.id as string);
     return res.status(200).json(data?.body || {});
   });

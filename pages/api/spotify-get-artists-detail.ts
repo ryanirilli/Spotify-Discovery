@@ -6,7 +6,7 @@ export default async function SpotifyGetArtistsDetails(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     if (!req.query.artists) {
       return res.status(400).json({ error: "Missing artists query parameter" });
     }

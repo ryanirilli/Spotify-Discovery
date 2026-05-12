@@ -6,7 +6,7 @@ export default async function SpotifyGetAlbumTracks(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     const data = await spotifyApi.getAlbumTracks(req.query.albumId as string, {
       limit: 50,
     });

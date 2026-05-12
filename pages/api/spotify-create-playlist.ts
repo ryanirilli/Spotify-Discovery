@@ -6,7 +6,7 @@ export default async function SpotifyGetGenreSeeds(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     const data = await spotifyApi.createPlaylist(req.body.name as string);
     return res.status(200).json({ success: true, data });
   });

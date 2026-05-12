@@ -1,6 +1,7 @@
 import { desc } from "drizzle-orm";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { waitUntil } from "@vercel/functions";
+import SpotifyWebApi from "spotify-web-api-node";
 import spotifyApi from "@/lib/SpotifyClient";
 import setSpotifyAccessToken from "@/lib/setSpotifyAccessToken";
 import { getDb } from "@/db";
@@ -37,6 +38,7 @@ function getBestArtistImage(
 }
 
 async function getArtistSnapshot(
+  spotifyApi: SpotifyWebApi,
   artistIds: string[]
 ): Promise<TSpotifyCollectionArtistSnapshot[]> {
   if (!artistIds.length) return [];
@@ -53,7 +55,7 @@ export default async function SpotifyCollections(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     if (req.method === "GET") {
       const rows = await getDb()
         .select()
@@ -83,7 +85,7 @@ export default async function SpotifyCollections(
 
     const [me, artistSnapshot, titleOk] = await Promise.all([
       spotifyApi.getMe(),
-      getArtistSnapshot(getEnabledArtistsForConfig(config)),
+      getArtistSnapshot(spotifyApi, getEnabledArtistsForConfig(config)),
       isCollectionTitleAppropriate(title),
     ]);
 

@@ -7,7 +7,7 @@ export default async function SpotifyGetUserPlaylists(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     let offset = 0;
     let allPlaylists: any[] = [];
     const {

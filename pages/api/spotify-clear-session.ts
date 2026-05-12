@@ -7,7 +7,7 @@ export default async function SpotifyClearSession(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     const cookieOptions: CookieSerializeOptions = {
       expires: new Date(0),
       httpOnly: true,

@@ -6,7 +6,7 @@ export default async function SpotifyAddTracksToPlaylist(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     const { playlistId, tracks } = req.body;
     const data = await spotifyApi.addTracksToPlaylist(playlistId, tracks);
     return res.status(200).json(data?.body || {});

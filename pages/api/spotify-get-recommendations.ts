@@ -19,7 +19,7 @@ export default async function SpotifyGetRecommendationsreq(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     const seed_artists = (req.query.artists as string) ?? "";
     const seed_genres = (req.query.genres as string) ?? "";
     const recommendationFilters = Object.fromEntries(

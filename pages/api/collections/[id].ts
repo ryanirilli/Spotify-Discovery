@@ -11,7 +11,7 @@ export default async function SpotifyCollectionById(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     if (req.method !== "GET" && req.method !== "DELETE") {
       res.setHeader("Allow", "GET, DELETE");
       return res.status(405).json({ error: "Method not allowed" });

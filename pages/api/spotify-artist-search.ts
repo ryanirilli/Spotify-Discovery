@@ -7,7 +7,7 @@ export default async function SpotifyArtistSearch(
   res: NextApiResponse
 ) {
   const { artist } = req.query;
-  return await setSpotifyAccessToken(req, res, spotifyApi, async () => {
+  return await setSpotifyAccessToken(req, res, spotifyApi, async (spotifyApi) => {
     const data = await spotifyApi.searchArtists(artist as string);
     return res.status(200).json(data);
   });

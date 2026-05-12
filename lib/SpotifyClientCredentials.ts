@@ -1,3 +1,5 @@
+import SpotifyWebApi from "spotify-web-api-node";
+
 type ClientCredentialsToken = {
   accessToken: string;
   expiresAt: number;
@@ -53,19 +55,12 @@ async function getClientCredentialsToken() {
   return fetchClientCredentialsToken();
 }
 
-export async function spotifyClientCredentialsFetch(path: string) {
-  let accessToken = await getClientCredentialsToken();
-  let response = await fetch(`https://api.spotify.com${path}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+export default async function createSpotifyClientCredentialsApi() {
+  const spotifyApi = new SpotifyWebApi({
+    clientId: process.env.NEXT_SPOTIFY_CLIENT_ID,
+    clientSecret: process.env.NEXT_SPOTIFY_CLIENT_SECRET,
+    redirectUri: process.env.NEXT_SPOTIFY_REDIRECT_URI,
   });
-
-  if (response.status === 401) {
-    cachedToken = null;
-    accessToken = await getClientCredentialsToken();
-    response = await fetch(`https://api.spotify.com${path}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-  }
-
-  return response;
+  spotifyApi.setAccessToken(await getClientCredentialsToken());
+  return spotifyApi;
 }

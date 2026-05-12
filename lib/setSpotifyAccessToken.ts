@@ -20,13 +20,6 @@ type SpotifyTokenResponse = {
   expires_in?: number;
 };
 
-type SpotifyErrorPhase =
-  | "access_token_refresh"
-  | "spotify_route_handler"
-  | "spotify_route_handler_after_token_refresh";
-
-const TRANSIENT_RETRY_DELAYS_MS = [250, 750] as const;
-
 function getRequestId(req: NextApiRequest) {
   const vercelId = req.headers["x-vercel-id"];
   if (typeof vercelId === "string" && vercelId) return vercelId;
@@ -73,29 +66,6 @@ function getPublicStatusCode(spotifyStatusCode: number | undefined) {
   return 502;
 }
 
-function isTransientSpotifyStatus(spotifyStatusCode: number | undefined) {
-  return (
-    spotifyStatusCode === 429 ||
-    (typeof spotifyStatusCode === "number" && spotifyStatusCode >= 500)
-  );
-}
-
-function getRetryDelayMs(err: unknown, fallbackDelayMs: number) {
-  const retryAfter = getHeaderValue(
-    (err as SpotifyApiError).headers,
-    "retry-after"
-  );
-  const retryAfterSeconds = retryAfter ? Number(retryAfter) : NaN;
-  if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds >= 0) {
-    return Math.min(retryAfterSeconds * 1000, 2000);
-  }
-  return fallbackDelayMs;
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 function logSpotifyError({
   err,
   phase,
@@ -103,7 +73,10 @@ function logSpotifyError({
   requestId,
 }: {
   err: unknown;
-  phase: SpotifyErrorPhase;
+  phase:
+    | "access_token_refresh"
+    | "spotify_route_handler"
+    | "spotify_route_handler_after_token_refresh";
   req: NextApiRequest;
   requestId: string;
 }) {
@@ -133,37 +106,6 @@ function logSpotifyError({
   );
 }
 
-function logSpotifyRetry({
-  attempt,
-  delayMs,
-  err,
-  phase,
-  req,
-  requestId,
-}: {
-  attempt: number;
-  delayMs: number;
-  err: unknown;
-  phase: SpotifyErrorPhase;
-  req: NextApiRequest;
-  requestId: string;
-}) {
-  console.warn(
-    JSON.stringify({
-      event: "spotify_api_retry",
-      requestId,
-      phase,
-      method: req.method,
-      path: req.url?.split("?")[0],
-      attempt,
-      delayMs,
-      spotifyStatusCode: getSpotifyStatusCode(err),
-      spotifyMessage: getSpotifyErrorMessage(err),
-      timestamp: new Date().toISOString(),
-    })
-  );
-}
-
 function logSpotifyAccessTokenRejected(req: NextApiRequest, requestId: string) {
   console.warn(
     JSON.stringify({
@@ -175,46 +117,6 @@ function logSpotifyAccessTokenRejected(req: NextApiRequest, requestId: string) {
       timestamp: new Date().toISOString(),
     })
   );
-}
-
-async function runSpotifyHandler<T>({
-  fn,
-  phase,
-  req,
-  requestId,
-  spotifyApi,
-}: {
-  fn: (spotifyApi: SpotifyWebApi) => T | Promise<T>;
-  phase: SpotifyErrorPhase;
-  req: NextApiRequest;
-  requestId: string;
-  spotifyApi: SpotifyWebApi;
-}) {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      return await fn(spotifyApi);
-    } catch (err) {
-      const canRetry =
-        req.method === "GET" &&
-        attempt < TRANSIENT_RETRY_DELAYS_MS.length &&
-        isTransientSpotifyStatus(getSpotifyStatusCode(err));
-
-      if (!canRetry) {
-        throw err;
-      }
-
-      const delayMs = getRetryDelayMs(err, TRANSIENT_RETRY_DELAYS_MS[attempt]);
-      logSpotifyRetry({
-        attempt: attempt + 1,
-        delayMs,
-        err,
-        phase,
-        req,
-        requestId,
-      });
-      await sleep(delayMs);
-    }
-  }
 }
 
 export default async function setSpotifyAccessToken<T>(
@@ -273,13 +175,7 @@ export default async function setSpotifyAccessToken<T>(
   }
 
   try {
-    return await runSpotifyHandler({
-      fn,
-      phase: "spotify_route_handler",
-      req,
-      requestId,
-      spotifyApi,
-    });
+    return await fn(spotifyApi);
   } catch (err) {
     const spotifyStatusCode = getSpotifyStatusCode(err);
 
@@ -301,13 +197,7 @@ export default async function setSpotifyAccessToken<T>(
       if (!refreshed) return;
 
       try {
-        return await runSpotifyHandler({
-          fn,
-          phase: "spotify_route_handler_after_token_refresh",
-          req,
-          requestId,
-          spotifyApi,
-        });
+        return await fn(spotifyApi);
       } catch (retryErr) {
         const retrySpotifyStatusCode = getSpotifyStatusCode(retryErr);
         logSpotifyError({

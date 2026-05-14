@@ -41,7 +41,7 @@ export default function SpotifyDefaultContent() {
   }, [collections, refetch]);
 
   const itemContainerProps = {
-    w: ["calc(100% - 16px)", null, "calc(50% - 16px)", "calc(25% - 16px)"],
+    w: ["100%", null, "calc(50% - 8px)", "calc(25% - 12px)"],
   };
 
   return (

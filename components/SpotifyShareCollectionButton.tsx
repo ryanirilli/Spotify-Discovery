@@ -163,12 +163,12 @@ export default function SpotifyShareCollectionButton() {
   const inputValue = isCreated ? collection.title : title;
   const submitDisabled = !isCreated && (!title.trim() || !canShare);
   const submitLabel = isCreated
-    ? "Close"
+    ? "Done"
     : mutation.isPending
       ? "Sharing..."
       : "Share";
   const description = isCreated
-    ? "Shared to Community Collections"
+    ? null
     : "Your search will be published on the home page";
   const statusMessage = mutation.isPending
     ? "Sharing to Community Collections. You can close this and keep exploring."
@@ -255,17 +255,18 @@ export default function SpotifyShareCollectionButton() {
           </Flex>
         </Clipboard.Root>
       )}
-      <Input
-        ref={titleInputRef}
-        value={inputValue}
-        textStyle="body"
-        onChange={(event) => setTitle(event.target.value)}
-        placeholder="Collection title"
-        aria-label="Collection title"
-        maxLength={80}
-        disabled={isCreated}
-        required
-      />
+      {!isCreated && (
+        <Input
+          ref={titleInputRef}
+          value={inputValue}
+          textStyle="body"
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Collection title"
+          aria-label="Collection title"
+          maxLength={80}
+          required
+        />
+      )}
     </Flex>
   );
 
@@ -279,9 +280,11 @@ export default function SpotifyShareCollectionButton() {
         doneLabel="Close"
       >
         <form onSubmit={onSubmit} noValidate>
-          <Text color="whiteAlpha.700" textStyle="body" mb={4}>
-            {description}
-          </Text>
+          {description && (
+            <Text color="whiteAlpha.700" textStyle="body" mb={4}>
+              {description}
+            </Text>
+          )}
           {formControls}
           <Box mt={4} pt={3} pb={1} position="sticky" bottom="-12px" bg="black">
             {getSubmitButton(handleClose)}
@@ -314,7 +317,7 @@ export default function SpotifyShareCollectionButton() {
             maxW="md"
           >
             <Dialog.CloseTrigger asChild>
-              <DialogCloseButton>Close</DialogCloseButton>
+              <DialogCloseButton />
             </Dialog.CloseTrigger>
             <form onSubmit={onSubmit} noValidate>
               <Dialog.Header
@@ -328,21 +331,17 @@ export default function SpotifyShareCollectionButton() {
                 <Dialog.Title textStyle="dialogTitle">
                   Share with the community
                 </Dialog.Title>
-                <Text color="whiteAlpha.700" textStyle="body">
-                  {description}
-                </Text>
+                {description && (
+                  <Text color="whiteAlpha.700" textStyle="body">
+                    {description}
+                  </Text>
+                )}
               </Dialog.Header>
               <Dialog.Body px={[6, 5]} py={4}>
                 {formControls}
               </Dialog.Body>
               <Dialog.Footer px={[6, 5]} pb={[6, 5]}>
-                {isCreated ? (
-                  <Dialog.CloseTrigger asChild>
-                    {getSubmitButton()}
-                  </Dialog.CloseTrigger>
-                ) : (
-                  getSubmitButton()
-                )}
+                {getSubmitButton(handleClose)}
               </Dialog.Footer>
             </form>
           </Dialog.Content>
@@ -396,7 +395,7 @@ function CommunityCardPreview({
             objectFit="cover"
           />
         ) : (
-          <CollectionCoverPlaceholder />
+          <CollectionCoverPlaceholder seed={collection?.id || displayTitle} />
         )}
       </AspectRatio>
       <Box p={3} minH={artistNamesLabel ? "104px" : "84px"}>

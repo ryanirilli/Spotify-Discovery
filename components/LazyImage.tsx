@@ -1,17 +1,22 @@
 import useIntersectionObserver from "@/utils/useIntersectionObserver";
 import { Box, Image, ImageProps } from "@chakra-ui/react";
 import { useState, useRef, useEffect } from "react";
-import CollectionCoverSwirl from "./CollectionCoverSwirl";
+import CollectionCoverPlaceholder from "./CollectionCoverPlaceholder";
 
 interface ILazyImage extends ImageProps {
   src: string;
   alt: string;
+  placeholderSeed?: string;
 }
 
-const LazyImage = ({ src, alt, ...rest }: ILazyImage) => {
+const LazyImage = ({ src, alt, placeholderSeed, ...rest }: ILazyImage) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const [observe, isIntersecting] = useIntersectionObserver({ threshold: 0.2 });
+
+  useEffect(() => {
+    setIsLoaded(false);
+  }, [src]);
 
   useEffect(() => {
     const imgEl = imgRef.current;
@@ -40,7 +45,7 @@ const LazyImage = ({ src, alt, ...rest }: ILazyImage) => {
 
   return (
     <Box position="relative" overflow="hidden" w="100%" h="100%">
-      {!isLoaded && <CollectionCoverSwirl />}
+      {!isLoaded && <CollectionCoverPlaceholder seed={placeholderSeed ?? src} />}
       <Image
         ref={imgRef}
         alt={alt}

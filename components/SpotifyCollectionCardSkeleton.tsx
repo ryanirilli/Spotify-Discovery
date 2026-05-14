@@ -1,7 +1,8 @@
 import { AspectRatio, Box } from "@chakra-ui/react";
+import CollectionCoverPlaceholder from "./CollectionCoverPlaceholder";
 import { LoadingBox } from "./LoadingSkeleton";
 
-export function SpotifyCollectionCardSkeleton() {
+export function SpotifyCollectionCardSkeleton({ seed }: { seed?: string }) {
   return (
     <Box
       borderRadius="md"
@@ -11,7 +12,7 @@ export function SpotifyCollectionCardSkeleton() {
       position="relative"
     >
       <AspectRatio ratio={1} overflow="hidden" bg="blackAlpha.600" position="relative">
-        <LoadingBox w="100%" h="100%" borderRadius="0" />
+        <CollectionCoverPlaceholder seed={seed} />
       </AspectRatio>
       <Box p={3} minH="104px">
         <LoadingBox

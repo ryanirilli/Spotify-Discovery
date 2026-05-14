@@ -46,6 +46,8 @@ import { LoadingBox } from "./LoadingSkeleton";
 import SpotifyTrackDetails from "./SpotifyTrackDetails";
 import SpotifyLink from "./SpotifyLink";
 import SpotifyAddToPlaylistMenu from "./SpotifyAddToPlaylistMenu";
+import CollectionCoverPlaceholder from "./CollectionCoverPlaceholder";
+import LazyImage from "./LazyImage";
 import { buildSearchStringFromConfig } from "@/utils/spotifySearchConfig";
 import { TopNavHeightContext } from "./DesktopAppLayout";
 import {
@@ -467,16 +469,17 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                           name={`album-art-${track.id}`}
                           share="morph"
                         >
-                          <Image
+                          <LazyImage
                             alt={`${track.album.name} cover art`}
                             src={albumImageUrl}
                             w="100%"
                             h="100%"
                             objectFit="cover"
+                            placeholderSeed={`track-${track.id}`}
                           />
                         </ViewTransition>
                       ) : (
-                        <Box />
+                        <CollectionCoverPlaceholder seed={`track-${track.id}`} />
                       )}
                     </AspectRatio>
                   </Box>
@@ -590,8 +593,8 @@ export default function SpotifyTrackDetailView({ id }: { id: string }) {
                   overflow="hidden"
                   bg="blackAlpha.300"
                 >
-                  <AspectRatio ratio={1}>
-                    <LoadingBox w="100%" h="100%" borderRadius="0" />
+                  <AspectRatio ratio={1} position="relative" overflow="hidden">
+                    <CollectionCoverPlaceholder seed={`track-detail-loading-${id}`} />
                   </AspectRatio>
                   <Stack gap={4} p={4}>
                     <LoadingBox h="20px" w="80%" borderRadius="full" />
@@ -861,7 +864,7 @@ function AlbumAccordionItem({
                   objectFit="cover"
                 />
               ) : (
-                <Box />
+                <CollectionCoverPlaceholder seed={`album-${album.id}`} />
               )}
             </AspectRatio>
           </Box>

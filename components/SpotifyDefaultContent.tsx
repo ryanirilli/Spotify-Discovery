@@ -55,7 +55,7 @@ export default function SpotifyDefaultContent() {
           <Wrap gap={[8, 4]}>
             {Array.from({ length: 8 }).map((_, index) => (
               <Box key={index} {...itemContainerProps}>
-                <SpotifyCollectionCardSkeleton />
+                <SpotifyCollectionCardSkeleton seed={`collection-loading-${index}`} />
               </Box>
             ))}
           </Wrap>

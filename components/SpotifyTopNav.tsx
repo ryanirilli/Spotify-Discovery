@@ -1,13 +1,22 @@
 "use client";
 
+import { useContext } from "react";
 import NextLink from "next/link";
 import { Box, Image, Link } from "@chakra-ui/react";
+import { SpotifyRecommendationsContext } from "./SpotifyRecommendationsProvider";
 
 interface ISpotifyTopNav {
   children: React.ReactNode;
 }
 
 export default function SpotifyTopNav({ children }: ISpotifyTopNav) {
+  const { setSearchConfig } = useContext(SpotifyRecommendationsContext) || {};
+
+  const onGoHome = () => {
+    setSearchConfig?.({ artists: [], genres: [], filters: {} });
+    window.scrollTo(0, 0);
+  };
+
   return (
     <Box
       pt={2}
@@ -21,6 +30,7 @@ export default function SpotifyTopNav({ children }: ISpotifyTopNav) {
         as={NextLink}
         href="/home"
         aria-label="Go to home"
+        onClick={onGoHome}
         position="absolute"
         top={2}
         left={[2, 3]}

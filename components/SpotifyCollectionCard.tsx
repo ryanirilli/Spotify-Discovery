@@ -18,7 +18,6 @@ import {
   MdMoreVert,
 } from "react-icons/md";
 import CollectionCoverPlaceholder from "./CollectionCoverPlaceholder";
-import DialogCloseButton from "./DialogCloseButton";
 import LazyImage from "./LazyImage";
 import { Button, IconButton } from "@/components/ui/Button";
 import { SpotifyRecommendationsContext } from "./SpotifyRecommendationsProvider";
@@ -78,7 +77,11 @@ export function SpotifyCollectionCard({
   const onSelectCollection = () => {
     setSearchConfig?.(collection.config);
     const qs = buildSearchStringFromConfig(collection.config);
-    router.push(qs ? `/search?${qs}` : "/search");
+    const href = qs ? `/search?${qs}` : "/search";
+
+    window.scrollTo(0, 0);
+    router.push(href, { scroll: true });
+    window.requestAnimationFrame(() => window.scrollTo(0, 0));
   };
 
   const stopCardClick = (event: SyntheticEvent) => {
@@ -94,6 +97,12 @@ export function SpotifyCollectionCard({
   const onConfirmDelete = () => {
     if (!deleteMutation.isPending) {
       deleteMutation.mutate();
+    }
+  };
+
+  const onCancelDelete = () => {
+    if (!deleteMutation.isPending) {
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -158,9 +167,10 @@ export function SpotifyCollectionCard({
               w="100%"
               h="100%"
               objectFit="cover"
+              placeholderSeed={collection.id}
             />
           ) : (
-            <CollectionCoverPlaceholder />
+            <CollectionCoverPlaceholder seed={collection.id || collection.title} />
           )}
         </AspectRatio>
         <Box p={3} minH={artistNamesLabel ? "104px" : "84px"}>
@@ -217,24 +227,20 @@ export function SpotifyCollectionCard({
                     Delete collection
                   </Dialog.Title>
                 </Dialog.Header>
-                <Dialog.CloseTrigger asChild>
-                  <DialogCloseButton />
-                </Dialog.CloseTrigger>
                 <Dialog.Body px={6} py={3}>
                   <Text color="whiteAlpha.700" textStyle="body">
-                    Delete &quot;{collection.title}&quot; from Community
-                    Collections?
+                    Are you sure you want to remove &quot;{collection.title}&quot;
+                    from Community Collections?
                   </Text>
                 </Dialog.Body>
                 <Dialog.Footer px={6} pb={6} gap={3}>
-                  <Dialog.CloseTrigger asChild>
-                    <Button
-                      visual="secondary"
-                      disabled={deleteMutation.isPending}
-                    >
-                      Cancel
-                    </Button>
-                  </Dialog.CloseTrigger>
+                  <Button
+                    visual="secondary"
+                    disabled={deleteMutation.isPending}
+                    onClick={onCancelDelete}
+                  >
+                    Cancel
+                  </Button>
                   <Button
                     visual="primary"
                     bg="red.500"
@@ -243,7 +249,8 @@ export function SpotifyCollectionCard({
                     disabled={deleteMutation.isPending}
                     onClick={onConfirmDelete}
                   >
-                    {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                    <Icon as={MdDeleteOutline} boxSize={5} />
+                    {deleteMutation.isPending ? "Deleting" : "Delete"}
                   </Button>
                 </Dialog.Footer>
               </Dialog.Content>

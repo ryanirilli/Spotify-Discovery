@@ -42,6 +42,7 @@ import SpotifyLink from "./SpotifyLink";
 import SpotifyAddToPlaylistMenu from "./SpotifyAddToPlaylistMenu";
 import SpotifyTrackSkeleton from "./SpotifyTrackSkeleton";
 import useHoverPreview from "@/utils/useHoverPreview";
+import CollectionCoverPlaceholder from "./CollectionCoverPlaceholder";
 
 const lottiePlayerOptions = { animationData };
 
@@ -57,7 +58,7 @@ export default function SpotifyTracks() {
       <Wrap gap={0} px={4} pb={32}>
         {Array.from({ length: 12 }).map((_, index) => (
           <WrapItem w={itemWidth} key={index} position="relative">
-            <SpotifyTrackSkeleton />
+            <SpotifyTrackSkeleton seed={`track-card-loading-${index}`} />
           </WrapItem>
         ))}
       </Wrap>
@@ -262,6 +263,7 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
   const isTouchDevice =
     typeof window !== "undefined" && window.ontouchstart !== undefined;
   const albumImageUrl = rec.album.images[0]?.url;
+  const coverSeed = `track-${rec.id}`;
   const [hoverPreviewEnabled] = useHoverPreview();
 
   const handleMouseEnter = () => {
@@ -305,16 +307,19 @@ function SpotifyTrack({ rec }: { rec: TSpotifyTrack }) {
             onClick={toggleTrack}
             overflow="hidden"
           >
-            <Box>
-              {albumImageUrl && !isLoadingRecs && (
+            <Box position="relative" w="100%" h="100%" overflow="hidden">
+              {albumImageUrl && !isLoadingRecs ? (
                 <ViewTransition name={`album-art-${rec.id}`} share="morph">
                   <LazyImage
                     w="100%"
                     objectFit={"cover"}
                     src={albumImageUrl}
                     alt="album art"
+                    placeholderSeed={coverSeed}
                   />
                 </ViewTransition>
+              ) : (
+                <CollectionCoverPlaceholder seed={coverSeed} />
               )}
             </Box>
           </AspectRatio>
